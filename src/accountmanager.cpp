@@ -35,3 +35,13 @@ QJsonObject AccountManager::loadFile(QUrl filePath)
     budgetFile.close();
     return budget;
 }
+
+void AccountManager::saveFile(QUrl filePath, QJsonObject jsonData)
+{
+    QFile budgetFile(filePath.toLocalFile());
+    QJsonDocument jsonDoc(jsonData);
+
+    budgetFile.open(QIODevice::WriteOnly);
+    budgetFile.write(jsonDoc.toJson());
+    budgetFile.close();
+}

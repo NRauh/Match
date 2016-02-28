@@ -38,6 +38,17 @@ TEST_CASE("Can load a file", "[loadFile]") {
 
 TEST_CASE("Can save a file", "[saveFile]") {
     SECTION("A path and QJsonObject is given and it writes a file") {
+        AccountManager accManager;
+        QUrl path = QUrl::fromLocalFile("FooBar.json");
+        QJsonObject testObject;
+        testObject["greeting"] = "Hello World";
+
+        accManager.saveFile(path, testObject);
+        QFile testFile("FooBar.json");
+        REQUIRE(testFile.exists() == true);
+
+        testObject = accManager.loadFile(path);
+        REQUIRE(testObject["greeting"] == "Hello World");
     }
 }
 
