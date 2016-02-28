@@ -16,11 +16,8 @@ void AccountManager::createBudget(QUrl filePath, QString accountName)
     budget["balance"] = 0;
 
     QString budgetFilePath = filePath.toLocalFile() + "/" + accountName + ".mbgt";
-    QFile budgetFile(budgetFilePath);
-    QJsonDocument jsonDoc(budget);
-    budgetFile.open(QIODevice::WriteOnly);
-    budgetFile.write(jsonDoc.toJson());
-    budgetFile.close();
+    QUrl constructedFilePath = QUrl::fromLocalFile(budgetFilePath);
+    saveFile(constructedFilePath, budget);
 }
 
 QJsonObject AccountManager::loadFile(QUrl filePath)

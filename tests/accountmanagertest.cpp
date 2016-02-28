@@ -8,7 +8,7 @@
 #include <QDebug>
 
 TEST_CASE("Can create budget/save files", "[createBudget]") {
-  SECTION("A path is given, it creates a .mbgt file") {
+  SECTION("A path and name are given, then it creates a .mbgt file") {
       AccountManager accManager;
       QUrl path = QUrl::fromLocalFile(".");
       accManager.createBudget(path, "Foo Budget");
@@ -16,24 +16,12 @@ TEST_CASE("Can create budget/save files", "[createBudget]") {
       QFile testBudget("Foo Budget.mbgt");
       REQUIRE(testBudget.exists() == true);
 
-      testBudget.open(QIODevice::ReadOnly);
-      QString rawJson = testBudget.readAll();
-      QJsonDocument budgetDoc = QJsonDocument::fromJson(rawJson.toUtf8());
-      QJsonObject budget = budgetDoc.object();
-      REQUIRE(budget.value(QString("accountName")) == "Foo Budget");
+      path = QUrl::fromLocalFile("Foo Budget.mbgt");
+      QJsonObject budget = accManager.loadFile(path);
+      REQUIRE(budget["accountName"] == "Foo Budget");
 
       testBudget.close();
   }
-}
-
-TEST_CASE("Can load a file", "[loadFile]") {
-    SECTION("A path to a budget file is given and it loads it as a QJsonObject") {
-        AccountManager accManager;
-        QUrl path = QUrl::fromLocalFile("Foo Budget.mbgt");
-
-        QJsonObject testFile = accManager.loadFile(path);
-        REQUIRE(testFile["accountName"] == "Foo Budget");
-    }
 }
 
 TEST_CASE("Can save a file", "[saveFile]") {
@@ -46,9 +34,16 @@ TEST_CASE("Can save a file", "[saveFile]") {
         accManager.saveFile(path, testObject);
         QFile testFile("FooBar.json");
         REQUIRE(testFile.exists() == true);
+    }
+}
 
-        testObject = accManager.loadFile(path);
-        REQUIRE(testObject["greeting"] == "Hello World");
+TEST_CASE("Can load a file", "[loadFile]") {
+    SECTION("A path to a budget file is given and it loads it as a QJsonObject") {
+        AccountManager accManager;
+        QUrl path = QUrl::fromLocalFile("FooBar.json");
+
+        QJsonObject testFile = accManager.loadFile(path);
+        REQUIRE(testFile["greeting"] == "Hello World");
     }
 }
 
