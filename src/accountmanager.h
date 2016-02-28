@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QUrl>
+#include <QJsonObject>
 
 class AccountManager : public QObject
 {
@@ -10,6 +11,7 @@ class AccountManager : public QObject
 public:
     explicit AccountManager(QObject *parent = 0);
     Q_INVOKABLE void createBudget(QUrl filePath, QString accountName);
+    Q_INVOKABLE QJsonObject loadFile(QUrl filePath);
 
 signals:
 

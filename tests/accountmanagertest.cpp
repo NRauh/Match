@@ -26,6 +26,21 @@ TEST_CASE("Can create budget/save files", "[createBudget]") {
   }
 }
 
+TEST_CASE("Can load a file", "[loadFile]") {
+    SECTION("A path to a budget file is given and it loads it as a QJsonObject") {
+        AccountManager accManager;
+        QUrl path = QUrl::fromLocalFile("Foo Budget.mbgt");
+
+        QJsonObject testFile = accManager.loadFile(path);
+        REQUIRE(testFile["accountName"] == "Foo Budget");
+    }
+}
+
+TEST_CASE("Can save a file", "[saveFile]") {
+    SECTION("A path and QJsonObject is given and it writes a file") {
+    }
+}
+
 TEST_CASE("Can add checking account", "[addChecking]") {
   SECTION("The details are given, a table for a checking account is created") {
   }
