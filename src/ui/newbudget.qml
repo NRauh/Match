@@ -114,7 +114,8 @@ Window {
         anchors.bottomMargin: 10
         onClicked: {
             accManager.createBudget(pathDialog.fileUrl, budgetName.text)
-            accManager.setLastFile(pathDialog.fileUrl)
+            var filePath = pathDialog.fileUrl.toString() + "/" + budgetName.text + ".mbgt";
+            accManager.setLastFile(filePath)
         }
     }
 

@@ -12,9 +12,10 @@ int main(int argc, char *argv[])
     qmlRegisterType<AccountManager>("com.nrauh", 1, 0, "AccountManager");
 
     AccountManager accManager;
-    QUrl lastFile = accManager.getLastFile();
+    QUrl lastFilePath = accManager.getLastFile();
+    QFile lastFile(lastFilePath.toLocalFile());
 
-    if (lastFile.fileName() != "") {
+    if (lastFile.fileName() != "" && lastFile.exists()) {
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     } else {
         engine.load(QUrl(QStringLiteral("qrc:/newbudget.qml")));
