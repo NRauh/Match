@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QtQml>
 #include "accountmanager.h"
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
@@ -9,7 +10,15 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     qmlRegisterType<AccountManager>("com.nrauh", 1, 0, "AccountManager");
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
+    AccountManager accManager;
+    QUrl lastFile = accManager.getLastFile();
+
+    if (lastFile.fileName() != "") {
+        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    } else {
+        engine.load(QUrl(QStringLiteral("qrc:/newbudget.qml")));
+    }
 
     return app.exec();
 }

@@ -5,9 +5,10 @@ import QtQuick.Dialogs 1.2
 import com.nrauh 1.0
 
 Window {
-    id: window1
+    id: newBudgetWindow
     width: 600
     height: 500
+    visible: true
 
     Label {
         id: newBudgetLabel
@@ -113,7 +114,7 @@ Window {
         anchors.bottomMargin: 10
         onClicked: {
             accManager.createBudget(pathDialog.fileUrl, budgetName.text)
-            //console.log(pathDialog.fileUrl, budgetName.text)
+            accManager.setLastFile(pathDialog.fileUrl)
         }
     }
 
