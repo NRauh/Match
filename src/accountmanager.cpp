@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QSettings>
 #include <QDebug>
 
 AccountManager::AccountManager(QObject *parent) : QObject(parent)
@@ -41,4 +42,16 @@ void AccountManager::saveFile(QUrl filePath, QJsonObject jsonData)
     budgetFile.open(QIODevice::WriteOnly);
     budgetFile.write(jsonDoc.toJson());
     budgetFile.close();
+}
+
+void AccountManager::setLastFile(QUrl lastFilePath)
+{
+    QSettings settings("nrauh", "Match");
+    settings.setValue("lastOpenedFile", lastFilePath);
+}
+
+QUrl AccountManager::getLastFile()
+{
+    QSettings settings("nrauh", "Match");
+    return settings.value("lastOpenedFile").value<QUrl>();
 }

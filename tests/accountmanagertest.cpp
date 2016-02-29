@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QDir>
 #include <QDebug>
+#include <QSettings>
 
 TEST_CASE("Can create budget/save files", "[createBudget]") {
   SECTION("A path and name are given, then it creates a .mbgt file") {
@@ -44,6 +45,26 @@ TEST_CASE("Can load a file", "[loadFile]") {
 
         QJsonObject testFile = accManager.loadFile(path);
         REQUIRE(testFile["greeting"] == "Hello World");
+    }
+}
+
+TEST_CASE("Can set the last loaded file", "[setLastFile]") {
+    SECTION("Given a QUrl/path and saves the setting") {
+        AccountManager accManager;
+        QUrl path = QUrl::fromLocalFile("Foo Budget.mbgt");
+
+        accManager.setLastFile(path);
+        QSettings settings("nrauh", "Match");
+        REQUIRE(settings.value("lastOpenedFile") == path);
+    }
+}
+
+TEST_CASE("Can get the last loaded file", "[getLastFile]") {
+    SECTION("Returns a QUrl for the last file opened") {
+        AccountManager accManager;
+        QUrl path = QUrl::fromLocalFile("Foo Budget.mbgt");
+
+        REQUIRE(accManager.getLastFile() == path);
     }
 }
 

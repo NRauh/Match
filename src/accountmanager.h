@@ -13,6 +13,8 @@ public:
     Q_INVOKABLE void createBudget(QUrl filePath, QString accountName);
     Q_INVOKABLE QJsonObject loadFile(QUrl filePath);
     Q_INVOKABLE void saveFile(QUrl filePath, QJsonObject jsonData);
+    Q_INVOKABLE void setLastFile(QUrl lastFilePath);
+    Q_INVOKABLE QUrl getLastFile();
 
 signals:
 
