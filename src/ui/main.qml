@@ -3,9 +3,9 @@ import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
 
 ApplicationWindow {
-    title: qsTr("Hello World")
-    width: 640
-    height: 480
+    title: qsTr("Match")
+    width: 800
+    height: 500
     visible: true
     id: matchWindow
 
@@ -28,5 +28,9 @@ ApplicationWindow {
                 onTriggered: Qt.quit();
             }
         }
+    }
+
+    Sidebar {
+        accountData: [{accountName: "foo", accountType: "Checking"}]
     }
 }
