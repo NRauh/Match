@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QUrl>
-#include "../src/json/json.h"
+#include "json/json.h"
 
 class AccountManager : public QObject
 {

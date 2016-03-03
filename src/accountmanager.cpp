@@ -1,7 +1,5 @@
 #include "accountmanager.h"
 #include <QFile>
-#include <QJsonObject>
-#include <QJsonDocument>
 #include <QSettings>
 #include <QDebug>
 

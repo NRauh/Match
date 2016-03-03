@@ -6,7 +6,6 @@
 #include <QDebug>
 #include <QSettings>
 #include "../src/json/json.h"
-#include <iostream>
 
 TEST_CASE("Can create budget/save files", "[createBudget]") {
   SECTION("A path and name are given, then it creates a .mbgt file") {
@@ -26,7 +25,7 @@ TEST_CASE("Can create budget/save files", "[createBudget]") {
 }
 
 TEST_CASE("Can save a file", "[saveFile]") {
-    SECTION("A path and QJsonObject is given and it writes a file") {
+    SECTION("A path and Json Value is given and it writes a file") {
         AccountManager accManager;
         QUrl path = QUrl::fromLocalFile("FooBar.json");
         Json::Value testObject;
@@ -39,7 +38,7 @@ TEST_CASE("Can save a file", "[saveFile]") {
 }
 
 TEST_CASE("Can load a file", "[loadFile]") {
-    SECTION("A path to a budget file is given and it loads it as a QJsonObject") {
+    SECTION("A path to a budget file is given and it loads it as a Json Value") {
         AccountManager accManager;
         QUrl path = QUrl::fromLocalFile("FooBar.json");
 
