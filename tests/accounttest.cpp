@@ -20,3 +20,33 @@ TEST_CASE("Can add checking accounts", "[addChecking]") {
         REQUIRE(budget["balance"] == 80000);
     }
 }
+
+TEST_CASE("Can add transactions to account", "[addTransaction]") {
+    SECTION("Given file path, account index, date, payee, if outflow, amount, and note") {
+        Account account;
+        AccountManager accManager;
+        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
+        QDate transactionDate = QDate(2016, 2, 29);
+
+        account.addTransaction(filePath, 0, transactionDate, "Caffe Nero", true, 125, "Espresso");
+        Json::Value budget = accManager.loadFile(filePath);
+
+        REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["date"] == "2016-02-29");
+        REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["payee"] == "Caffe Nero");
+        REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["outflow"] == true);
+        REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["amount"] == 125);
+        REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["note"] == "Espresso");
+        REQUIRE(budget["onBudgetAccounts"][0]["balance"] == 79875);
+    }
+
+    SECTION("If outflow is false, then it's income and should be added") {
+        Account account;
+        AccountManager accManager;
+        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
+        QDate transactionDate = QDate(2016, 2, 29);
+
+        account.addTransaction(filePath, 0, transactionDate, "Tip", false, 1000, "");
+        Json::Value budget = accManager.loadFile(filePath);
+        REQUIRE(budget["onBudgetAccounts"][0]["balance"] == 80875);
+    }
+}

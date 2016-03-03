@@ -24,3 +24,28 @@ void Account::addChecking(QUrl filePath, QString accountName, int balance, QDate
     budget["balance"] = budget["balance"].asInt() + balance;
     accManager.saveFile(filePath, budget);
 }
+
+void Account::addTransaction(QUrl filePath, int accountIndex, QDate date, QString payee, bool outflow, int amount, QString note)
+{
+    AccountManager accManager;
+    Json::Value budget = accManager.loadFile(filePath);
+    QString formattedDate = date.toString("yyyy-MM-dd");
+
+    Json::Value transaction;
+    transaction["date"] = formattedDate.toStdString();
+    transaction["payee"] = payee.toStdString();
+    transaction["outflow"] = outflow;
+    transaction["amount"] = amount;
+    transaction["note"] = note.toStdString();
+
+    int balance = budget["onBudgetAccounts"][accountIndex]["balance"].asInt();
+
+    if (outflow) {
+        budget["onBudgetAccounts"][accountIndex]["balance"] = balance - amount;
+    } else {
+        budget["onBudgetAccounts"][accountIndex]["balance"] = balance + amount;
+    }
+
+    budget["onBudgetAccounts"][accountIndex]["transactions"].append(transaction);
+    accManager.saveFile(filePath, budget);
+}
