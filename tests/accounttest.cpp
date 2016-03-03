@@ -16,7 +16,7 @@ TEST_CASE("Can add checking accounts", "[addChecking]") {
         Json::Value budget = accManager.loadFile(filePath);
         REQUIRE(budget["onBudgetAccounts"][0]["accountName"] == "Foo CU");
         REQUIRE(budget["onBudgetAccounts"][0]["balance"] == 80000);
-        //REQUIRE(budget["onBudgetAccounts"][0]["transactions"][0]["note"] == "Initial Balance");
+        REQUIRE(budget["onBudgetAccounts"][0]["transactions"][0]["note"] == "Initial Balance");
         REQUIRE(budget["balance"] == 80000);
     }
 }
