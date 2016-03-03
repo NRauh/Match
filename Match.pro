@@ -2,8 +2,11 @@ TEMPLATE = app
 
 QT += qml quick widgets
 
+CONFIG += c++11
+
 SOURCES += src/main.cpp \
-    src/accountmanager.cpp
+    src/accountmanager.cpp \
+    src/account.cpp
 
 RESOURCES += src/ui/qml.qrc
 
@@ -14,4 +17,5 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 HEADERS += \
-    src/accountmanager.h
+    src/accountmanager.h \
+    src/account.h

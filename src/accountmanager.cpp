@@ -12,8 +12,8 @@ AccountManager::AccountManager(QObject *parent) : QObject(parent)
 
 void AccountManager::createBudget(QUrl filePath, QString accountName)
 {
-    QJsonObject budget;
-    budget["accountName"] = accountName;
+    Json::Value budget;
+    budget["accountName"] = accountName.toStdString();
     budget["balance"] = 0;
 
     QString budgetFilePath = filePath.toLocalFile() + "/" + accountName + ".mbgt";
@@ -21,26 +21,28 @@ void AccountManager::createBudget(QUrl filePath, QString accountName)
     saveFile(constructedFilePath, budget);
 }
 
-QJsonObject AccountManager::loadFile(QUrl filePath)
+Json::Value AccountManager::loadFile(QUrl filePath)
 {
     QFile budgetFile(filePath.toLocalFile());
 
     budgetFile.open(QIODevice::ReadOnly);
     QString rawJson = budgetFile.readAll();
-    QJsonDocument budgetDoc = QJsonDocument::fromJson(rawJson.toUtf8());
-    QJsonObject budget = budgetDoc.object();
+    Json::Value budget = rawJson.toStdString();
+    Json::Reader budgetReader;
+
+    budgetReader.parse(rawJson.toStdString(), budget);
 
     budgetFile.close();
     return budget;
 }
 
-void AccountManager::saveFile(QUrl filePath, QJsonObject jsonData)
+void AccountManager::saveFile(QUrl filePath, Json::Value jsonData)
 {
     QFile budgetFile(filePath.toLocalFile());
-    QJsonDocument jsonDoc(jsonData);
+    Json::FastWriter budgetWriter;
 
     budgetFile.open(QIODevice::WriteOnly);
-    budgetFile.write(jsonDoc.toJson());
+    budgetFile.write(budgetWriter.write(jsonData).c_str());
     budgetFile.close();
 }
 
