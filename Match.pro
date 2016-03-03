@@ -6,7 +6,8 @@ CONFIG += c++11
 
 SOURCES += src/main.cpp \
     src/accountmanager.cpp \
-    src/jsoncpp.cpp
+    src/jsoncpp.cpp \
+    src/account.cpp
 
 RESOURCES += src/ui/qml.qrc
 
@@ -19,4 +20,5 @@ include(deployment.pri)
 HEADERS += \
     src/accountmanager.h \
     src/json/json.h \
-    src/json/json-forwards.h
+    src/json/json-forwards.h \
+    src/account.h

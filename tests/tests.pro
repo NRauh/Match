@@ -9,8 +9,11 @@ INCLUDEPATH += .
 CONFIG += c++11
 
 # Input
-HEADERS += catch.hpp ../src/accountmanager.h ../src/json/json.h ../src/json/json.h ../src/json/json-forwards.h
+HEADERS += catch.hpp ../src/accountmanager.h ../src/json/json.h ../src/json/json.h ../src/json/json-forwards.h \
+        ../src/account.h
 SOURCES += accountmanagertest.cpp \
            matchtest.cpp \
            ../src/accountmanager.cpp \
-           ../src/jsoncpp.cpp
+           ../src/jsoncpp.cpp \
+           accounttest.cpp \
+        ../src/account.cpp
