@@ -37,6 +37,7 @@ TEST_CASE("Can add transactions to account", "[addTransaction]") {
         REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["amount"] == 125);
         REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["note"] == "Espresso");
         REQUIRE(budget["onBudgetAccounts"][0]["balance"] == 79875);
+        REQUIRE(budget["balance"] == 79875);
     }
 
     SECTION("If outflow is false, then it's income and should be added") {
@@ -48,5 +49,6 @@ TEST_CASE("Can add transactions to account", "[addTransaction]") {
         account.addTransaction(filePath, 0, transactionDate, "Tip", false, 1000, "");
         Json::Value budget = accManager.loadFile(filePath);
         REQUIRE(budget["onBudgetAccounts"][0]["balance"] == 80875);
+        REQUIRE(budget["balance"] == 80875);
     }
 }

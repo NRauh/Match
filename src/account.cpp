@@ -38,12 +38,15 @@ void Account::addTransaction(QUrl filePath, int accountIndex, QDate date, QStrin
     transaction["amount"] = amount;
     transaction["note"] = note.toStdString();
 
-    int balance = budget["onBudgetAccounts"][accountIndex]["balance"].asInt();
+    int accBalance = budget["onBudgetAccounts"][accountIndex]["balance"].asInt();
+    int balance = budget["balance"].asInt();
 
     if (outflow) {
-        budget["onBudgetAccounts"][accountIndex]["balance"] = balance - amount;
+        budget["onBudgetAccounts"][accountIndex]["balance"] = accBalance - amount;
+        budget["balance"] = balance - amount;
     } else {
-        budget["onBudgetAccounts"][accountIndex]["balance"] = balance + amount;
+        budget["onBudgetAccounts"][accountIndex]["balance"] = accBalance + amount;
+        budget["balance"] = balance + amount;
     }
 
     budget["onBudgetAccounts"][accountIndex]["transactions"].append(transaction);
