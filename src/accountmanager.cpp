@@ -37,7 +37,7 @@ Json::Value AccountManager::loadFile(QUrl filePath)
 void AccountManager::saveFile(QUrl filePath, Json::Value jsonData)
 {
     QFile budgetFile(filePath.toLocalFile());
-    Json::FastWriter budgetWriter;
+    Json::StyledWriter budgetWriter;
 
     budgetFile.open(QIODevice::WriteOnly);
     budgetFile.write(budgetWriter.write(jsonData).c_str());
