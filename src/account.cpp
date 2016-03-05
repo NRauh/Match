@@ -1,6 +1,6 @@
 #include "account.h"
-#include "json/json.h"
 #include "accountmanager.h"
+#include <iostream>
 
 Account::Account(QObject *parent) : QObject(parent)
 {
@@ -51,4 +51,28 @@ void Account::addTransaction(QUrl filePath, int accountIndex, QDate date, QStrin
 
     budget["onBudgetAccounts"][accountIndex]["transactions"].append(transaction);
     accManager.saveFile(filePath, budget);
+}
+
+Json::Value Account::getAccountList(QUrl filePath)
+{
+    AccountManager accManager;
+    Json::Value budget = accManager.loadFile(filePath);
+    Json::Value accountList;
+
+    accountList["balance"] = budget["balance"];
+
+    for (int i = 0; i < (int)budget["onBudgetAccounts"].size(); i++) {
+        accountList["accounts"][i]["accountName"] = budget["onBudgetAccounts"][i]["accountName"];
+        accountList["accounts"][i]["accountBalance"] = budget["onBudgetAccounts"][i]["balance"];
+        accountList["accounts"][i]["index"] = i;
+    }
+
+    return accountList;
+}
+
+QString Account::getAccountListString(QUrl filePath)
+{
+    Json::Value accountList = getAccountList(filePath);
+    QString accounts = accountList.toStyledString().c_str();
+    return accounts;
 }

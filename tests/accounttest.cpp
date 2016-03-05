@@ -52,3 +52,28 @@ TEST_CASE("Can add transactions to account", "[addTransaction]") {
         REQUIRE(budget["balance"] == 80875);
     }
 }
+
+TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
+    SECTION("Give file path, returns account, index, and balance") {
+        Account account;
+        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
+
+        Json::Value accountList = account.getAccountList(filePath);
+        REQUIRE(accountList["balance"] == 80875);
+        REQUIRE(accountList["accounts"][0]["accountName"] == "Foo CU");
+        REQUIRE(accountList["accounts"][0]["accountBalance"] == 80875);
+        REQUIRE(accountList["accounts"][0]["index"] == 0);
+    }
+
+    SECTION("Method can return as a QString") {
+        Account account;
+        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
+
+        QString accountString = account.getAccountListString(filePath);
+        Json::Value accountList;
+        Json::Reader reader;
+        reader.parse(accountString.toStdString(), accountList);
+
+        REQUIRE(accountList["balance"] == 80875);
+    }
+}
