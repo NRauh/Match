@@ -21,7 +21,7 @@ ApplicationWindow {
                     text: qsTr("&Checking")
                     onTriggered: {
                         var component = Qt.createComponent("newchecking.qml")
-                        var win = component.createObject(matchWindow)
+                        var win = component.createObject(matchWindow, {updateList: mainSidebar})
                         win.show()
                     }
                 }
@@ -42,6 +42,7 @@ ApplicationWindow {
     }
 
     Sidebar {
+        id: mainSidebar
         accountData: [{accountName: "foo", accountType: "Checking"}]
     }
 }
