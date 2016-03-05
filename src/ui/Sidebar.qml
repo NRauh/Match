@@ -6,7 +6,7 @@ Rectangle {
     width: 300
     height: 500
     color: "#e5e7e8"
-    property var accountData: [{accountName: "Hello", accountType: "Checking"}, {accountName: "World", accountType: "Credit"}]
+    property var accountData
 
     Label {
         id: logo
@@ -53,7 +53,7 @@ Rectangle {
         anchors.topMargin: 180
         Repeater {
             id: accountItems
-            model: accountData
+            model: accountData["accounts"]
             Rectangle {
                 id: accountRect
                 anchors.right: parent.right

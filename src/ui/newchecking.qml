@@ -83,7 +83,9 @@ Window {
             var filePath = accManager.getLastFile()
             var accountBalanceInt = parseFloat(accountBalance.text) * 100
             account.addChecking(filePath, accountName.text, accountBalanceInt, accountBalanceDate.selectedDate)
-            updateList.accountData = [{accountName: "bar", accountType: "Checking"}]
+            var accountList = account.getAccountListString(filePath)
+            accountList = JSON.parse(accountList)
+            updateList.accountData = accountList
             newCheckingWindow.close()
         }
     }
