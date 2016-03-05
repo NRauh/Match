@@ -3,5 +3,6 @@
         <file>main.qml</file>
         <file>newbudget.qml</file>
         <file>Sidebar.qml</file>
+        <file>newchecking.qml</file>
     </qresource>
 </RCC>

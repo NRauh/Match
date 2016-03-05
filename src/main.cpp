@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QtQml>
 #include "accountmanager.h"
+#include "account.h"
 #include <QDebug>
 
 int main(int argc, char *argv[])
@@ -10,6 +11,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     qmlRegisterType<AccountManager>("com.nrauh", 1, 0, "AccountManager");
+    qmlRegisterType<Account>("com.nrauh", 1, 0, "Account");
 
     AccountManager accManager;
     QUrl lastFilePath = accManager.getLastFile();

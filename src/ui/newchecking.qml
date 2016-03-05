@@ -5,16 +5,16 @@ import QtQuick.Dialogs 1.2
 import com.nrauh 1.0
 
 Window {
-    id: newBudgetWindow
+    id: newCheckingWindow
     width: 600
     height: 500
     visible: true
 
     Label {
-        id: newBudgetLabel
+        id: newCheckingLabel
         width: 232
         height: 50
-        text: qsTr("New Budget")
+        text: qsTr("New Checking Account")
         anchors.left: parent.left
         anchors.leftMargin: 30
         anchors.top: parent.top
@@ -25,7 +25,7 @@ Window {
 
     Label {
         id: nameLabel
-        text: qsTr("Give your budget a name")
+        text: qsTr("Checking Account Name")
         anchors.left: parent.left
         anchors.leftMargin: 50
         anchors.top: parent.top
@@ -35,7 +35,7 @@ Window {
     }
 
     TextField {
-        id: budgetName
+        id: accountName
         height: 27
         anchors.right: parent.right
         anchors.rightMargin: 50
@@ -45,14 +45,14 @@ Window {
         anchors.topMargin: 170
         font.family: "Arial"
         font.pointSize: 22
-        placeholderText: qsTr("Budget Name")
+        placeholderText: qsTr("Account Name")
     }
 
     Label {
-        id: pathLabel
+        id: accountBalanceLabel
         x: 0
         y: 0
-        text: qsTr("Budget Save Location")
+        text: qsTr("Account Balance")
         anchors.leftMargin: 50
         anchors.top: parent.top
         anchors.left: parent.left
@@ -61,44 +61,9 @@ Window {
         font.family: "Arial"
     }
 
-    FileDialog {
-        id: pathDialog
-        title: "Where will your budget file live?"
-        selectFolder: true
-        onAccepted: pathLocation.text = pathDialog.fileUrl
-        folder: "~"
+    Account {
+        id: account
     }
-
-    Button {
-        id: pathButton
-        height: 27
-        text: qsTr("Save Location")
-        anchors.right: parent.right
-        anchors.rightMargin: 440
-        anchors.left: parent.left
-        anchors.leftMargin: 50
-        anchors.top: parent.top
-        anchors.topMargin: 254
-        onClicked: {
-            pathDialog.open()
-        }
-    }
-
-    Label {
-        id: pathLocation
-        height: 19
-        color: "#424242"
-        text: qsTr("")
-        anchors.left: parent.left
-        anchors.leftMargin: 166
-        anchors.top: parent.top
-        anchors.topMargin: 258
-        anchors.right: parent.right
-        anchors.rightMargin: 50
-        font.italic: true
-        font.pointSize: 16
-    }
-
     AccountManager {
         id: accManager
     }
@@ -113,10 +78,10 @@ Window {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 10
         onClicked: {
-            accManager.createBudget(pathDialog.fileUrl, budgetName.text)
-            var filePath = pathDialog.fileUrl.toString() + "/" + budgetName.text + ".mbgt";
-            accManager.setLastFile(filePath)
-            newBudgetWindow.close()
+            var filePath = accManager.getLastFile()
+            var accountBalanceInt = parseFloat(accountBalance.text) * 100
+            account.addChecking(filePath, accountName.text, accountBalanceInt, accountBalanceDate.selectedDate)
+            newCheckingWindow.close()
         }
     }
 
@@ -129,7 +94,48 @@ Window {
         anchors.rightMargin: 99
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 10
-        onClicked: newBudgetWindow.close()
+        onClicked: newCheckingWindow.close()
+    }
+
+    TextField {
+        id: accountBalance
+        x: -2
+        y: 9
+        height: 27
+        anchors.top: parent.top
+        font.pointSize: 22
+        anchors.rightMargin: 50
+        anchors.left: parent.left
+        anchors.leftMargin: 322
+        anchors.topMargin: 223
+        font.family: "Arial"
+        anchors.right: parent.right
+        placeholderText: qsTr("Balance")
+        validator: RegExpValidator { regExp: /\d+\.\d\d/ }
+    }
+
+    Label {
+        id: balanceDateLabel
+        x: -5
+        y: 6
+        text: qsTr("Balance Date")
+        anchors.top: parent.top
+        font.pointSize: 22
+        anchors.left: parent.left
+        anchors.leftMargin: 50
+        anchors.topMargin: 274
+        font.family: "Arial"
+    }
+
+    Calendar {
+        id: accountBalanceDate
+        height: 167
+        anchors.left: parent.left
+        anchors.leftMargin: 322
+        anchors.top: parent.top
+        anchors.topMargin: 274
+        anchors.right: parent.right
+        anchors.rightMargin: 50
     }
 }
 
