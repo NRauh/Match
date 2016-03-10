@@ -4,5 +4,6 @@
         <file>newbudget.qml</file>
         <file>Sidebar.qml</file>
         <file>newchecking.qml</file>
+        <file>AccountView.qml</file>
     </qresource>
 </RCC>

@@ -1,12 +1,27 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
+import com.nrauh 1.0
 
 Rectangle {
-    id: sidebarr
+    id: sidebar
     width: 300
     height: 500
     color: "#e5e7e8"
     property var accountData
+    property var targetLoader
+    Component.onCompleted: {
+        var filePath = accManager.getLastFile()
+        var accountList = account.getAccountListString(filePath)
+        accountData = JSON.parse(accountList)
+    }
+
+    AccountManager {
+        id: accManager
+    }
+
+    Account {
+        id: account
+    }
 
     Label {
         id: logo
@@ -64,7 +79,7 @@ Rectangle {
 
                 Label {
                     id: accountNameLabel
-                    text: modelData.accountName
+                    text: modelData.accountName || ""
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.leftMargin: 5
@@ -75,6 +90,7 @@ Rectangle {
                     hoverEnabled: true
                     onEntered: parent.color = "#e5e7e8"
                     onExited: parent.color = "#cdd3d6"
+                    onClicked: targetLoader.setSource("AccountView.qml", {accountIndex: modelData.index})
                 }
             }
         }

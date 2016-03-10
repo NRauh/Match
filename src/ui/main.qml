@@ -43,6 +43,18 @@ ApplicationWindow {
 
     Sidebar {
         id: mainSidebar
-        accountData: [{accountName: "foo", accountType: "Checking"}]
+        targetLoader: contentLoader
+    }
+
+    Loader {
+        id: contentLoader
+        anchors.left: parent.left
+        anchors.leftMargin: 600
+        anchors.top: parent.top
+        anchors.topMargin: 0
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 500
+        anchors.right: parent.right
+        anchors.rightMargin: 800
     }
 }
