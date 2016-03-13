@@ -90,7 +90,8 @@ Rectangle {
                     hoverEnabled: true
                     onEntered: parent.color = "#e5e7e8"
                     onExited: parent.color = "#cdd3d6"
-                    onClicked: targetLoader.setSource("AccountView.qml", {accountIndex: modelData.index})
+                    onClicked: targetLoader.setSource("AccountView.qml", {accountIndex: modelData.index,
+                                                      accountName: accountNameLabel.text})
                 }
             }
         }
