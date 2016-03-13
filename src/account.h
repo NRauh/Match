@@ -16,6 +16,7 @@ public:
     Q_INVOKABLE Json::Value getAccountList(QUrl filePath);
     Q_INVOKABLE QString getAccountListString(QUrl filePath);
     Q_INVOKABLE Json::Value getTransactions(QUrl filePath, int accountIndex);
+    Q_INVOKABLE QString getTransactionsString(QUrl filePath, int accountIndex);
 
 signals:
 

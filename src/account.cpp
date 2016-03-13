@@ -96,3 +96,10 @@ Json::Value Account::getTransactions(QUrl filePath, int accountIndex)
 
     return transactions;
 }
+
+QString Account::getTransactionsString(QUrl filePath, int accountIndex)
+{
+    Json::Value transactions = getTransactions(filePath, accountIndex);
+    QString transactionString = transactions.toStyledString().c_str();
+    return transactionString;
+}

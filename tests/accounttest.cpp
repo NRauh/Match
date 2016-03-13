@@ -91,4 +91,16 @@ TEST_CASE("Can get list of transactions, and account balance", "[getTransactions
         REQUIRE(transactions["transactions"][1]["amount"] == 125);
         REQUIRE(transactions["transactions"][1]["outflow"] == true);
     }
+
+    SECTION("Can run as QString") {
+        Account account;
+        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
+
+        QString transactionsString = account.getTransactionsString(filePath, 0);
+        Json::Value transactions;
+        Json::Reader reader;
+        reader.parse(transactionsString.toStdString(), transactions);
+
+        REQUIRE(transactions["balance"] == 80875);
+    }
 }
