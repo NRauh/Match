@@ -76,3 +76,23 @@ QString Account::getAccountListString(QUrl filePath)
     QString accounts = accountList.toStyledString().c_str();
     return accounts;
 }
+
+Json::Value Account::getTransactions(QUrl filePath, int accountIndex)
+{
+    AccountManager accManager;
+    Json::Value budget = accManager.loadFile(filePath);
+    budget = budget["onBudgetAccounts"][accountIndex];
+    Json::Value transactions;
+
+    transactions["balance"] = budget["balance"];
+
+    for (int i = 0; i < (int)budget["transactions"].size(); i++) {
+        transactions["transactions"][i]["date"] = budget["transactions"][i]["date"];
+        transactions["transactions"][i]["payee"] = budget["transactions"][i]["payee"];
+        transactions["transactions"][i]["note"] = budget["transactions"][i]["note"];
+        transactions["transactions"][i]["amount"] = budget["transactions"][i]["amount"];
+        transactions["transactions"][i]["outflow"] = budget["transactions"][i]["outflow"];
+    }
+
+    return transactions;
+}

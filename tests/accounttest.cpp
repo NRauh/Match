@@ -77,3 +77,18 @@ TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
         REQUIRE(accountList["balance"] == 80875);
     }
 }
+
+TEST_CASE("Can get list of transactions, and account balance", "[getTransactions]") {
+    SECTION("Filepath, and index returns balance and array of transactions") {
+        Account account;
+        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
+
+        Json::Value transactions = account.getTransactions(filePath, 0);
+        REQUIRE(transactions["balance"] == 80875);
+        REQUIRE(transactions["transactions"][1]["date"] == "2016-02-29");
+        REQUIRE(transactions["transactions"][1]["payee"] == "Caffe Nero");
+        REQUIRE(transactions["transactions"][1]["note"] == "Espresso");
+        REQUIRE(transactions["transactions"][1]["amount"] == 125);
+        REQUIRE(transactions["transactions"][1]["outflow"] == true);
+    }
+}
