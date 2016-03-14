@@ -53,12 +53,17 @@ Json::Value Account::getAccountList(QUrl filePath)
     AccountManager accManager;
     Json::Value budget = accManager.loadFile(filePath);
     Json::Value accountList;
+    std::string totalBalance = budget["balance"].asString();
+    totalBalance = totalBalance.insert(totalBalance.length() - 2, ".");
 
-    accountList["balance"] = budget["balance"];
+    accountList["balance"] = totalBalance;
 
     for (int i = 0; i < (int)budget["onBudgetAccounts"].size(); i++) {
+        std::string accountBalance = budget["onBudgetAccounts"][i]["balance"].asString();
+        accountBalance = accountBalance.insert(accountBalance.length() - 2, ".");
+
         accountList["accounts"][i]["accountName"] = budget["onBudgetAccounts"][i]["accountName"];
-        accountList["accounts"][i]["accountBalance"] = budget["onBudgetAccounts"][i]["balance"];
+        accountList["accounts"][i]["accountBalance"] = accountBalance;
         accountList["accounts"][i]["index"] = i;
     }
 

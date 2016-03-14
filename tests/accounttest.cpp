@@ -59,9 +59,9 @@ TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
         QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
 
         Json::Value accountList = account.getAccountList(filePath);
-        REQUIRE(accountList["balance"] == 80875);
+        REQUIRE(accountList["balance"] == "808.75");
         REQUIRE(accountList["accounts"][0]["accountName"] == "Foo CU");
-        REQUIRE(accountList["accounts"][0]["accountBalance"] == 80875);
+        REQUIRE(accountList["accounts"][0]["accountBalance"] == "808.75");
         REQUIRE(accountList["accounts"][0]["index"] == 0);
     }
 
@@ -74,7 +74,7 @@ TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
         Json::Reader reader;
         reader.parse(accountString.toStdString(), accountList);
 
-        REQUIRE(accountList["balance"] == 80875);
+        REQUIRE(accountList["balance"] == "808.75");
     }
 }
 
