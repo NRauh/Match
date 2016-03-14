@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
+import com.nrauh 1.0
 
 Rectangle {
     id: rectangle1
@@ -8,7 +9,20 @@ Rectangle {
     color: "#ffffff"
     property var accountIndex
     property var accountName
+    property var transactions
+    Component.onCompleted: {
+        var lastFile = accManager.getLastFile()
+        var transactionString = JSON.parse(account.getTransactionsString(lastFile, accountIndex))
+        transactions = transactionString
+        console.log(transactionString)
+    }
 
+    AccountManager {
+        id: accManager
+    }
+    Account {
+        id: account
+    }
 
     Rectangle {
         id: titleBackground
@@ -89,14 +103,7 @@ Rectangle {
             title: "Category"
             width: 125
         }
-        model: [{
-                transactionDate: "12/18/2015",
-                payee: "The Barber Shop",
-                note: "Fancy new haircut and tip",
-                outflow: "$25.00",
-                income: "",
-                category: "Health & Beauty"
-            }]
+        model: transactions["transactions"]
     }
 
     Rectangle {
