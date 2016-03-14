@@ -233,7 +233,7 @@ Rectangle {
         headerVisible: true
         frameVisible: false
         TableViewColumn {
-            role: "transactionDate"
+            role: "date"
             title: "Date"
             width: 80
         }
