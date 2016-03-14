@@ -252,11 +252,6 @@ Rectangle {
             title: "Amount"
             width: 70
         }
-        TableViewColumn {
-            role: "outflow"
-            title: "Flow"
-            width: 35
-        }
         //TableViewColumn {
             //role: "category"
             //title: "Category"

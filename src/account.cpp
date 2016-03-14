@@ -1,6 +1,6 @@
 #include "account.h"
 #include "accountmanager.h"
-#include <QDebug>
+#include <regex>
 
 Account::Account(QObject *parent) : QObject(parent)
 {
@@ -78,15 +78,29 @@ Json::Value Account::getTransactions(QUrl filePath, int accountIndex)
     Json::Value budget = accManager.loadFile(filePath);
     budget = budget["onBudgetAccounts"][accountIndex];
     Json::Value transactions;
+    std::string accountBalance = budget["balance"].asString();
 
-    transactions["balance"] = budget["balance"];
+    transactions["balance"] = accountBalance.insert(accountBalance.length() - 2, ".");
 
     for (int i = 0; i < (int)budget["transactions"].size(); i++) {
-        transactions["transactions"][i]["date"] = budget["transactions"][i]["date"];
+        std::string amountString = budget["transactions"][i]["amount"].asString();
+        QString date = budget["transactions"][i]["date"].asCString();
+        // TODO: Allow people to chose this format
+        QDate formattedDate = QDate::fromString(date, QString("yyyy-MM-dd"));
+
+        transactions["transactions"][i]["date"] = formattedDate.toString("M/d/yy").toStdString();
         transactions["transactions"][i]["payee"] = budget["transactions"][i]["payee"];
         transactions["transactions"][i]["note"] = budget["transactions"][i]["note"];
-        transactions["transactions"][i]["amount"] = budget["transactions"][i]["amount"];
-        transactions["transactions"][i]["outflow"] = budget["transactions"][i]["outflow"];
+
+
+
+        amountString.insert(amountString.length() - 2, ".");
+        if (budget["transactions"][i]["outflow"].asBool()) {
+            amountString.insert(0, "-");
+        } else {
+            amountString.insert(0, "+");
+        }
+        transactions["transactions"][i]["amount"] = amountString;
     }
 
     return transactions;

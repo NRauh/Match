@@ -84,12 +84,12 @@ TEST_CASE("Can get list of transactions, and account balance", "[getTransactions
         QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
 
         Json::Value transactions = account.getTransactions(filePath, 0);
-        REQUIRE(transactions["balance"] == 80875);
-        REQUIRE(transactions["transactions"][1]["date"] == "2016-02-29");
+        REQUIRE(transactions["balance"] == "808.75");
+        REQUIRE(transactions["transactions"][0]["amount"] == "+800.00");
+        REQUIRE(transactions["transactions"][1]["date"] == "2/29/16");
         REQUIRE(transactions["transactions"][1]["payee"] == "Caffe Nero");
         REQUIRE(transactions["transactions"][1]["note"] == "Espresso");
-        REQUIRE(transactions["transactions"][1]["amount"] == 125);
-        REQUIRE(transactions["transactions"][1]["outflow"] == true);
+        REQUIRE(transactions["transactions"][1]["amount"] == "-1.25");
     }
 
     SECTION("Can run as QString") {
@@ -101,6 +101,6 @@ TEST_CASE("Can get list of transactions, and account balance", "[getTransactions
         Json::Reader reader;
         reader.parse(transactionsString.toStdString(), transactions);
 
-        REQUIRE(transactions["balance"] == 80875);
+        REQUIRE(transactions["balance"] == "808.75");
     }
 }
