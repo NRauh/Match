@@ -5,7 +5,7 @@ import com.nrauh 1.0
 Rectangle {
     id: sidebar
     width: 250
-    height: 650
+    height: 720
     color: "#c3d9e6"
     property var accountData
     property var targetLoader

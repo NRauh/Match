@@ -1,11 +1,11 @@
 import QtQuick 2.0
-import QtQuick.Controls 1.2
+import QtQuick.Controls 1.4
 import com.nrauh 1.0
 
 Rectangle {
     id: rectangle1
-    width: 710
-    height: 500
+    width: 770
+    height: 720
     color: "#ffffff"
     property var accountIndex
     property var accountName
@@ -14,7 +14,6 @@ Rectangle {
         var lastFile = accManager.getLastFile()
         var transactionString = JSON.parse(account.getTransactionsString(lastFile, accountIndex))
         transactions = transactionString
-        console.log(transactionString)
     }
 
     AccountManager {
@@ -24,53 +23,213 @@ Rectangle {
         id: account
     }
 
+
     Rectangle {
-        id: titleBackground
-        height: 42
-        color: "#b6bac5"
-        anchors.right: parent.right
-        anchors.rightMargin: 0
-        anchors.left: parent.left
-        anchors.leftMargin: 0
+        id: rectangle2
+        x: 570
+        width: 200
+        color: "#e1e7ed"
         anchors.top: parent.top
         anchors.topMargin: 0
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 0
+        anchors.right: parent.right
+        anchors.rightMargin: 0
 
-        Label {
+            Label {
             id: accountNameLabel
-            x: 20
-            y: 10
+            height: 27
             text: accountName
             anchors.left: parent.left
-            anchors.leftMargin: 20
+            anchors.leftMargin: 10
+            anchors.right: parent.right
+            anchors.rightMargin: 10
             anchors.top: parent.top
             anchors.topMargin: 10
-            font.pointSize: 18
+            wrapMode: Text.WordWrap
+            horizontalAlignment: Text.AlignHCenter
+            font.pointSize: 16
         }
 
         Label {
             id: accountBalanceLabel
-            x: 315
-            y: 15
-            height: 22
-            text: "Balance"
+            y: 60
+            height: 33
+            text: transactions["balance"]
+            anchors.left: parent.left
+            anchors.leftMargin: 10
             anchors.right: parent.right
-            anchors.rightMargin: 20
-            font.pointSize: 18
-            anchors.topMargin: 10
+            anchors.rightMargin: 10
+            horizontalAlignment: Text.AlignHCenter
             anchors.top: parent.top
+            anchors.topMargin: 65
+            font.pointSize: 18
+        }
+
+        Label {
+            id: dateLabel
+            y: 140
+            text: qsTr("Date")
+            anchors.top: parent.top
+            anchors.topMargin: 130
+            anchors.right: parent.right
+            anchors.rightMargin: 161
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            font.pointSize: 9
+        }
+
+        Calendar {
+            id: dateInput
+            height: 187
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.top: parent.top
+            anchors.topMargin: 153
+            navigationBarVisible: true
+            frameVisible: false
+            dayOfWeekFormat: 1
+            weekNumbersVisible: false
+            visibleMonth: 2
+        }
+
+        Label {
+            id: payeeLabel
+            text: qsTr("Payee")
+            anchors.right: parent.right
+            anchors.rightMargin: 158
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.top: parent.top
+            anchors.topMargin: 356
+        }
+
+        TextField {
+            id: payeeInput
+            height: 25
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.top: parent.top
+            anchors.topMargin: 379
+            placeholderText: qsTr("Payee")
+        }
+
+        Label {
+            id: noteLabel
+            text: qsTr("Note")
+            anchors.right: parent.right
+            anchors.rightMargin: 162
+            anchors.top: parent.top
+            anchors.topMargin: 420
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+        }
+
+        TextArea {
+            id: noteInput
+            height: 60
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.top: parent.top
+            anchors.topMargin: 443
+            tabChangesFocus: true
+        }
+
+        Label {
+            id: amountlabel
+            text: qsTr("Amount")
+            anchors.top: parent.top
+            anchors.topMargin: 519
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.right: parent.right
+            anchors.rightMargin: 143
+        }
+
+        TextField {
+            id: amountInput
+            width: 90
+            anchors.top: parent.top
+            anchors.topMargin: 542
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.right: parent.right
+            anchors.rightMargin: 100
+            placeholderText: qsTr("0.00")
+        }
+
+        CheckBox {
+            id: outflowInput
+            text: "Expense"
+            anchors.top: parent.top
+            anchors.topMargin: 544
+            anchors.left: parent.left
+            anchors.leftMargin: 115
+            anchors.rightMargin: 10
+            anchors.right: parent.right
+            checked: true
+        }
+
+        Label {
+            id: categoryLabel
+            x: 10
+            y: 583
+            text: qsTr("Category")
+        }
+
+        ComboBox {
+            id: categoryInput
+            height: 25
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            anchors.top: parent.top
+            anchors.topMargin: 606
+        }
+
+        Button {
+            id: addTransactionButton
+            text: qsTr("Add Transaction")
+            anchors.right: parent.right
+            anchors.rightMargin: 75
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.top: parent.top
+            anchors.topMargin: 647
+        }
+
+        Button {
+            id: resetButton
+            text: qsTr("Reset")
+            anchors.right: parent.right
+            anchors.rightMargin: 105
+            anchors.top: parent.top
+            anchors.topMargin: 680
+            anchors.left: parent.left
+            anchors.leftMargin: 10
         }
     }
 
     TableView {
         id: transactionTable
+        y: 0
+        anchors.right: parent.right
+        anchors.rightMargin: 200
+        verticalScrollBarPolicy: 1
+        horizontalScrollBarPolicy: 0
         anchors.top: parent.top
-        anchors.topMargin: 132
+        anchors.topMargin: 0
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 0
         anchors.left: parent.left
         anchors.leftMargin: 0
-        anchors.right: parent.right
-        anchors.rightMargin: 0
         headerVisible: true
         frameVisible: false
         TableViewColumn {
@@ -81,167 +240,30 @@ Rectangle {
         TableViewColumn {
             role: "payee"
             title: "Payee"
-            width: 125
+            width: 100
         }
         TableViewColumn {
             role: "note"
             title: "Note"
-            width: 200
+            width: 165
+        }
+        TableViewColumn {
+            role: "amount"
+            title: "Amount"
+            width: 70
         }
         TableViewColumn {
             role: "outflow"
-            title: "Expense"
-            width: 90
-        }
-        TableViewColumn {
-            role: "income"
-            title: "Income"
-            width: 90
+            title: "Flow"
+            width: 35
         }
         TableViewColumn {
             role: "category"
             title: "Category"
-            width: 125
+            width: 120
         }
         model: transactions["transactions"]
-    }
-
-    Rectangle {
-        id: inputBackground
-        color: "#e1e6d9"
-        anchors.top: parent.top
-        anchors.topMargin: 42
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 368
-        anchors.left: parent.left
-        anchors.leftMargin: 0
-        anchors.right: parent.right
-        anchors.rightMargin: 0
-
-        Label {
-            id: dateLabel
-            x: 8
-            y: 8
-            text: qsTr("Date")
-            font.pointSize: 12
-        }
-
-        Label {
-            id: payeeLabel
-            x: 81
-            y: 8
-            text: qsTr("Payee")
-            font.pointSize: 12
-        }
-
-        Label {
-            id: noteLabel
-            x: 205
-            y: 8
-            text: qsTr("Note")
-            font.pointSize: 12
-        }
-
-        Label {
-            id: expenseLabel
-            x: 405
-            y: 8
-            text: qsTr("Expense")
-            font.pointSize: 12
-        }
-
-        Label {
-            id: incomeLabel
-            x: 495
-            y: 10
-            text: qsTr("Income")
-            font.pointSize: 12
-        }
-
-        Label {
-            id: categoryLabel
-            x: 585
-            y: 8
-            text: qsTr("Category")
-            font.pointSize: 12
-        }
-
-        TextField {
-            id: dateInput
-            x: 8
-            y: 29
-            width: 73
-            height: 22
-            placeholderText: qsTr("MM/DD/YYYY")
-            validator: RegExpValidator { regExp: /\d\d\/\d\d\/\d\d\d\d/ }
-        }
-
-        TextField {
-            id: payeeInput
-            x: 87
-            y: 29
-            width: 109
-            height: 22
-            clip: false
-            placeholderText: qsTr("Payee")
-        }
-
-        TextField {
-            id: noteInput
-            x: 205
-            y: 29
-            width: 190
-            placeholderText: qsTr("Note")
-        }
-
-        TextField {
-            id: expenseInput
-            x: 405
-            y: 30
-            width: 80
-            placeholderText: qsTr("0.00")
-            validator: RegExpValidator { regExp: /\d+\.\d\d/ }
-        }
-
-        TextField {
-            id: incomeInput
-            x: 495
-            y: 29
-            width: 80
-            placeholderText: qsTr("0.00")
-            validator: RegExpValidator { regExp: /\d+\.\d\d/ }
-        }
-
-        ComboBox {
-            id: categoryInput
-            x: 585
-            y: 29
-            width: 117
-            height: 23
-        }
-
-        Button {
-            id: addTransactionButton
-            x: 568
-            y: 57
-            text: qsTr("Add Transaction")
-        }
-
-
-
-        Button {
-            id: cancelTransactionButton
-            x: 485
-            y: 57
-            text: qsTr("Cancel")
-            onClicked: {
-                dateInput.text = ""
-                payeeInput.text = ""
-                noteInput.text = ""
-                expenseInput.text = ""
-                incomeInput.text = ""
-            }
-        }
+        //model: [{transactionDate: "10/18/2015", payee: "Barber Shop", note: "A new haircut, and a tip", amount: "20.00", outflow: true, category: "Health & Beauty"}]
     }
 }
 

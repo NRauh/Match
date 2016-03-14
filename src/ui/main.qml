@@ -5,7 +5,7 @@ import QtQuick.Window 2.2
 ApplicationWindow {
     title: qsTr("Match")
     width: 995
-    height: 650
+    height: 735
     visible: true
     id: matchWindow
 
@@ -44,14 +44,20 @@ ApplicationWindow {
     Sidebar {
         id: mainSidebar
         width: 225
-        height: 650
+        height: 725
+        anchors.left: parent.left
+        anchors.leftMargin: 0
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 0
+        anchors.top: parent.top
+        anchors.topMargin: 0
         targetLoader: contentLoader
     }
 
     Loader {
         id: contentLoader
         anchors.left: parent.left
-        anchors.leftMargin: 300
+        anchors.leftMargin: 225
         anchors.top: parent.top
         anchors.topMargin: 0
         anchors.bottom: parent.bottom
