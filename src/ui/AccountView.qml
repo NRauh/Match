@@ -257,13 +257,12 @@ Rectangle {
             title: "Flow"
             width: 35
         }
-        TableViewColumn {
-            role: "category"
-            title: "Category"
-            width: 120
-        }
+        //TableViewColumn {
+            //role: "category"
+            //title: "Category"
+            //width: 120
+        //}
         model: transactions["transactions"]
-        //model: [{transactionDate: "10/18/2015", payee: "Barber Shop", note: "A new haircut, and a tip", amount: "20.00", outflow: true, category: "Health & Beauty"}]
     }
 }
 
