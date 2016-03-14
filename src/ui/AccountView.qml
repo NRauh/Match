@@ -203,6 +203,30 @@ Rectangle {
             anchors.leftMargin: 10
             anchors.top: parent.top
             anchors.topMargin: 647
+            onClicked: {
+                var lastFile = accManager.getLastFile();
+                var acceptable = true
+
+                if (!payeeInput.text) {
+                    acceptable = false
+                }
+                if (!noteInput.text) {
+                    acceptable = false
+                }
+
+                if (acceptable) {
+                    account.addTransaction(lastFile, accountIndex,
+                                           dateInput.selectedDate,
+                                           payeeInput.text,
+                                           outflowInput.checked,
+                                           parseFloat(amountInput.text) * 100,
+                                           noteInput.text)
+                    payeeInput.text = ""
+                    outflowInput.checked = true
+                    amountInput.text = ""
+                    noteInput.text = ""
+                }
+            }
         }
 
         Button {
@@ -214,6 +238,12 @@ Rectangle {
             anchors.topMargin: 680
             anchors.left: parent.left
             anchors.leftMargin: 10
+            onClicked: {
+                payeeInput.text = ""
+                outflowInput.checked = true
+                amountInput.text = ""
+                noteInput.text = ""
+            }
         }
     }
 
