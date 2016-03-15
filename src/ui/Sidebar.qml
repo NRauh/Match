@@ -54,6 +54,14 @@ Rectangle {
             anchors.leftMargin: 10
             font.pointSize: 22
         }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: parent.color = "#99b1bf"
+            onExited: parent.color = "#adc9d9"
+            onClicked: targetLoader.setSource("BudgetView.qml")
+        }
     }
 
     Label {
