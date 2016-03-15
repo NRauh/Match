@@ -225,6 +225,10 @@ Rectangle {
                     outflowInput.checked = true
                     amountInput.text = ""
                     noteInput.text = ""
+                    // TODO: would this be faster than appending temporarially?
+                    var lastFile = accManager.getLastFile()
+                    var transactionString = JSON.parse(account.getTransactionsString(lastFile, accountIndex))
+                    transactions = transactionString
                 }
             }
         }
