@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import com.nrauh 1.0
 
 Rectangle {
-    id: rectangle1
+    id: background
     width: 770
     height: 720
     color: "#ffffff"
@@ -25,7 +25,7 @@ Rectangle {
 
 
     Rectangle {
-        id: rectangle2
+        id: actionBar
         x: 570
         width: 200
         color: "#e1e7ed"
@@ -36,7 +36,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: 0
 
-            Label {
+        Label {
             id: accountNameLabel
             height: 27
             text: accountName
@@ -162,6 +162,7 @@ Rectangle {
             anchors.right: parent.right
             anchors.rightMargin: 100
             placeholderText: qsTr("0.00")
+            validator: RegExpValidator { regExp: /\d+\.\d\d/ }
         }
 
         CheckBox {
@@ -226,6 +227,7 @@ Rectangle {
                     amountInput.text = ""
                     noteInput.text = ""
                     // TODO: would this be faster than appending temporarially?
+                    // TODO: Should actually do this and arrange by date
                     var lastFile = accManager.getLastFile()
                     var transactionString = JSON.parse(account.getTransactionsString(lastFile, accountIndex))
                     transactions = transactionString
@@ -247,6 +249,82 @@ Rectangle {
                 outflowInput.checked = true
                 amountInput.text = ""
                 noteInput.text = ""
+            }
+        }
+
+        Button {
+            id: updateTransactionButton
+            x: -5
+            y: 7
+            height: 27
+            text: qsTr("Update Transaction")
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.rightMargin: 54
+            anchors.topMargin: 647
+            anchors.leftMargin: 10
+            anchors.left: parent.left
+            visible: false
+            onClicked: {
+                updateTransactionButton.visible = false
+                doneButton.visible = false
+                deleteButton.visible = false
+                addTransactionButton.visible = true
+                resetButton.visible = true
+                payeeInput.text = ""
+                noteInput.text = ""
+                amountInput.text = ""
+                outflowInput.checked = true
+            }
+        }
+
+        Button {
+            id: doneButton
+            x: -2
+            y: -6
+            text: qsTr("Done")
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.rightMargin: 105
+            anchors.topMargin: 680
+            anchors.leftMargin: 10
+            anchors.left: parent.left
+            visible: false
+            onClicked: {
+                updateTransactionButton.visible = false
+                doneButton.visible = false
+                deleteButton.visible = false
+                addTransactionButton.visible = true
+                resetButton.visible = true
+                payeeInput.text = ""
+                noteInput.text = ""
+                amountInput.text = ""
+                outflowInput.checked = true
+            }
+        }
+
+        Button {
+            id: deleteButton
+            x: 2
+            y: -2
+            text: qsTr("Delete")
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            anchors.topMargin: 680
+            anchors.leftMargin: 105
+            anchors.left: parent.left
+            visible: false
+            onClicked: {
+                updateTransactionButton.visible = false
+                doneButton.visible = false
+                deleteButton.visible = false
+                addTransactionButton.visible = true
+                resetButton.visible = true
+                payeeInput.text = ""
+                noteInput.text = ""
+                amountInput.text = ""
+                outflowInput.checked = true
             }
         }
     }
@@ -292,6 +370,18 @@ Rectangle {
             //width: 120
         //}
         model: transactions["transactions"]
+        onClicked: {
+            updateTransactionButton.visible = true
+            doneButton.visible = true
+            deleteButton.visible = true
+            addTransactionButton.visible = false
+            resetButton.visible = false
+
+            payeeInput.text = model[row].payee
+            noteInput.text = model[row].note
+            amountInput.text = parseFloat(model[row].amount.substr(1)).toFixed(2)
+            outflowInput.checked = model[row].outflow
+        }
     }
 }
 
