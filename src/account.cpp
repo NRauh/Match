@@ -90,11 +90,18 @@ QString Account::getAccountListString(QUrl filePath)
     return accounts;
 }
 
-Json::Value Account::getTransactions(QUrl filePath, int accountIndex)
+Json::Value Account::getTransactions(QUrl filePath, QString accountId)
 {
     AccountManager accManager;
     Json::Value budget = accManager.loadFile(filePath);
-    budget = budget["onBudgetAccounts"][accountIndex];
+
+    for (int i = 0; i < (int)budget["onBudgetAccounts"].size(); i++) {
+        if (budget["onBudgetAccounts"][i]["accountId"].asString() == accountId.toStdString()) {
+            budget = budget["onBudgetAccounts"][i];
+            break;
+        }
+    }
+
     Json::Value transactions;
     std::string accountBalance = budget["balance"].asString();
 
@@ -125,9 +132,9 @@ Json::Value Account::getTransactions(QUrl filePath, int accountIndex)
     return transactions;
 }
 
-QString Account::getTransactionsString(QUrl filePath, int accountIndex)
+QString Account::getTransactionsString(QUrl filePath, QString accountId)
 {
-    Json::Value transactions = getTransactions(filePath, accountIndex);
+    Json::Value transactions = getTransactions(filePath, accountId);
     QString transactionString = transactions.toStyledString().c_str();
     return transactionString;
 }

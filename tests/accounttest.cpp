@@ -85,11 +85,12 @@ TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
 }
 
 TEST_CASE("Can get list of transactions, and account balance", "[getTransactions]") {
-    SECTION("Filepath, and index returns balance and array of transactions") {
+    SECTION("Filepath, and ID returns balance and array of transactions") {
         Account account;
         QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
 
-        Json::Value transactions = account.getTransactions(filePath, 0);
+        Json::Value transactions = account.getTransactions(filePath, fooCuId);
+
         REQUIRE(transactions["balance"] == "808.75");
         REQUIRE(transactions["transactions"][0]["amount"] == "+800.00");
         REQUIRE(transactions["transactions"][1]["date"] == "2/29/16");
@@ -105,7 +106,7 @@ TEST_CASE("Can get list of transactions, and account balance", "[getTransactions
         Account account;
         QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
 
-        QString transactionsString = account.getTransactionsString(filePath, 0);
+        QString transactionsString = account.getTransactionsString(filePath, fooCuId);
         Json::Value transactions;
         Json::Reader reader;
         reader.parse(transactionsString.toStdString(), transactions);
