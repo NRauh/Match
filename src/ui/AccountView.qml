@@ -7,12 +7,12 @@ Rectangle {
     width: 770
     height: 720
     color: "#ffffff"
-    property var accountIndex
+    property var accountId
     property var accountName
     property var transactions
     Component.onCompleted: {
         var lastFile = accManager.getLastFile()
-        var transactionString = JSON.parse(account.getTransactionsString(lastFile, accountIndex))
+        var transactionString = JSON.parse(account.getTransactionsString(lastFile, accountId))
         transactions = transactionString
     }
 
