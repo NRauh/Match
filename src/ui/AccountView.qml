@@ -228,7 +228,6 @@ Rectangle {
                     noteInput.text = ""
                     // TODO: would this be faster than appending temporarially?
                     // TODO: Should actually do this and arrange by date
-                    var lastFile = accManager.getLastFile()
                     var transactionString = JSON.parse(account.getTransactionsString(lastFile, accountId))
                     transactions = transactionString
                 }
