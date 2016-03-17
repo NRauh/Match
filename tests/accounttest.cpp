@@ -68,7 +68,7 @@ TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
         REQUIRE(accountList["balance"] == "808.75");
         REQUIRE(accountList["accounts"][0]["accountName"] == "Foo CU");
         REQUIRE(accountList["accounts"][0]["accountBalance"] == "808.75");
-        REQUIRE(accountList["accounts"][0]["index"] == 0);
+        REQUIRE(accountList["accounts"][0]["accountId"] == fooCuId.toStdString());
     }
 
     SECTION("Method can return as a QString") {

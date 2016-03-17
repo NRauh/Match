@@ -77,7 +77,7 @@ Json::Value Account::getAccountList(QUrl filePath)
 
         accountList["accounts"][i]["accountName"] = budget["onBudgetAccounts"][i]["accountName"];
         accountList["accounts"][i]["accountBalance"] = accountBalance;
-        accountList["accounts"][i]["index"] = i;
+        accountList["accounts"][i]["accountId"] = budget["onBudgetAccounts"][i]["accountId"];
     }
 
     return accountList;
