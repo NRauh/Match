@@ -1,6 +1,7 @@
 #include "account.h"
 #include "accountmanager.h"
 #include <regex>
+#include <QUuid>
 
 Account::Account(QObject *parent) : QObject(parent)
 {
@@ -25,8 +26,10 @@ void Account::addTransaction(QUrl filePath, int accountIndex, QDate date, QStrin
     AccountManager accManager;
     Json::Value budget = accManager.loadFile(filePath);
     QString formattedDate = date.toString("yyyy-MM-dd");
+    QUuid transactionId = QUuid::createUuid();
 
     Json::Value transaction;
+    transaction["id"] = transactionId.toString().toStdString();
     transaction["date"] = formattedDate.toStdString();
     transaction["payee"] = payee.toStdString();
     transaction["outflow"] = outflow;
@@ -93,6 +96,7 @@ Json::Value Account::getTransactions(QUrl filePath, int accountIndex)
         // TODO: Allow people to chose this format
         QDate formattedDate = QDate::fromString(date, QString("yyyy-MM-dd"));
 
+        transactions["transactions"][i]["id"] = budget["transactions"][i]["id"];
         transactions["transactions"][i]["date"] = formattedDate.toString("M/d/yy").toStdString();
         transactions["transactions"][i]["intDate"] = date.toStdString();
         transactions["transactions"][i]["payee"] = budget["transactions"][i]["payee"];

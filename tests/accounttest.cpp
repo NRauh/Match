@@ -36,6 +36,7 @@ TEST_CASE("Can add transactions to account", "[addTransaction]") {
         REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["outflow"] == true);
         REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["amount"] == 125);
         REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["note"] == "Espresso");
+        REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["id"].asCString() != NULL);
         REQUIRE(budget["onBudgetAccounts"][0]["balance"] == 79875);
         REQUIRE(budget["balance"] == 79875);
     }
@@ -92,6 +93,7 @@ TEST_CASE("Can get list of transactions, and account balance", "[getTransactions
         REQUIRE(transactions["transactions"][1]["amount"] == "-1.25");
         REQUIRE(transactions["transactions"][1]["outflow"] == true);
         REQUIRE(transactions["transactions"][1]["intDate"] == "2016-02-29");
+        REQUIRE(transactions["transactions"][1]["id"].asCString() != NULL);
     }
 
     SECTION("Can run as QString") {
