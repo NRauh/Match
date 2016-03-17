@@ -20,15 +20,16 @@ void Account::addChecking(QUrl filePath, QString accountName, int balance, QDate
     budget["onBudgetAccounts"].append(newAccount);
     accManager.saveFile(filePath, budget);
 
-    addTransaction(filePath, (int)budget["onBudgetAccounts"].size() - 1, balanceDate, QString("Self"), false, balance, QString("Initial Balance"));
+    addTransaction(filePath, accountId.toString(), balanceDate, QString("Self"), false, balance, QString("Initial Balance"));
 }
 
-void Account::addTransaction(QUrl filePath, int accountIndex, QDate date, QString payee, bool outflow, int amount, QString note)
+void Account::addTransaction(QUrl filePath, QString accountId, QDate date, QString payee, bool outflow, int amount, QString note)
 {
     AccountManager accManager;
     Json::Value budget = accManager.loadFile(filePath);
     QString formattedDate = date.toString("yyyy-MM-dd");
     QUuid transactionId = QUuid::createUuid();
+    int accountIndex;
 
     Json::Value transaction;
     transaction["id"] = transactionId.toString().toStdString();
@@ -37,6 +38,13 @@ void Account::addTransaction(QUrl filePath, int accountIndex, QDate date, QStrin
     transaction["outflow"] = outflow;
     transaction["amount"] = amount;
     transaction["note"] = note.toStdString();
+
+    for (int i = 0; i < (int)budget["onBudgetAccounts"].size(); i++) {
+        if (budget["onBudgetAccounts"][i]["accountId"].asString() == accountId.toStdString()) {
+            accountIndex = i;
+            break;
+        }
+    }
 
     int accBalance = budget["onBudgetAccounts"][accountIndex]["balance"].asInt();
     int balance = budget["balance"].asInt();

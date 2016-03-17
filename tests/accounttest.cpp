@@ -27,13 +27,13 @@ TEST_CASE("Can add checking accounts", "[addChecking]") {
 }
 
 TEST_CASE("Can add transactions to account", "[addTransaction]") {
-    SECTION("Given file path, account index, date, payee, if outflow, amount, and note") {
+    SECTION("Given file path, account ID, date, payee, if outflow, amount, and note") {
         Account account;
         AccountManager accManager;
         QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
         QDate transactionDate = QDate(2016, 2, 29);
 
-        account.addTransaction(filePath, 0, transactionDate, "Caffe Nero", true, 125, "Espresso");
+        account.addTransaction(filePath, fooCuId, transactionDate, "Caffe Nero", true, 125, "Espresso");
         Json::Value budget = accManager.loadFile(filePath);
 
         REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["date"] == "2016-02-29");
