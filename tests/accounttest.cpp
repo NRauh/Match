@@ -6,6 +6,7 @@
 #include "../src/accountmanager.h"
 
 QString fooCuId;
+QString testTransactionId;
 
 TEST_CASE("Can add checking accounts", "[addChecking]") {
     SECTION("File path, account name, balance, and balance date are given") {
@@ -36,12 +37,13 @@ TEST_CASE("Can add transactions to account", "[addTransaction]") {
         account.addTransaction(filePath, fooCuId, transactionDate, "Caffe Nero", true, 125, "Espresso");
         Json::Value budget = accManager.loadFile(filePath);
 
+        testTransactionId = budget["onBudgetAccounts"][0]["transactions"][1]["id"].asCString();
+        REQUIRE(testTransactionId.isNull() == false);
         REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["date"] == "2016-02-29");
         REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["payee"] == "Caffe Nero");
         REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["outflow"] == true);
         REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["amount"] == 125);
         REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["note"] == "Espresso");
-        REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["id"].asCString() != NULL);
         REQUIRE(budget["onBudgetAccounts"][0]["balance"] == 79875);
         REQUIRE(budget["balance"] == 79875);
     }
@@ -99,7 +101,7 @@ TEST_CASE("Can get list of transactions, and account balance", "[getTransactions
         REQUIRE(transactions["transactions"][1]["amount"] == "-1.25");
         REQUIRE(transactions["transactions"][1]["outflow"] == true);
         REQUIRE(transactions["transactions"][1]["intDate"] == "2016-02-29");
-        REQUIRE(transactions["transactions"][1]["id"].asCString() != NULL);
+        REQUIRE(transactions["transactions"][1]["id"].asString() == testTransactionId.toStdString());
     }
 
     SECTION("Can run as QString") {
@@ -112,5 +114,18 @@ TEST_CASE("Can get list of transactions, and account balance", "[getTransactions
         reader.parse(transactionsString.toStdString(), transactions);
 
         REQUIRE(transactions["balance"] == "808.75");
+    }
+}
+
+TEST_CASE("Can delete transactions", "[deleteTransaction]") {
+    SECTION("Filepath, accountId, and transaction ID will delete that transaction") {
+        Account account;
+        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
+
+        account.deleteTransaction(filePath, fooCuId, testTransactionId);
+        Json::Value transactions = account.getTransactions(filePath, fooCuId);
+
+        REQUIRE(transactions["transactions"][1]["payee"] != "Caffe Nero");
+        REQUIRE(transactions["balance"] == "810.00");
     }
 }

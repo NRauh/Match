@@ -17,6 +17,7 @@ public:
     Q_INVOKABLE QString getAccountListString(QUrl filePath);
     Q_INVOKABLE Json::Value getTransactions(QUrl filePath, QString accountId);
     Q_INVOKABLE QString getTransactionsString(QUrl filePath, QString accountId);
+    Q_INVOKABLE void deleteTransaction(QUrl filePath, QString accountId, QString transactionId);
 
 signals:
 

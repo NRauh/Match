@@ -1,6 +1,5 @@
 #include "account.h"
 #include "accountmanager.h"
-#include <regex>
 #include <QUuid>
 
 Account::Account(QObject *parent) : QObject(parent)
@@ -137,4 +136,40 @@ QString Account::getTransactionsString(QUrl filePath, QString accountId)
     Json::Value transactions = getTransactions(filePath, accountId);
     QString transactionString = transactions.toStyledString().c_str();
     return transactionString;
+}
+
+void Account::deleteTransaction(QUrl filePath, QString accountId, QString transactionId)
+{
+    AccountManager accManager;
+    Json::Value budget = accManager.loadFile(filePath);
+    Json::Value account;
+    Json::Value transactions;
+    int accountIndex;
+
+    for (int i = 0; i < (int)budget.size(); i++) {
+        if (budget["onBudgetAccounts"][i]["accountId"] == accountId.toStdString()) {
+            accountIndex = i;
+            account = budget["onBudgetAccounts"][i];
+            break;
+        }
+    }
+
+    for (int i = 0; i < (int)account["transactions"].size(); i++) {
+        if (account["transactions"][i]["id"] == transactionId.toStdString()) {
+            int amount = account["transactions"][i]["amount"].asInt();
+            if (account["transactions"][i]["outflow"].asBool()) {
+                account["balance"] = account["balance"].asInt() + amount;
+                budget["balance"] = budget["balance"].asInt() + amount;
+            } else {
+                account["balance"] = account["balance"].asInt() - amount;
+                budget["balance"] = budget["balance"].asInt() - amount;
+            }
+        } else {
+            transactions[transactions.size()] = account["transactions"][i];
+        }
+    }
+
+    account["transactions"] = transactions;
+    budget["onBudgetAccounts"][accountIndex] = account;
+    accManager.saveFile(filePath, budget);
 }
