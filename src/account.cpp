@@ -12,6 +12,8 @@ void Account::addChecking(QUrl filePath, QString accountName, int balance, QDate
 {
     AccountManager accManager;
     Json::Value newAccount;
+    QUuid accountId = QUuid::createUuid();
+    newAccount["accountId"] = accountId.toString().toStdString();
     newAccount["accountName"] = accountName.toStdString();
 
     Json::Value budget = accManager.loadFile(filePath);
