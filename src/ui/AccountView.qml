@@ -216,7 +216,7 @@ Rectangle {
                 }
 
                 if (acceptable) {
-                    account.addTransaction(lastFile, accountIndex,
+                    account.addTransaction(lastFile, accountId,
                                            dateInput.selectedDate,
                                            payeeInput.text,
                                            outflowInput.checked,
@@ -229,7 +229,7 @@ Rectangle {
                     // TODO: would this be faster than appending temporarially?
                     // TODO: Should actually do this and arrange by date
                     var lastFile = accManager.getLastFile()
-                    var transactionString = JSON.parse(account.getTransactionsString(lastFile, accountIndex))
+                    var transactionString = JSON.parse(account.getTransactionsString(lastFile, accountId))
                     transactions = transactionString
                 }
             }
