@@ -94,10 +94,10 @@ Json::Value Account::getTransactions(QUrl filePath, int accountIndex)
         QDate formattedDate = QDate::fromString(date, QString("yyyy-MM-dd"));
 
         transactions["transactions"][i]["date"] = formattedDate.toString("M/d/yy").toStdString();
+        transactions["transactions"][i]["intDate"] = date.toStdString();
         transactions["transactions"][i]["payee"] = budget["transactions"][i]["payee"];
         transactions["transactions"][i]["note"] = budget["transactions"][i]["note"];
-
-
+        transactions["transactions"][i]["outflow"] = budget["transactions"][i]["outflow"].asBool();
 
         amountString.insert(amountString.length() - 2, ".");
         if (budget["transactions"][i]["outflow"].asBool()) {

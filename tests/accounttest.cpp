@@ -90,6 +90,8 @@ TEST_CASE("Can get list of transactions, and account balance", "[getTransactions
         REQUIRE(transactions["transactions"][1]["payee"] == "Caffe Nero");
         REQUIRE(transactions["transactions"][1]["note"] == "Espresso");
         REQUIRE(transactions["transactions"][1]["amount"] == "-1.25");
+        REQUIRE(transactions["transactions"][1]["outflow"] == true);
+        REQUIRE(transactions["transactions"][1]["intDate"] == "2016-02-29");
     }
 
     SECTION("Can run as QString") {

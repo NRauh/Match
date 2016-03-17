@@ -377,6 +377,9 @@ Rectangle {
             addTransactionButton.visible = false
             resetButton.visible = false
 
+            var transactionDate = new Date(model[row].intDate)
+            transactionDate = new Date(transactionDate.getTime() + transactionDate.getTimezoneOffset() * 60000)
+            dateInput.selectedDate = transactionDate
             payeeInput.text = model[row].payee
             noteInput.text = model[row].note
             amountInput.text = parseFloat(model[row].amount.substr(1)).toFixed(2)
