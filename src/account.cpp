@@ -1,6 +1,7 @@
 #include "account.h"
 #include "accountmanager.h"
 #include <QUuid>
+#include "sqlitecpp/SQLiteCpp.h"
 
 Account::Account(QObject *parent) : QObject(parent)
 {
@@ -9,17 +10,10 @@ Account::Account(QObject *parent) : QObject(parent)
 
 void Account::addChecking(QUrl filePath, QString accountName, int balance, QDate balanceDate)
 {
-    AccountManager accManager;
-    Json::Value newAccount;
-    QUuid accountId = QUuid::createUuid();
-    newAccount["accountId"] = accountId.toString().toStdString();
-    newAccount["accountName"] = accountName.toStdString();
-
-    Json::Value budget = accManager.loadFile(filePath);
-    budget["onBudgetAccounts"].append(newAccount);
-    accManager.saveFile(filePath, budget);
-
-    addTransaction(filePath, accountId.toString(), balanceDate, QString("Self"), false, balance, QString("Initial Balance"));
+    SQLite::Database budget(filePath.toLocalFile().toStdString());
+    SQLite::Statement query(budget, "INSERT INTO accounts (accountName, balance) VALUES (?, 0)");
+    query.bind(1, accountName.toStdString());
+    query.reset();
 }
 
 void Account::addTransaction(QUrl filePath, QString accountId, QDate date, QString payee, bool outflow, int amount, QString note)

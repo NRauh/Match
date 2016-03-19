@@ -4,6 +4,7 @@
 #include <QDate>
 #include "../src/json/json.h"
 #include "../src/accountmanager.h"
+#include "../src/sqlitecpp/SQLiteCpp.h"
 
 QString fooCuId;
 QString testTransactionId;
@@ -16,14 +17,13 @@ TEST_CASE("Can add checking accounts", "[addChecking]") {
         QDate balanceDate = QDate(2016, 2, 29);
 
         account.addChecking(filePath, "Foo CU", 80000, balanceDate);
-        Json::Value budget = accManager.loadFile(filePath);
-
-        fooCuId = budget["onBudgetAccounts"][0]["accountId"].asCString();
-        REQUIRE(fooCuId.isNull() == false);
-        REQUIRE(budget["onBudgetAccounts"][0]["accountName"] == "Foo CU");
-        REQUIRE(budget["onBudgetAccounts"][0]["balance"] == 80000);
-        REQUIRE(budget["onBudgetAccounts"][0]["transactions"][0]["note"] == "Initial Balance");
-        REQUIRE(budget["balance"] == 80000);
+        SQLite::Database budget("Foo Budget.mbgt");
+        SQLite::Statement query(budget, "SELECT accountName, balance FROM accounts");
+        while (query.executeStep()) {
+            REQUIRE(query.getColumn(0) == "Foo CU");
+            REQUIRE(query.getColumn(1).getInt() == 0);
+        }
+        query.reset();
     }
 }
 
