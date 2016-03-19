@@ -6,8 +6,7 @@
 #include <QDebug>
 #include <QSettings>
 #include "../src/json/json.h"
-#include <QSqlDatabase>
-#include <QSqlQuery>
+#include "../src/sqlitecpp/SQLiteCpp.h"
 
 TEST_CASE("Can create budget/save files", "[createBudget]") {
   SECTION("A path and name are given, then it creates a .mbgt file") {
@@ -18,11 +17,9 @@ TEST_CASE("Can create budget/save files", "[createBudget]") {
       QFile testBudget("Foo Budget.mbgt");
       REQUIRE(testBudget.exists() == true);
 
-      QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-      db.setDatabaseName("Foo Budget.mbgt");
-      db.open();
-      REQUIRE(db.tables().join("|") == "accounts|transactions");
-      db.close();
+      SQLite::Database db("Foo Budget.mbgt");
+      REQUIRE(db.tableExists("accounts") == true);
+      REQUIRE(db.tableExists("transactions") == true);
   }
 }
 
