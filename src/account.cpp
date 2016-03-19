@@ -1,7 +1,6 @@
 #include "account.h"
 #include "accountmanager.h"
 #include <QUuid>
-#include "sqlitecpp/SQLiteCpp.h"
 #include <iostream>
 
 Account::Account(QObject *parent) : QObject(parent)
