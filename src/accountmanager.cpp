@@ -13,11 +13,12 @@ void AccountManager::createBudget(QUrl filePath, QString accountName)
 {
     QString budgetFilePath = filePath.toLocalFile() + "/" + accountName + ".mbgt";
     SQLite::Database budget(budgetFilePath.toStdString(), SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE);
-    budget.exec("CREATE TABLE accounts(id integer primary key, accountName text, balance integer)");
-    budget.exec("CREATE TABLE transactions(id integer primary key, toAccount integer,"
-                "transactionDate text, payee text, amount integer, outflow bool, note text)");
+    budget.exec("CREATE TABLE IF NOT EXISTS accounts(id integer primary key, accountName text, balance integer)");
+    budget.exec("CREATE TABLE IF NOT EXISTS transactions(id integer primary key, toAccount integer,"
+                "transactionDate text, payee text, amount integer, outflow integer, note text)");
 }
 
+/*
 Json::Value AccountManager::loadFile(QUrl filePath)
 {
     QFile budgetFile(filePath.toLocalFile());
@@ -54,3 +55,4 @@ QUrl AccountManager::getLastFile()
     QSettings settings("nrauh", "Match");
     return settings.value("lastOpenedFile").value<QUrl>();
 }
+*/

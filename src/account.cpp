@@ -2,12 +2,14 @@
 #include "accountmanager.h"
 #include <QUuid>
 #include "sqlitecpp/SQLiteCpp.h"
+#include <iostream>
 
 Account::Account(QObject *parent) : QObject(parent)
 {
 
 }
 
+/*
 void Account::addChecking(QUrl filePath, QString accountName, int balance, QDate balanceDate)
 {
     SQLite::Database budget(filePath.toLocalFile().toStdString());
@@ -16,42 +18,55 @@ void Account::addChecking(QUrl filePath, QString accountName, int balance, QDate
     query.reset();
 }
 
-void Account::addTransaction(QUrl filePath, QString accountId, QDate date, QString payee, bool outflow, int amount, QString note)
+void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString payee, bool outflow, int amount, QString note)
 {
     AccountManager accManager;
-    Json::Value budget = accManager.loadFile(filePath);
+    //Json::Value budget = accManager.loadFile(filePath);
     QString formattedDate = date.toString("yyyy-MM-dd");
     QUuid transactionId = QUuid::createUuid();
     int accountIndex;
 
-    Json::Value transaction;
-    transaction["id"] = transactionId.toString().toStdString();
-    transaction["date"] = formattedDate.toStdString();
-    transaction["payee"] = payee.toStdString();
-    transaction["outflow"] = outflow;
-    transaction["amount"] = amount;
-    transaction["note"] = note.toStdString();
+    //Json::Value transaction;
+    //transaction["id"] = transactionId.toString().toStdString();
+    //transaction["date"] = formattedDate.toStdString();
+    //transaction["payee"] = payee.toStdString();
+    //transaction["outflow"] = outflow;
+    //transaction["amount"] = amount;
+    //transaction["note"] = note.toStdString();
 
-    for (int i = 0; i < (int)budget["onBudgetAccounts"].size(); i++) {
-        if (budget["onBudgetAccounts"][i]["accountId"].asString() == accountId.toStdString()) {
-            accountIndex = i;
-            break;
-        }
-    }
+    //for (int i = 0; i < (int)budget["onBudgetAccounts"].size(); i++) {
+        //if (budget["onBudgetAccounts"][i]["accountId"].asString() == accountId.toStdString()) {
+            //accountIndex = i;
+            //break;
+        //}
+    //}
+    //SQLite::Database budget(filePath.toString().toStdString());
+    SQLite::Database budget(filePath.toString().toStdString(), SQLITE_OPEN_READWRITE);
+    SQLite::Statement query(budget, "INSERT INTO transactions(toAccount, transactionDate,"
+                                    "payee, amount, outflow, note) VALUES (?, ?, ?, ?, ?, ?)");
 
-    int accBalance = budget["onBudgetAccounts"][accountIndex]["balance"].asInt();
-    int balance = budget["balance"].asInt();
+    std::cout << "HELLO WORLD" << std::endl;
+    query.bind(1, accountId);
+    query.bind(1, formattedDate.toStdString());
+    query.bind(1, payee.toStdString());
+    query.bind(1, amount);
+    query.bind(1, (int)outflow);
+    query.bind(1, note.toStdString());
+    query.reset();
 
-    if (outflow) {
-        budget["onBudgetAccounts"][accountIndex]["balance"] = accBalance - amount;
-        budget["balance"] = balance - amount;
-    } else {
-        budget["onBudgetAccounts"][accountIndex]["balance"] = accBalance + amount;
-        budget["balance"] = balance + amount;
-    }
+    //int accBalance = budget["onBudgetAccounts"][accountIndex]["balance"].asInt();
+    //int balance = budget["balance"].asInt();
 
-    budget["onBudgetAccounts"][accountIndex]["transactions"].append(transaction);
-    accManager.saveFile(filePath, budget);
+    //if (outflow) {
+        //budget["onBudgetAccounts"][accountIndex]["balance"] = accBalance - amount;
+        //budget["balance"] = balance - amount;
+    //} else {
+        //budget["onBudgetAccounts"][accountIndex]["balance"] = accBalance + amount;
+        //budget["balance"] = balance + amount;
+    //}
+
+    //budget["onBudgetAccounts"][accountIndex]["transactions"].append(transaction);
+    //accManager.saveFile(filePath, budget);
 }
 
 Json::Value Account::getAccountList(QUrl filePath)
@@ -167,3 +182,4 @@ void Account::deleteTransaction(QUrl filePath, QString accountId, QString transa
     budget["onBudgetAccounts"][accountIndex] = account;
     accManager.saveFile(filePath, budget);
 }
+*/
