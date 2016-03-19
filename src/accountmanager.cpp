@@ -2,6 +2,8 @@
 #include <QFile>
 #include <QSettings>
 #include <QDebug>
+#include <QSqlDatabase>
+#include <QSqlQuery>
 
 AccountManager::AccountManager(QObject *parent) : QObject(parent)
 {
@@ -10,13 +12,15 @@ AccountManager::AccountManager(QObject *parent) : QObject(parent)
 
 void AccountManager::createBudget(QUrl filePath, QString accountName)
 {
-    Json::Value budget;
-    budget["accountName"] = accountName.toStdString();
-    budget["balance"] = 0;
-
     QString budgetFilePath = filePath.toLocalFile() + "/" + accountName + ".mbgt";
-    QUrl constructedFilePath = QUrl::fromLocalFile(budgetFilePath);
-    saveFile(constructedFilePath, budget);
+    QSqlDatabase budget = QSqlDatabase::addDatabase("QSQLITE");
+
+    budget.setDatabaseName(budgetFilePath);
+    budget.open();
+    budget.exec("CREATE TABLE accounts(id integer primary key, accountName text, balance integer)");
+    budget.exec("CREATE TABLE transactions(id integer primary key, toAccount integer,"
+                "trasactionDate text, payee text, amount integer, outflow bool, note text)");
+    budget.close();
 }
 
 Json::Value AccountManager::loadFile(QUrl filePath)

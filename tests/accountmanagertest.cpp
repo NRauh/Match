@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <QSettings>
 #include "../src/json/json.h"
+#include <QSqlDatabase>
+#include <QSqlQuery>
 
 TEST_CASE("Can create budget/save files", "[createBudget]") {
   SECTION("A path and name are given, then it creates a .mbgt file") {
@@ -16,11 +18,11 @@ TEST_CASE("Can create budget/save files", "[createBudget]") {
       QFile testBudget("Foo Budget.mbgt");
       REQUIRE(testBudget.exists() == true);
 
-      path = QUrl::fromLocalFile("Foo Budget.mbgt");
-      Json::Value budget = accManager.loadFile(path);
-      REQUIRE(budget["accountName"] == "Foo Budget");
-
-      testBudget.close();
+      QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+      db.setDatabaseName("Foo Budget.mbgt");
+      db.open();
+      REQUIRE(db.tables().join("|") == "accounts|transactions");
+      db.close();
   }
 }
 
