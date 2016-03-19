@@ -4,12 +4,12 @@
 #include <QDate>
 #include "../src/json/json.h"
 #include "../src/accountmanager.h"
-#include "../src/sqlitecpp/SQLiteCpp.h"
+#include "../src/sqlite/sqlite.hpp"
 
 QString fooCuId;
 QString testTransactionId;
 
-/*TEST_CASE("Can add checking accounts", "[addChecking]") {
+TEST_CASE("Can add checking accounts", "[addChecking]") {
     SECTION("File path, account name, balance, and balance date are given") {
         Account account;
         AccountManager accManager;
@@ -17,16 +17,18 @@ QString testTransactionId;
         QDate balanceDate = QDate(2016, 2, 29);
 
         account.addChecking(filePath, "Foo CU", 80000, balanceDate);
-        SQLite::Database budget("Foo Budget.mbgt");
-        SQLite::Statement query(budget, "SELECT accountName, balance FROM accounts");
-        while (query.executeStep()) {
-            REQUIRE(query.getColumn(0) == "Foo CU");
-            REQUIRE(query.getColumn(1).getInt() == 0);
+
+        io::sqlite::db budget("Foo Budget.mbgt");
+        io::sqlite::stmt query(budget, "SELECT accountName, balance FROM accounts");
+        REQUIRE(query.step() == true);
+        while (query.step()) {
+            REQUIRE(query.row().text(0) == "Foo CU");
+            REQUIRE(query.row().int32(1) == 0);
         }
-        query.reset();
     }
 }
 
+/*
 TEST_CASE("Can add transactions to account", "[addTransaction]") {
     SECTION("Given file path, account ID, date, payee, if outflow, amount, and note") {
         Account account;

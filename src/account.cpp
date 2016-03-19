@@ -1,22 +1,26 @@
 #include "account.h"
 #include "accountmanager.h"
 #include <QUuid>
-#include <iostream>
+#include "sqlite/sqlite.hpp"
 
 Account::Account(QObject *parent) : QObject(parent)
 {
 
 }
 
-/*
 void Account::addChecking(QUrl filePath, QString accountName, int balance, QDate balanceDate)
 {
-    SQLite::Database budget(filePath.toLocalFile().toStdString());
-    SQLite::Statement query(budget, "INSERT INTO accounts (accountName, balance) VALUES (?, 0)");
-    query.bind(1, accountName.toStdString());
-    query.reset();
+    //SQLite::Database budget(filePath.toLocalFile().toStdString());
+    //SQLite::Statement query(budget, "INSERT INTO accounts (accountName, balance) VALUES (?, 0)");
+    //query.bind(1, accountName.toStdString());
+    //query.reset();
+    io::sqlite::db budget(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(budget, "INSERT INTO accounts (accountName, balance) VALUES (?, 0)");
+    query.bind().text(1, accountName.toStdString());
+    query.exec();
 }
 
+/*
 void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString payee, bool outflow, int amount, QString note)
 {
     AccountManager accManager;
