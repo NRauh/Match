@@ -71,6 +71,26 @@ TEST_CASE("Can add transactions to account", "[addTransaction]") {
     }
 }
 
+TEST_CASE("Can delete transactions", "[deleteTransaction]") {
+    SECTION("Filepath, and transaction ID will delete that transaction") {
+        Account account;
+        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
+
+        account.deleteTransaction(filePath, 2);
+
+        io::sqlite::db budget("Foo Budget.mbgt");
+        io::sqlite::stmt query(budget, "SELECT * FROM transactions WHERE id == 2");
+        REQUIRE(query.step() == false);
+        query.reset();
+        query = io::sqlite::stmt(budget, "SELECT balance FROM accounts WHERE id == 1");
+        query.exec();
+        while (query.step()) {
+            std::cout << "3: deleteTransaction\n";
+            REQUIRE(query.row().int32(0) == -125);
+        }
+    }
+}
+
 /*
 TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
     SECTION("Give file path, returns account, index, and balance") {
@@ -125,18 +145,5 @@ TEST_CASE("Can get list of transactions, and account balance", "[getTransactions
         reader.parse(transactionsString.toStdString(), transactions);
 
         REQUIRE(transactions["balance"] == "808.75");
-    }
-}
-
-TEST_CASE("Can delete transactions", "[deleteTransaction]") {
-    SECTION("Filepath, accountId, and transaction ID will delete that transaction") {
-        Account account;
-        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
-
-        account.deleteTransaction(filePath, fooCuId, testTransactionId);
-        Json::Value transactions = account.getTransactions(filePath, fooCuId);
-
-        REQUIRE(transactions["transactions"][1]["payee"] != "Caffe Nero");
-        REQUIRE(transactions["balance"] == "810.00");
     }
 }*/

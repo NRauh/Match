@@ -45,6 +45,37 @@ void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString p
     query.exec();
 }
 
+void Account::deleteTransaction(QUrl filePath, int transactionId)
+{
+    io::sqlite::db budget(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(budget, "SELECT toAccount, amount, outflow FROM transactions WHERE id == ?");
+    query.bind().int32(1, transactionId);
+    query.exec();
+
+    int account;
+    int amount;
+    bool outflow;
+    while (query.step()) {
+        account = query.row().int32(0);
+        amount = query.row().int32(1);
+        outflow = query.row().int32(3);
+    }
+
+    query.reset();
+    if (outflow) {
+        query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance + ? WHERE id == ?");
+    } else {
+        query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance - ? WHERE id == ?");
+    }
+    query.bind().int32(1, amount);
+    query.bind().int32(2, account);
+    query.exec();
+
+    query = io::sqlite::stmt(budget, "DELETE FROM transactions WHERE id == ?");
+    query.bind().int32(1, transactionId);
+    query.exec();
+}
+
 /*
 Json::Value Account::getAccountList(QUrl filePath)
 {
@@ -124,39 +155,5 @@ QString Account::getTransactionsString(QUrl filePath, QString accountId)
     return transactionString;
 }
 
-void Account::deleteTransaction(QUrl filePath, QString accountId, QString transactionId)
-{
-    AccountManager accManager;
-    Json::Value budget = accManager.loadFile(filePath);
-    Json::Value account;
-    Json::Value transactions;
-    int accountIndex;
 
-    for (int i = 0; i < (int)budget.size(); i++) {
-        if (budget["onBudgetAccounts"][i]["accountId"] == accountId.toStdString()) {
-            accountIndex = i;
-            account = budget["onBudgetAccounts"][i];
-            break;
-        }
-    }
-
-    for (int i = 0; i < (int)account["transactions"].size(); i++) {
-        if (account["transactions"][i]["id"] == transactionId.toStdString()) {
-            int amount = account["transactions"][i]["amount"].asInt();
-            if (account["transactions"][i]["outflow"].asBool()) {
-                account["balance"] = account["balance"].asInt() + amount;
-                budget["balance"] = budget["balance"].asInt() + amount;
-            } else {
-                account["balance"] = account["balance"].asInt() - amount;
-                budget["balance"] = budget["balance"].asInt() - amount;
-            }
-        } else {
-            transactions[transactions.size()] = account["transactions"][i];
-        }
-    }
-
-    account["transactions"] = transactions;
-    budget["onBudgetAccounts"][accountIndex] = account;
-    accManager.saveFile(filePath, budget);
-}
 */
