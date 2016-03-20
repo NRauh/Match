@@ -40,7 +40,7 @@ void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString p
     query.bind().text(2, formattedDate.toStdString());
     query.bind().text(3, payee.toStdString());
     query.bind().int32(4, amount);
-    query.bind().int32(5, 1);
+    query.bind().int32(5, outflow);
     query.bind().text(6, note.toStdString());
     query.exec();
 
@@ -122,62 +122,71 @@ QJsonObject Account::getAccountList(QUrl filePath)
     return accountList;
 }
 
-/*
-QString Account::getAccountListString(QUrl filePath)
+QJsonObject Account::getTransactions(QUrl filePath, int accountId)
 {
-    Json::Value accountList = getAccountList(filePath);
-    QString accounts = accountList.toStyledString().c_str();
-    return accounts;
-}
+    //AccountManager accManager;
+    //Json::Value budget = accManager.loadFile(filePath);
 
-Json::Value Account::getTransactions(QUrl filePath, QString accountId)
-{
-    AccountManager accManager;
-    Json::Value budget = accManager.loadFile(filePath);
+    //for (int i = 0; i < (int)budget["onBudgetAccounts"].size(); i++) {
+        //if (budget["onBudgetAccounts"][i]["accountId"].asString() == accountId.toStdString()) {
+            //budget = budget["onBudgetAccounts"][i];
+            //break;
+        //}
+    //}
 
-    for (int i = 0; i < (int)budget["onBudgetAccounts"].size(); i++) {
-        if (budget["onBudgetAccounts"][i]["accountId"].asString() == accountId.toStdString()) {
-            budget = budget["onBudgetAccounts"][i];
-            break;
-        }
+    //Json::Value transactions;
+    QJsonObject transactionList;
+    double balance = 7;
+    //std::string accountBalance = budget["balance"].asString();
+
+    //transactions["balance"] = accountBalance.insert(accountBalance.length() - 2, ".");
+
+    io::sqlite::db budget(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(budget, "SELECT balance FROM accounts WHERE id == ?");
+    query.bind().int32(1, accountId);
+    query.exec();
+
+    while (query.step()) {
+        balance = query.row().int32(0);
     }
 
-    Json::Value transactions;
-    std::string accountBalance = budget["balance"].asString();
+    query.reset();
+    query = io::sqlite::stmt(budget, "SELECT transactionDate, payee, amount, outflow, note, id FROM transactions WHERE toAccount == ?");
+    query.bind().int32(1, accountId);
+    query.exec();
 
-    transactions["balance"] = accountBalance.insert(accountBalance.length() - 2, ".");
+    QJsonArray transactions;
+    while (query.step()) {
+        QJsonObject transaction;
+        bool outflow = query.row().int32(3);
+        QString formattedAmount = QString::fromStdString(query.row().text(2));
+        formattedAmount.insert(formattedAmount.length() - 2, ".");
+        if (outflow) {
+            formattedAmount.prepend("-");
+        } else {
+            formattedAmount.prepend("+");
+        }
 
-    for (int i = 0; i < (int)budget["transactions"].size(); i++) {
-        std::string amountString = budget["transactions"][i]["amount"].asString();
-        QString date = budget["transactions"][i]["date"].asCString();
-        // TODO: Allow people to chose this format
+        QString date = QString::fromStdString(query.row().text(0));
         QDate formattedDate = QDate::fromString(date, QString("yyyy-MM-dd"));
 
-        transactions["transactions"][i]["id"] = budget["transactions"][i]["id"];
-        transactions["transactions"][i]["date"] = formattedDate.toString("M/d/yy").toStdString();
-        transactions["transactions"][i]["intDate"] = date.toStdString();
-        transactions["transactions"][i]["payee"] = budget["transactions"][i]["payee"];
-        transactions["transactions"][i]["note"] = budget["transactions"][i]["note"];
-        transactions["transactions"][i]["outflow"] = budget["transactions"][i]["outflow"].asBool();
+        QString payee = QString::fromStdString(query.row().text(1));
+        QString note = QString::fromStdString(query.row().text(4));
+        int transactionId = query.row().int32(5);
 
-        amountString.insert(amountString.length() - 2, ".");
-        if (budget["transactions"][i]["outflow"].asBool()) {
-            amountString.insert(0, "-");
-        } else {
-            amountString.insert(0, "+");
-        }
-        transactions["transactions"][i]["amount"] = amountString;
+        transaction.insert("amount", formattedAmount);
+        transaction.insert("date", formattedDate.toString("M/d/yy"));
+        transaction.insert("payee", payee);
+        transaction.insert("note", note);
+        transaction.insert("outflow", outflow);
+        transaction.insert("intDate", date);
+        transaction.insert("id", transactionId);
+        transactions.append(transaction);
     }
 
-    return transactions;
+    QString formattedBalance = QString::number(balance / 100);
+    transactionList.insert("balance", formattedBalance);
+    transactionList.insert("transactions", transactions);
+
+    return transactionList;
 }
-
-QString Account::getTransactionsString(QUrl filePath, QString accountId)
-{
-    Json::Value transactions = getTransactions(filePath, accountId);
-    QString transactionString = transactions.toStyledString().c_str();
-    return transactionString;
-}
-
-
-*/

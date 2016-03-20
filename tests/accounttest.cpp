@@ -116,34 +116,21 @@ TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
     }
 }
 
-/*
-TEST_CASE("Can get list of transactions, and account balance", "[getTransactions]") {
-    SECTION("Filepath, and ID returns balance and array of transactions") {
+TEST_CASE("Can get list of transactions and balance for account", "[getTransactions]") {
+    SECTION("Filepath, and accountId returns balance and array of transactions") {
         Account account;
         QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
 
-        Json::Value transactions = account.getTransactions(filePath, fooCuId);
+        QJsonObject transactions = account.getTransactions(filePath, 1);
 
-        REQUIRE(transactions["balance"] == "808.75");
-        REQUIRE(transactions["transactions"][0]["amount"] == "+800.00");
-        REQUIRE(transactions["transactions"][1]["date"] == "2/29/16");
-        REQUIRE(transactions["transactions"][1]["payee"] == "Caffe Nero");
-        REQUIRE(transactions["transactions"][1]["note"] == "Espresso");
-        REQUIRE(transactions["transactions"][1]["amount"] == "-1.25");
-        REQUIRE(transactions["transactions"][1]["outflow"] == true);
-        REQUIRE(transactions["transactions"][1]["intDate"] == "2016-02-29");
-        REQUIRE(transactions["transactions"][1]["id"].asString() == testTransactionId.toStdString());
+        REQUIRE(transactions["balance"] == "798.75");
+        REQUIRE(transactions["transactions"].toArray()[0].toObject()["amount"] == "+800.00");
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["date"] == "2/29/16");
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["payee"] == "Caffe Nero");
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["note"] == "Espresso");
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["amount"] == "-1.25");
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["outflow"] == true);
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["intDate"] == "2016-02-29");
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["id"] == 2);
     }
-
-    SECTION("Can run as QString") {
-        Account account;
-        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
-
-        QString transactionsString = account.getTransactionsString(filePath, fooCuId);
-        Json::Value transactions;
-        Json::Reader reader;
-        reader.parse(transactionsString.toStdString(), transactions);
-
-        REQUIRE(transactions["balance"] == "808.75");
-    }
-}*/
+}
