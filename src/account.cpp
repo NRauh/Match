@@ -15,6 +15,17 @@ void Account::addChecking(QUrl filePath, QString accountName, int balance, QDate
     io::sqlite::stmt query(budget, "INSERT INTO accounts (accountName, balance) VALUES (?, 0)");
     query.bind().text(1, accountName.toStdString());
     query.exec();
+
+    query.reset();
+    query = io::sqlite::stmt(budget, "SELECT last_insert_rowid() FROM accounts");
+
+    int accountId;
+    query.exec();
+    while (query.step()) {
+        accountId = query.row().int32(0);
+    }
+
+    addTransaction(filePath, accountId, balanceDate, "Self", false, balance, "Initial Balance");
 }
 
 void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString payee, bool outflow, int amount, QString note)
