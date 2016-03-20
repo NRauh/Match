@@ -11,10 +11,8 @@ class AccountManager : public QObject
 public:
     explicit AccountManager(QObject *parent = 0);
     Q_INVOKABLE void createBudget(QUrl filePath, QString accountName);
-    //Q_INVOKABLE Json::Value loadFile(QUrl filePath);
-    //Q_INVOKABLE void saveFile(QUrl filePath, Json::Value jsonData);
-    //Q_INVOKABLE void setLastFile(QUrl lastFilePath);
-    //Q_INVOKABLE QUrl getLastFile();
+    Q_INVOKABLE void setLastFile(QUrl lastFilePath);
+    Q_INVOKABLE QUrl getLastFile();
 
 signals:
 

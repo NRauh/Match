@@ -18,32 +18,6 @@ void AccountManager::createBudget(QUrl filePath, QString accountName)
                 "transactionDate text, payee text, amount integer, outflow integer, note text)");
 }
 
-/*
-Json::Value AccountManager::loadFile(QUrl filePath)
-{
-    QFile budgetFile(filePath.toLocalFile());
-
-    budgetFile.open(QIODevice::ReadOnly);
-    QString rawJson = budgetFile.readAll();
-    Json::Value budget = rawJson.toStdString();
-    Json::Reader budgetReader;
-
-    budgetReader.parse(rawJson.toStdString(), budget);
-
-    budgetFile.close();
-    return budget;
-}
-
-void AccountManager::saveFile(QUrl filePath, Json::Value jsonData)
-{
-    QFile budgetFile(filePath.toLocalFile());
-    Json::StyledWriter budgetWriter;
-
-    budgetFile.open(QIODevice::WriteOnly);
-    budgetFile.write(budgetWriter.write(jsonData).c_str());
-    budgetFile.close();
-}
-
 void AccountManager::setLastFile(QUrl lastFilePath)
 {
     QSettings settings("nrauh", "Match");
@@ -55,4 +29,3 @@ QUrl AccountManager::getLastFile()
     QSettings settings("nrauh", "Match");
     return settings.value("lastOpenedFile").value<QUrl>();
 }
-*/
