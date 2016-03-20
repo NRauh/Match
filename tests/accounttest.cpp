@@ -5,6 +5,7 @@
 #include "../src/json/json.h"
 #include "../src/accountmanager.h"
 #include "../src/sqlite/sqlite.hpp"
+#include <iostream>
 
 QString fooCuId;
 QString testTransactionId;
@@ -20,15 +21,14 @@ TEST_CASE("Can add checking accounts", "[addChecking]") {
 
         io::sqlite::db budget("Foo Budget.mbgt");
         io::sqlite::stmt query(budget, "SELECT accountName, balance FROM accounts");
-        REQUIRE(query.step() == true);
         while (query.step()) {
+            std::cout << "1: addChecking\n";
             REQUIRE(query.row().text(0) == "Foo CU");
             REQUIRE(query.row().int32(1) == 0);
         }
     }
 }
 
-/*
 TEST_CASE("Can add transactions to account", "[addTransaction]") {
     SECTION("Given file path, account ID, date, payee, if outflow, amount, and note") {
         Account account;
@@ -37,28 +37,22 @@ TEST_CASE("Can add transactions to account", "[addTransaction]") {
         QDate transactionDate = QDate(2016, 2, 29);
 
         account.addTransaction(filePath, 1, transactionDate, "Caffe Nero", true, 125, "Espresso");
-        //Json::Value budget = accManager.loadFile(filePath);
-
-        //testTransactionId = budget["onBudgetAccounts"][0]["transactions"][1]["id"].asCString();
-        //REQUIRE(testTransactionId.isNull() == false);
-        //REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["date"] == "2016-02-29");
-        //REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["payee"] == "Caffe Nero");
-        //REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["outflow"] == true);
-        //REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["amount"] == 125);
-        //REQUIRE(budget["onBudgetAccounts"][0]["transactions"][1]["note"] == "Espresso");
-        //REQUIRE(budget["onBudgetAccounts"][0]["balance"] == 79875);
-        //REQUIRE(budget["balance"] == 79875);
-        SQLite::Database budget("Foo Budget.mbgt");
-        SQLite::Statement query(budget, "SELECT transactionDate, payee, amount, outflow, note"
-                                        "FROM transactions WHERE id == 1");
-        while (query.executeStep()) {
-            REQUIRE(query.getColumn(0) == "2016-02-29");
-            REQUIRE(query.getColumn(1) == "Caffe Nero");
-            REQUIRE(query.getColumn(3).getInt() == 125);
-            REQUIRE(query.getColumn(2).getInt() == true);
-            REQUIRE(query.getColumn(4) == "Espresso");
+        io::sqlite::db budget("Foo Budget.mbgt");
+        io::sqlite::stmt query(budget, "SELECT toAccount, transactionDate, payee, amount, outflow, note FROM transactions WHERE id == 1");
+        while (query.step()) {
+            std::cout << "2: addTransaction (1)\n";
+            REQUIRE(query.row().int32(0) == 1);
+            REQUIRE(query.row().text(1) == "2016-02-29");
+            REQUIRE(query.row().text(2) == "Caffe Nero");
+            REQUIRE(query.row().int32(3) == 125);
+            REQUIRE(query.row().int32(4) == 1);
+            REQUIRE(query.row().text(5) == "Espresso");
         }
-        query.reset();
+        io::sqlite::stmt q(budget, "SELECT balance FROM accounts WHERE id == 1");
+        while (q.step()) {
+            std::cout << "2: addTransaction (2)\n";
+            REQUIRE(q.row().int32(0) == -125);
+        }
     }
 
     SECTION("If outflow is false, then it's income and should be added") {
@@ -67,13 +61,17 @@ TEST_CASE("Can add transactions to account", "[addTransaction]") {
         QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
         QDate transactionDate = QDate(2016, 2, 29);
 
-        account.addTransaction(filePath, 0, transactionDate, "Tip", false, 1000, "");
-        //Json::Value budget = accManager.loadFile(filePath);
-        //REQUIRE(budget["onBudgetAccounts"][0]["balance"] == 80875);
-        //REQUIRE(budget["balance"] == 80875);
+        account.addTransaction(filePath, 1, transactionDate, "Tip", false, 1000, "");
+        io::sqlite::db budget("Foo Budget.mbgt");
+        io::sqlite::stmt query(budget, "SELECT balance FROM accounts WHERE id == 1");
+        while (query.step()) {
+            std::cout << "2: addTransaction (3)\n";
+            REQUIRE(query.row().int32(0) == 875);
+        }
     }
 }
 
+/*
 TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
     SECTION("Give file path, returns account, index, and balance") {
         Account account;

@@ -2,6 +2,7 @@
 #include "accountmanager.h"
 #include <QUuid>
 #include "sqlite/sqlite.hpp"
+#include <iostream>
 
 Account::Account(QObject *parent) : QObject(parent)
 {
@@ -10,68 +11,41 @@ Account::Account(QObject *parent) : QObject(parent)
 
 void Account::addChecking(QUrl filePath, QString accountName, int balance, QDate balanceDate)
 {
-    //SQLite::Database budget(filePath.toLocalFile().toStdString());
-    //SQLite::Statement query(budget, "INSERT INTO accounts (accountName, balance) VALUES (?, 0)");
-    //query.bind(1, accountName.toStdString());
-    //query.reset();
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(budget, "INSERT INTO accounts (accountName, balance) VALUES (?, 0)");
     query.bind().text(1, accountName.toStdString());
     query.exec();
 }
 
-/*
 void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString payee, bool outflow, int amount, QString note)
 {
-    AccountManager accManager;
-    //Json::Value budget = accManager.loadFile(filePath);
     QString formattedDate = date.toString("yyyy-MM-dd");
-    QUuid transactionId = QUuid::createUuid();
-    int accountIndex;
+    io::sqlite::db budget(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(budget, "INSERT INTO transactions"
+                                   "(toAccount, transactionDate, payee, amount, outflow, note)"
+                                   "VALUES (?, ?, ?, ?, ?, ?)");
+    query.bind().int32(1, accountId);
+    query.bind().text(2, formattedDate.toStdString());
+    query.bind().text(3, payee.toStdString());
+    query.bind().int32(4, amount);
+    query.bind().int32(5, 1);
+    query.bind().text(6, note.toStdString());
+    query.exec();
 
-    //Json::Value transaction;
-    //transaction["id"] = transactionId.toString().toStdString();
-    //transaction["date"] = formattedDate.toStdString();
-    //transaction["payee"] = payee.toStdString();
-    //transaction["outflow"] = outflow;
-    //transaction["amount"] = amount;
-    //transaction["note"] = note.toStdString();
-
-    //for (int i = 0; i < (int)budget["onBudgetAccounts"].size(); i++) {
-        //if (budget["onBudgetAccounts"][i]["accountId"].asString() == accountId.toStdString()) {
-            //accountIndex = i;
-            //break;
-        //}
-    //}
-    //SQLite::Database budget(filePath.toString().toStdString());
-    SQLite::Database budget(filePath.toString().toStdString(), SQLITE_OPEN_READWRITE);
-    SQLite::Statement query(budget, "INSERT INTO transactions(toAccount, transactionDate,"
-                                    "payee, amount, outflow, note) VALUES (?, ?, ?, ?, ?, ?)");
-
-    std::cout << "HELLO WORLD" << std::endl;
-    query.bind(1, accountId);
-    query.bind(1, formattedDate.toStdString());
-    query.bind(1, payee.toStdString());
-    query.bind(1, amount);
-    query.bind(1, (int)outflow);
-    query.bind(1, note.toStdString());
     query.reset();
 
-    //int accBalance = budget["onBudgetAccounts"][accountIndex]["balance"].asInt();
-    //int balance = budget["balance"].asInt();
+    if (outflow) {
+        query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance - ? WHERE id == ?");
+    } else {
+        query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance + ? WHERE id == ?");
+    }
 
-    //if (outflow) {
-        //budget["onBudgetAccounts"][accountIndex]["balance"] = accBalance - amount;
-        //budget["balance"] = balance - amount;
-    //} else {
-        //budget["onBudgetAccounts"][accountIndex]["balance"] = accBalance + amount;
-        //budget["balance"] = balance + amount;
-    //}
-
-    //budget["onBudgetAccounts"][accountIndex]["transactions"].append(transaction);
-    //accManager.saveFile(filePath, budget);
+    query.bind().int32(1, amount);
+    query.bind().int32(2, accountId);
+    query.exec();
 }
 
+/*
 Json::Value Account::getAccountList(QUrl filePath)
 {
     AccountManager accManager;

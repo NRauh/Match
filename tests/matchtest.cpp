@@ -1,10 +1,15 @@
 #define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
+#include "../src/accountmanager.h"
 
 int main(int argc, char* const argv[]) {
-  int result = Catch::Session().run( argc, argv );
+    AccountManager accManager;
+    QUrl filePath = QUrl::fromLocalFile(".");
+    accManager.createBudget(filePath, "Foo Budget");
 
-  remove("Foo Budget.mbgt");
+    int result = Catch::Session().run( argc, argv );
 
-  return result;
+    remove("Foo Budget.mbgt");
+
+    return result;
 }

@@ -9,7 +9,7 @@
 #include "../src/sqlite/sqlite.hpp"
 
 
-TEST_CASE("Can create budget/save files", "[createBudget]") {
+/*TEST_CASE("Can create budget/save files", "[createBudget]") {
   SECTION("A path and name are given, then it creates a .mbgt file") {
       AccountManager accManager;
       QUrl path = QUrl::fromLocalFile(".");
@@ -18,7 +18,7 @@ TEST_CASE("Can create budget/save files", "[createBudget]") {
       QFile testBudget("Foo Budget.mbgt");
       REQUIRE(testBudget.exists() == true);
   }
-}
+}*/
 
 /*TEST_CASE("Can save a file", "[saveFile]") {
     SECTION("A path and Json Value is given and it writes a file") {
