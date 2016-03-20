@@ -11,8 +11,7 @@ Rectangle {
     property var targetLoader
     Component.onCompleted: {
         var filePath = accManager.getLastFile()
-        var accountList = account.getAccountListString(filePath)
-        accountData = JSON.parse(accountList)
+        accountData = account.getAccountList(filePath)
     }
 
     Label {

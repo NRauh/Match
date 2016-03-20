@@ -12,8 +12,7 @@ Rectangle {
     property var transactions
     Component.onCompleted: {
         var lastFile = accManager.getLastFile()
-        var transactionString = JSON.parse(account.getTransactionsString(lastFile, accountId))
-        transactions = transactionString
+        transactions = account.getTransactions(lastFile, accountId)
     }
 
     AccountManager {
@@ -228,8 +227,7 @@ Rectangle {
                     noteInput.text = ""
                     // TODO: would this be faster than appending temporarially?
                     // TODO: Should actually do this and arrange by date
-                    var transactionString = JSON.parse(account.getTransactionsString(lastFile, accountId))
-                    transactions = transactionString
+                    transactions = account.getTransactions(lastFile, accountId);
                 }
             }
         }
