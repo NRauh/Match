@@ -6,6 +6,9 @@
 #include "../src/accountmanager.h"
 #include "../src/sqlite/sqlite.hpp"
 #include <iostream>
+#include <QJsonObject>
+#include <QDebug>
+#include <QJsonArray>
 
 QString fooCuId;
 QString testTransactionId;
@@ -100,32 +103,20 @@ TEST_CASE("Can delete transactions", "[deleteTransaction]") {
     }
 }
 
-/*
 TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
-    SECTION("Give file path, returns account, index, and balance") {
+    SECTION("Give file path, returns name, balance, and id") {
         Account account;
         QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
 
-        Json::Value accountList = account.getAccountList(filePath);
-        REQUIRE(accountList["balance"] == "808.75");
-        REQUIRE(accountList["accounts"][0]["accountName"] == "Foo CU");
-        REQUIRE(accountList["accounts"][0]["accountBalance"] == "808.75");
-        REQUIRE(accountList["accounts"][0]["accountId"] == fooCuId.toStdString());
-    }
-
-    SECTION("Method can return as a QString") {
-        Account account;
-        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
-
-        QString accountString = account.getAccountListString(filePath);
-        Json::Value accountList;
-        Json::Reader reader;
-        reader.parse(accountString.toStdString(), accountList);
-
-        REQUIRE(accountList["balance"] == "808.75");
+        QJsonObject accountList = account.getAccountList(filePath);
+        REQUIRE(accountList["balance"] == "798.75");
+        REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountId"] == 1);
+        REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountName"] == "Foo CU");
+        REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountBalance"] == "798.75");
     }
 }
 
+/*
 TEST_CASE("Can get list of transactions, and account balance", "[getTransactions]") {
     SECTION("Filepath, and ID returns balance and array of transactions") {
         Account account;

@@ -3,6 +3,7 @@
 #include <QUuid>
 #include "sqlite/sqlite.hpp"
 #include <iostream>
+#include <QJsonArray>
 
 Account::Account(QObject *parent) : QObject(parent)
 {
@@ -87,29 +88,41 @@ void Account::deleteTransaction(QUrl filePath, int transactionId)
     query.exec();
 }
 
-/*
-Json::Value Account::getAccountList(QUrl filePath)
+QJsonObject Account::getAccountList(QUrl filePath)
 {
-    AccountManager accManager;
-    Json::Value budget = accManager.loadFile(filePath);
-    Json::Value accountList;
-    std::string totalBalance = budget["balance"].asString();
-    totalBalance = totalBalance.insert(totalBalance.length() - 2, ".");
+    QJsonObject accountList;
+    QJsonArray accounts;
+    double totalBalance = 0;
 
-    accountList["balance"] = totalBalance;
+    io::sqlite::db budget(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(budget, "SELECT id, accountName, balance FROM accounts");
 
-    for (int i = 0; i < (int)budget["onBudgetAccounts"].size(); i++) {
-        std::string accountBalance = budget["onBudgetAccounts"][i]["balance"].asString();
-        accountBalance = accountBalance.insert(accountBalance.length() - 2, ".");
+    while (query.step()) {
+        QJsonObject account;
+        QString accountName = QString::fromStdString(query.row().text(1));
+        double balance = query.row().int32(2);
+        QString accountBalance = QString::number(balance / 100);
 
-        accountList["accounts"][i]["accountName"] = budget["onBudgetAccounts"][i]["accountName"];
-        accountList["accounts"][i]["accountBalance"] = accountBalance;
-        accountList["accounts"][i]["accountId"] = budget["onBudgetAccounts"][i]["accountId"];
+        account.insert("accountId", query.row().int32(0));
+        account.insert("accountName", accountName);
+        account.insert("accountBalance", accountBalance);
+
+        QJsonValue accountValue(account);
+        accounts.append(accountValue);
+        totalBalance += query.row().int32(2);
     }
+
+    totalBalance = totalBalance / 100;
+    QString formattedNumber = QString::number(totalBalance);
+    QJsonValue accountsValue(accounts);
+
+    accountList.insert("balance", formattedNumber);
+    accountList.insert("accounts", accountsValue);
 
     return accountList;
 }
 
+/*
 QString Account::getAccountListString(QUrl filePath)
 {
     Json::Value accountList = getAccountList(filePath);
