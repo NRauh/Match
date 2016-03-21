@@ -57,6 +57,54 @@ void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString p
     query.exec();
 }
 
+void Account::updateTransaction(QUrl filePath, int transactionId, QDate date, QString payee, bool outflow, int amount, QString note)
+{
+    io::sqlite::db budget(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(budget, "SELECT outflow, amount, toAccount FROM transactions WHERE id == ?");
+
+    query.bind().int32(1, transactionId);
+    query.exec();
+
+    while (query.step()) {
+        bool previousOutflow = query.row().int32(0);
+        int previousAmount = query.row().int32(1);
+        int accountId = query.row().int32(2);
+        io::sqlite::stmt loopQuery;
+
+        if (previousOutflow) {
+            loopQuery = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance + ? WHERE id == ?");
+        } else {
+            loopQuery = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance - ? WHERE id == ?");
+        }
+
+        loopQuery.bind().int32(1, previousAmount);
+        loopQuery.bind().int32(2, accountId);
+        loopQuery.exec();
+        loopQuery.reset();
+
+        if (outflow) {
+            loopQuery = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance - ? WHERE id == ?");
+        } else {
+            loopQuery = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance + ? WHERE id == ?");
+        }
+
+        loopQuery.bind().int32(1, amount);
+        loopQuery.bind().int32(2, accountId);
+        loopQuery.exec();
+    }
+
+    query = io::sqlite::stmt(budget, "UPDATE transactions SET transactionDate = ?, payee = ?, amount = ?, outflow = ?, note = ? WHERE id == ?");
+
+    QString formattedDate = date.toString("yyyy-MM-dd");
+    query.bind().text(1, formattedDate.toStdString());
+    query.bind().text(2, payee.toStdString());
+    query.bind().int32(3, amount);
+    query.bind().int32(4, outflow);
+    query.bind().text(5, note.toStdString());
+    query.bind().int32(6, transactionId);
+    query.exec();
+}
+
 void Account::deleteTransaction(QUrl filePath, int transactionId)
 {
     io::sqlite::db budget(filePath.toLocalFile().toStdString());

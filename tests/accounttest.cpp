@@ -83,6 +83,41 @@ TEST_CASE("Can add transactions to account", "[addTransaction]") {
     }
 }
 
+TEST_CASE("Can update a transaction", "[updateTransaction]") {
+    SECTION("Filepath, transaction ID, date, payee, outflow, amount, and note") {
+        Account account;
+        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
+        QDate transactionDate = QDate(2016, 2, 28);
+
+        account.updateTransaction(filePath, 3, transactionDate, "Tips", true, 1100, "Tip I guess");
+
+        io::sqlite::db budget("Foo Budget.mbgt");
+        io::sqlite::stmt query(budget, "SELECT transactionDate, payee, amount, outflow, note FROM transactions WHERE id == 3");
+        while (query.step()) {
+            std::cout << "3: updateTransaction (1)\n";
+            REQUIRE(query.row().text(0) == "2016-02-28");
+            REQUIRE(query.row().text(1) == "Tips");
+            REQUIRE(query.row().int32(2) == 1100);
+            REQUIRE(query.row().int32(3) == true);
+            REQUIRE(query.row().text(4) == "Tip I guess");
+        }
+    }
+
+    SECTION("It shows on the balance") {
+        Account account;
+        QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
+        QDate transactionDate = QDate(2016, 2, 29);
+
+        io::sqlite::db budget("Foo Budget.mbgt");
+        io::sqlite::stmt query(budget, "SELECT balance FROM accounts WHERE id == 1");
+        while (query.step()) {
+            REQUIRE(query.row().int32(0) == 78775);
+        }
+        //changing it back
+        account.updateTransaction(filePath, 3, transactionDate, "Tip", false, 1000, "");
+    }
+}
+
 TEST_CASE("Can delete transactions", "[deleteTransaction]") {
     SECTION("Filepath, and transaction ID will delete that transaction") {
         Account account;
@@ -97,7 +132,7 @@ TEST_CASE("Can delete transactions", "[deleteTransaction]") {
         query = io::sqlite::stmt(budget, "SELECT balance FROM accounts WHERE id == 1");
         query.exec();
         while (query.step()) {
-            std::cout << "3: deleteTransaction\n";
+            std::cout << "4: deleteTransaction\n";
             REQUIRE(query.row().int32(0) == 79875);
         }
     }
