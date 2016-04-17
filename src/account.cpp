@@ -140,7 +140,7 @@ QJsonObject Account::getAccountList(QUrl filePath)
 {
     QJsonObject accountList;
     QJsonArray accounts;
-    double totalBalance = 0;
+    int totalBalance = 0;
 
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(budget, "SELECT id, accountName, balance FROM accounts");
@@ -148,8 +148,8 @@ QJsonObject Account::getAccountList(QUrl filePath)
     while (query.step()) {
         QJsonObject account;
         QString accountName = QString::fromStdString(query.row().text(1));
-        double balance = query.row().int32(2);
-        QString accountBalance = QString::number(balance / 100);
+        QString accountBalance = QString::number(query.row().int32(2));
+        accountBalance.insert(accountBalance.length() - 2, ".");
 
         account.insert("accountId", query.row().int32(0));
         account.insert("accountName", accountName);
@@ -160,11 +160,11 @@ QJsonObject Account::getAccountList(QUrl filePath)
         totalBalance += query.row().int32(2);
     }
 
-    totalBalance = totalBalance / 100;
-    QString formattedNumber = QString::number(totalBalance);
+    QString formattedBalance = QString::number(totalBalance);
+    formattedBalance.insert(formattedBalance.length() - 2, ".");
     QJsonValue accountsValue(accounts);
 
-    accountList.insert("balance", formattedNumber);
+    accountList.insert("balance", formattedBalance);
     accountList.insert("accounts", accountsValue);
 
     return accountList;
@@ -184,7 +184,7 @@ QJsonObject Account::getTransactions(QUrl filePath, int accountId)
 
     //Json::Value transactions;
     QJsonObject transactionList;
-    double balance = 7;
+    int balance;
     //std::string accountBalance = budget["balance"].asString();
 
     //transactions["balance"] = accountBalance.insert(accountBalance.length() - 2, ".");
@@ -232,7 +232,8 @@ QJsonObject Account::getTransactions(QUrl filePath, int accountId)
         transactions.append(transaction);
     }
 
-    QString formattedBalance = QString::number(balance / 100);
+    QString formattedBalance = QString::number(balance);
+    formattedBalance.insert(formattedBalance.length() - 2, ".");
     transactionList.insert("balance", formattedBalance);
     transactionList.insert("transactions", transactions);
 
