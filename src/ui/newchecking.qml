@@ -31,20 +31,20 @@ Window {
         anchors.left: parent.left
         anchors.leftMargin: 50
         anchors.top: parent.top
-        anchors.topMargin: 139
+        anchors.topMargin: 119
         font.family: "Arial"
         font.pointSize: 22
     }
 
     TextField {
         id: accountName
-        height: 27
+        height: 32
         anchors.right: parent.right
         anchors.rightMargin: 50
         anchors.left: parent.left
         anchors.leftMargin: 50
         anchors.top: parent.top
-        anchors.topMargin: 170
+        anchors.topMargin: 159
         font.family: "Arial"
         font.pointSize: 22
         placeholderText: qsTr("Account Name")
@@ -58,7 +58,7 @@ Window {
         anchors.leftMargin: 50
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.topMargin: 223
+        anchors.topMargin: 207
         font.pointSize: 22
         font.family: "Arial"
     }
@@ -91,11 +91,11 @@ Window {
 
     Button {
         id: cancelButton
-        x: 424
-        y: 464
+        x: 399
+        y: 463
         text: qsTr("Cancel")
         anchors.right: parent.right
-        anchors.rightMargin: 99
+        anchors.rightMargin: 116
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 10
         onClicked: newCheckingWindow.close()
@@ -105,13 +105,13 @@ Window {
         id: accountBalance
         x: -2
         y: 9
-        height: 27
+        height: 32
         anchors.top: parent.top
         font.pointSize: 22
         anchors.rightMargin: 50
         anchors.left: parent.left
         anchors.leftMargin: 322
-        anchors.topMargin: 223
+        anchors.topMargin: 207
         font.family: "Arial"
         anchors.right: parent.right
         placeholderText: qsTr("Balance")
@@ -127,7 +127,7 @@ Window {
         font.pointSize: 22
         anchors.left: parent.left
         anchors.leftMargin: 50
-        anchors.topMargin: 274
+        anchors.topMargin: 257
         font.family: "Arial"
     }
 
@@ -137,7 +137,7 @@ Window {
         anchors.left: parent.left
         anchors.leftMargin: 322
         anchors.top: parent.top
-        anchors.topMargin: 274
+        anchors.topMargin: 257
         anchors.right: parent.right
         anchors.rightMargin: 50
     }

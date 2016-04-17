@@ -36,13 +36,13 @@ Window {
 
     TextField {
         id: budgetName
-        height: 27
+        height: 32
         anchors.right: parent.right
         anchors.rightMargin: 50
         anchors.left: parent.left
         anchors.leftMargin: 50
         anchors.top: parent.top
-        anchors.topMargin: 170
+        anchors.topMargin: 179
         font.family: "Arial"
         font.pointSize: 22
         placeholderText: qsTr("Budget Name")
@@ -56,7 +56,7 @@ Window {
         anchors.leftMargin: 50
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.topMargin: 223
+        anchors.topMargin: 227
         font.pointSize: 22
         font.family: "Arial"
     }
@@ -78,7 +78,7 @@ Window {
         anchors.left: parent.left
         anchors.leftMargin: 50
         anchors.top: parent.top
-        anchors.topMargin: 254
+        anchors.topMargin: 267
         onClicked: {
             pathDialog.open()
         }
@@ -86,13 +86,13 @@ Window {
 
     Label {
         id: pathLocation
-        height: 19
+        height: 27
         color: "#424242"
         text: qsTr("")
         anchors.left: parent.left
         anchors.leftMargin: 166
         anchors.top: parent.top
-        anchors.topMargin: 258
+        anchors.topMargin: 267
         anchors.right: parent.right
         anchors.rightMargin: 50
         font.italic: true
@@ -122,11 +122,11 @@ Window {
 
     Button {
         id: cancelButton
-        x: 424
-        y: 464
+        x: 399
+        y: 463
         text: qsTr("Cancel")
         anchors.right: parent.right
-        anchors.rightMargin: 99
+        anchors.rightMargin: 116
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 10
         onClicked: newBudgetWindow.close()
