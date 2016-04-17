@@ -118,7 +118,7 @@ void Account::deleteTransaction(QUrl filePath, int transactionId)
     while (query.step()) {
         account = query.row().int32(0);
         amount = query.row().int32(1);
-        outflow = query.row().int32(3);
+        outflow = query.row().int32(2);
     }
 
     query.reset();

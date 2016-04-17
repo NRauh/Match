@@ -122,6 +122,7 @@ TEST_CASE("Can delete transactions", "[deleteTransaction]") {
     SECTION("Filepath, and transaction ID will delete that transaction") {
         Account account;
         QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
+        QDate transactionDate = QDate(2016, 2, 29);
 
         account.deleteTransaction(filePath, 3);
 
@@ -133,6 +134,14 @@ TEST_CASE("Can delete transactions", "[deleteTransaction]") {
         query.exec();
         while (query.step()) {
             std::cout << "4: deleteTransaction\n";
+            REQUIRE(query.row().int32(0) == 79875);
+        }
+
+        account.addTransaction(filePath, 1, transactionDate, "Gas Station", 1, 1100, "Some gas");
+        account.deleteTransaction(filePath, 3);
+        query.exec();
+        while (query.step()) {
+            std::cout << "4: deleteTransaction (2)\n";
             REQUIRE(query.row().int32(0) == 79875);
         }
     }
