@@ -8,6 +8,8 @@ INCLUDEPATH += .
 
 CONFIG += c++11
 
+LIBS += -ldl
+
 # Input
 HEADERS += catch.hpp ../src/accountmanager.h ../src/json/json.h ../src/json/json.h ../src/json/json-forwards.h \
         ../src/account.h \

@@ -4,6 +4,8 @@ QT += qml quick widgets
 
 CONFIG += c++11
 
+LIBS += -ldl
+
 SOURCES += src/main.cpp \
         src/accountmanager.cpp \
         src/jsoncpp.cpp \
