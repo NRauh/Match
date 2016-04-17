@@ -10,6 +10,7 @@ Rectangle {
     property var accountId
     property var accountName
     property var transactions
+    property var selectedTransactionId
     Component.onCompleted: {
         var lastFile = accManager.getLastFile()
         transactions = account.getTransactions(lastFile, accountId)
@@ -263,6 +264,14 @@ Rectangle {
             anchors.left: parent.left
             visible: false
             onClicked: {
+                var lastFile = accManager.getLastFile();
+                account.updateTransaction(lastFile, selectedTransactionId,
+                                          dateInput.selectedDate,
+                                          payeeInput.text,
+                                          outflowInput.checked,
+                                          parseFloat(amountInput.text) * 100,
+                                          noteInput.text)
+
                 updateTransactionButton.visible = false
                 doneButton.visible = false
                 deleteButton.visible = false
@@ -272,6 +281,8 @@ Rectangle {
                 noteInput.text = ""
                 amountInput.text = ""
                 outflowInput.checked = true
+
+                transactions = account.getTransactions(lastFile, accountId);
             }
         }
 
@@ -381,6 +392,7 @@ Rectangle {
             noteInput.text = model[row].note
             amountInput.text = parseFloat(model[row].amount.substr(1)).toFixed(2)
             outflowInput.checked = model[row].outflow
+            selectedTransactionId = model[row].id;
         }
     }
 }
