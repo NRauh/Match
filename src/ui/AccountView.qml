@@ -324,6 +324,9 @@ Rectangle {
             anchors.left: parent.left
             visible: false
             onClicked: {
+                var lastFile = accManager.getLastFile()
+                account.deleteTransaction(lastFile, selectedTransactionId)
+
                 updateTransactionButton.visible = false
                 doneButton.visible = false
                 deleteButton.visible = false
@@ -333,6 +336,8 @@ Rectangle {
                 noteInput.text = ""
                 amountInput.text = ""
                 outflowInput.checked = true
+
+                transactions = account.getTransactions(lastFile, accountId)
             }
         }
     }
