@@ -9,7 +9,7 @@
 #include "../src/sqlite/sqlite.hpp"
 
 
-/*TEST_CASE("Can create budget/save files", "[createBudget]") {
+TEST_CASE("Can create budget/save files", "[createBudget]") {
   SECTION("A path and name are given, then it creates a .mbgt file") {
       AccountManager accManager;
       QUrl path = QUrl::fromLocalFile(".");
@@ -18,30 +18,7 @@
       QFile testBudget("Foo Budget.mbgt");
       REQUIRE(testBudget.exists() == true);
   }
-}*/
-
-/*TEST_CASE("Can save a file", "[saveFile]") {
-    SECTION("A path and Json Value is given and it writes a file") {
-        AccountManager accManager;
-        QUrl path = QUrl::fromLocalFile("FooBar.json");
-        Json::Value testObject;
-        testObject["greeting"] = "Hello World";
-
-        accManager.saveFile(path, testObject);
-        QFile testFile("FooBar.json");
-        REQUIRE(testFile.exists() == true);
-    }
 }
-
-TEST_CASE("Can load a file", "[loadFile]") {
-    SECTION("A path to a budget file is given and it loads it as a Json Value") {
-        AccountManager accManager;
-        QUrl path = QUrl::fromLocalFile("FooBar.json");
-
-        Json::Value testFile = accManager.loadFile(path);
-        REQUIRE(testFile["greeting"] == "Hello World");
-    }
-}*/
 
 /* setLastFile and getLastFile tests fail and work seemingly randomly
  * so are commented out to make tests run nicely since they do work
