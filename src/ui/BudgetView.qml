@@ -38,11 +38,9 @@ Item {
             height: 58
             anchors.top: parent.top
             anchors.topMargin: 50
-            anchors.leftMargin: 10
-            anchors.horizontalCenter: item1.horizontalCenter
-            anchors.right: item1.left
             anchors.left: parent.left
-            source: "qrc:/qtquickplugin/images/template_image.png"
+            anchors.leftMargin: 10
+            source: "../assets/leftarrow.png"
         }
 
         Label {
@@ -74,8 +72,7 @@ Item {
             anchors.topMargin: 50
             anchors.right: parent.right
             anchors.rightMargin: 10
-            source: "qrc:/qtquickplugin/images/template_image.png"
-            anchors.horizontalCenter: item1.horizontalCenter
+            source: "../assets/rightarrow.png"
         }
 
         Label {
@@ -251,16 +248,6 @@ Item {
         height: 40
         color: "#dadfe6"
 
-        Image {
-            id: chevron
-            y: 8
-            width: 24
-            height: 24
-            anchors.left: parent.left
-            anchors.leftMargin: 8
-            source: "qrc:/qtquickplugin/images/template_image.png"
-        }
-
         Text {
             id: parentLabel
             y: 10
@@ -278,7 +265,7 @@ Item {
             height: 24
             anchors.right: parent.right
             anchors.rightMargin: 8
-            source: "qrc:/qtquickplugin/images/template_image.png"
+            source: "../assets/search.png"
         }
 
         Text {
@@ -320,7 +307,7 @@ Item {
             height: 19
             anchors.right: parent.right
             anchors.rightMargin: 8
-            source: "qrc:/qtquickplugin/images/template_image.png"
+            source: "../assets/search.png"
         }
 
         Text {

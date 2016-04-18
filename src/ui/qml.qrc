@@ -6,5 +6,9 @@
         <file>newchecking.qml</file>
         <file>AccountView.qml</file>
         <file>BudgetView.qml</file>
+        <file>../assets/search.png</file>
+        <file>../assets/chevron.png</file>
+        <file>../assets/leftarrow.png</file>
+        <file>../assets/rightarrow.png</file>
     </qresource>
 </RCC>
