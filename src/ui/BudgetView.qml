@@ -5,6 +5,10 @@ Item {
     id: item1
     width: 770
     height: 720
+    property var categories
+    Component.onCompleted: {
+        categories = [{name: "Category", remaining: "100.00"}]
+    }
 
     Rectangle {
         id: actionBar
@@ -216,111 +220,51 @@ Item {
             anchors.left: parent.left
             anchors.leftMargin: 10
         }
-
-        ComboBox {
-            id: parentCategoryInput
-            y: 506
-            height: 33
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 181
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-        }
-
-        Label {
-            id: parentCategoryLabel
-            y: 483
-            text: qsTr("Parent Category")
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 220
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-        }
     }
 
-    Rectangle {
-        id: parentCategoryBackground
-        x: 0
-        y: 0
-        width: 570
-        height: 40
-        color: "#dadfe6"
+    Column {
+        Repeater {
+            model: categories
+            Rectangle {
+                id: categoryBackground
+                width: 570
+                height: 40
+                color: "#ffffff"
+                border.width: 5
+                border.color: "#dadfe6"
 
-        Text {
-            id: parentLabel
-            y: 10
-            text: qsTr("Parent Category")
-            anchors.left: parent.left
-            anchors.leftMargin: 38
-            font.pixelSize: 15
-        }
+                Text {
+                    id: categoryLabel
+                    y: 10
+                    text: modelData.name
+                    anchors.left: parent.left
+                    anchors.leftMargin: 38
+                    font.pixelSize: 15
+                }
 
-        Image {
-            id: parentCategorySearch
-            x: 538
-            y: 8
-            width: 24
-            height: 24
-            anchors.right: parent.right
-            anchors.rightMargin: 8
-            source: "../assets/search.png"
-        }
+                Image {
+                    id: categorySearch
+                    x: 538
+                    y: 8
+                    width: 24
+                    height: 24
+                    anchors.right: parent.right
+                    anchors.rightMargin: 8
+                    source: "../assets/search.png"
+                }
 
-        Text {
-            id: parentRemainingBudget
-            x: 478
-            y: 10
-            text: qsTr("100.00")
-            anchors.right: parent.right
-            anchors.rightMargin: 38
-            horizontalAlignment: Text.AlignRight
-            font.pixelSize: 15
-        }
-    }
-
-    Rectangle {
-        id: categoryBackground
-        x: 0
-        y: 40
-        width: 570
-        height: 35
-        color: "#ffffff"
-        border.width: 2
-        border.color: "#dadfe6"
-
-        Text {
-            id: categoryLabel
-            y: 8
-            text: qsTr("Category")
-            anchors.left: parent.left
-            anchors.leftMargin: 48
-            font.pixelSize: 14
-        }
-
-        Image {
-            id: categorySearch
-            x: 543
-            y: 8
-            width: 19
-            height: 19
-            anchors.right: parent.right
-            anchors.rightMargin: 8
-            source: "../assets/search.png"
-        }
-
-        Text {
-            id: categoryRemainingBudget
-            x: 495
-            y: 8
-            text: qsTr("100.00")
-            anchors.right: parent.right
-            anchors.rightMargin: 33
-            horizontalAlignment: Text.AlignRight
-            font.pixelSize: 14
+                Text {
+                    id: categoryRemainingBudget
+                    x: 478
+                    y: 10
+                    text: modelData.remaining
+                    anchors.right: parent.right
+                    anchors.rightMargin: 38
+                    horizontalAlignment: Text.AlignRight
+                    font.pixelSize: 15
+                }
+            }
         }
     }
-
 }
 
