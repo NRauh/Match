@@ -4,11 +4,12 @@
 #include <QUrl>
 #include <QDate>
 #include <iostream>
+#include <QDebug>
 
 // Budget account and stuff made in matchtest file
 // Separated to make sure there's a control
 
-QUrl budgetFilePath("BudgetTestAccount.mbgt");
+QUrl budgetFilePath = QUrl::fromLocalFile("BudgetTestAccount.mbgt");
 
 TEST_CASE("Can add budget categories", "[addCategory]") {
     SECTION("Give file path, name, and initial amount") {
@@ -18,9 +19,6 @@ TEST_CASE("Can add budget categories", "[addCategory]") {
         io::sqlite::db mbgt("BudgetTestAccount.mbgt");
         io::sqlite::stmt query(mbgt, "SELECT categoryName, monthOne, monthOneDate, monthTwo, monthTwoDate, monthThree, monthThreeDate FROM budgets");
 
-        REQUIRE(query.step());
-
-        /*
         QString currentMonth = QDate::currentDate().toString("yyyy-MM");
         QString monthPlusOne = QDate::currentDate().addMonths(1).toString("yyyy-MM");
         QString monthPlusTwo = QDate::currentDate().addMonths(2).toString("yyyy-MM");
@@ -37,7 +35,7 @@ TEST_CASE("Can add budget categories", "[addCategory]") {
         }
 
         query.reset();
-        query = io::sqlite::stmt(mbgt, "SELECT categoryName, prevOne, prevOneDate, prevTwo, prevTwoDate FROM prevBudgets");
+        /*query = io::sqlite::stmt(mbgt, "SELECT categoryName, prevOne, prevOneDate, prevTwo, prevTwoDate FROM prevBudgets");
 
         QString monthMinusOne = QDate::currentDate().addMonths(-1).toString("yyyy-MM");
         QString monthMinusTwo = QDate::currentDate().addMonths(-2).toString("yyyy-MM");
