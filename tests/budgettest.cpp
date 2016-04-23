@@ -17,36 +17,41 @@ TEST_CASE("Can add budget categories", "[addCategory]") {
         budget.addCategory(budgetFilePath, "Test Budget", 10000);
 
         io::sqlite::db mbgt("BudgetTestAccount.mbgt");
-        io::sqlite::stmt query(mbgt, "SELECT categoryName, monthOne, monthOneDate, monthTwo, monthTwoDate, monthThree, monthThreeDate FROM budgets");
+        io::sqlite::stmt query(mbgt, "SELECT categoryName, monthOne,"
+                                     "monthOneDate, monthTwo, monthTwoDate,"
+                                     "monthThree, monthThreeDate, prevOne,"
+                                     "prevOneDate, prevTwo, prevTwoDate FROM budgets");
 
         QString currentMonth = QDate::currentDate().toString("yyyy-MM");
         QString monthPlusOne = QDate::currentDate().addMonths(1).toString("yyyy-MM");
         QString monthPlusTwo = QDate::currentDate().addMonths(2).toString("yyyy-MM");
-
-        while (query.step()) {
-            std::cout << "1: addCategory(1)\n";
-            REQUIRE(query.row().text(0) == "Test Budget");
-            REQUIRE(query.row().int32(1) == 10000);
-            REQUIRE(query.row().text(2) == currentMonth.toStdString());
-            REQUIRE(query.row().int32(3) == 0);
-            REQUIRE(query.row().text(4) == monthPlusOne.toStdString());
-            REQUIRE(query.row().int32(5) == 0);
-            REQUIRE(query.row().text(6) == monthPlusTwo.toStdString());
-        }
-
-        query.reset();
-        /*query = io::sqlite::stmt(mbgt, "SELECT categoryName, prevOne, prevOneDate, prevTwo, prevTwoDate FROM prevBudgets");
-
         QString monthMinusOne = QDate::currentDate().addMonths(-1).toString("yyyy-MM");
         QString monthMinusTwo = QDate::currentDate().addMonths(-2).toString("yyyy-MM");
 
         while (query.step()) {
-            std::cout << "1: addCategory(2)\n";
+            std::cout << "1: addCategory(1)\n";
+            // categoryName
             REQUIRE(query.row().text(0) == "Test Budget");
-            REQUIRE(query.row().int32(1) == 0);
-            REQUIRE(query.row().text(2) == monthMinusOne.toStdString());
+            // monthOne
+            REQUIRE(query.row().int32(1) == 10000);
+            // monthOneDate
+            REQUIRE(query.row().text(2) == currentMonth.toStdString());
+            // monthTwo
             REQUIRE(query.row().int32(3) == 0);
-            REQUIRE(query.row().text(4) == monthMinusTwo.toStdString());
-        }*/
+            // monthTwoDate
+            REQUIRE(query.row().text(4) == monthPlusOne.toStdString());
+            // monthThree
+            REQUIRE(query.row().int32(5) == 0);
+            // monthThreeDate
+            REQUIRE(query.row().text(6) == monthPlusTwo.toStdString());
+            // prevOne
+            REQUIRE(query.row().int32(7) == 0);
+            // prevOneDate
+            REQUIRE(query.row().text(8) == monthMinusOne.toStdString());
+            // prevTwo
+            REQUIRE(query.row().int32(9) == 0);
+            // prevTwoDate
+            REQUIRE(query.row().text(10) == monthMinusTwo.toStdString());
+        }
     }
 }
