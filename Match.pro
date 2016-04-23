@@ -11,7 +11,8 @@ SOURCES += src/main.cpp \
         src/jsoncpp.cpp \
         src/account.cpp \
         src/sqlite/sqlite3.c \
-        src/sqlite/sqlite.cpp
+        src/sqlite/sqlite.cpp \
+    src/budget.cpp
 
 RESOURCES += src/ui/qml.qrc
 
@@ -27,4 +28,5 @@ HEADERS += \
         src/json/json-forwards.h \
         src/account.h \
         src/sqlite/sqlite3.h \
-        src/sqlite/sqlite.cpp
+        src/sqlite/sqlite.cpp \
+    src/budget.h

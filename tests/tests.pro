@@ -14,7 +14,8 @@ LIBS += -ldl
 HEADERS += catch.hpp ../src/accountmanager.h ../src/json/json.h ../src/json/json.h ../src/json/json-forwards.h \
         ../src/account.h \
         ../src/sqlite/sqlite3.h \
-        ../src/sqlite/sqlite.hpp
+        ../src/sqlite/sqlite.hpp \
+        ../src/budget.h
 SOURCES += accountmanagertest.cpp \
         matchtest.cpp \
         ../src/accountmanager.cpp \
@@ -22,4 +23,6 @@ SOURCES += accountmanagertest.cpp \
         accounttest.cpp \
         ../src/account.cpp \
         ../src/sqlite/sqlite3.c \
-        ../src/sqlite/sqlite.cpp
+        ../src/sqlite/sqlite.cpp \
+        budgettest.cpp \
+        ../src/budget.cpp
