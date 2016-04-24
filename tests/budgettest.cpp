@@ -5,15 +5,17 @@
 #include <QDate>
 #include <iostream>
 #include <QDebug>
+#include <QJsonArray>
+#include <QJsonObject>
 
 // Budget account and stuff made in matchtest file
 // Separated to make sure there's a control
 
 QUrl budgetFilePath = QUrl::fromLocalFile("BudgetTestAccount.mbgt");
+Budget budget;
 
 TEST_CASE("Can add budget categories", "[addCategory]") {
     SECTION("Give file path, name, and initial amount") {
-        Budget budget;
         budget.addCategory(budgetFilePath, "Test Budget", 10000);
 
         io::sqlite::db mbgt("BudgetTestAccount.mbgt");
@@ -53,5 +55,37 @@ TEST_CASE("Can add budget categories", "[addCategory]") {
             // prevTwoDate
             REQUIRE(query.row().text(10) == monthMinusTwo.toStdString());
         }
+    }
+}
+
+TEST_CASE("Can get a list of categories with amounts for a month at relative index", "[getCategories]") {
+    SECTION("Zero is current month") {
+        QJsonArray categories = budget.getCategories(budgetFilePath, 0);
+
+        REQUIRE(categories[0].toObject()["categoryName"] == "Test Budget");
+        REQUIRE(categories[0].toObject()["amount"] == "100.00");
+    }
+
+    SECTION("Can go positive or negative up to 2 out") {
+        QJsonArray categories = budget.getCategories(budgetFilePath, 1);
+        REQUIRE(categories[0].toObject()["categoryName"] == "Test Budget");
+        REQUIRE(categories[0].toObject()["amount"] == "0.00");
+
+        categories = budget.getCategories(budgetFilePath, 2);
+        REQUIRE(categories[0].toObject()["categoryName"] == "Test Budget");
+
+        categories = budget.getCategories(budgetFilePath, -1);
+        REQUIRE(categories[0].toObject()["categoryName"] == "Test Budget");
+
+        categories = budget.getCategories(budgetFilePath, -2);
+        REQUIRE(categories[0].toObject()["categoryName"] == "Test Budget");
+    }
+
+    SECTION("Out of that range, has error") {
+        QJsonArray categories = budget.getCategories(budgetFilePath, 3);
+        REQUIRE(categories[0].toObject()["err"] == "Out of stored range");
+
+        categories = budget.getCategories(budgetFilePath, -3);
+        REQUIRE(categories[0].toObject()["err"] == "Out of stored range");
     }
 }

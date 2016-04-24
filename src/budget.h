@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QUrl>
+#include <QJsonArray>
 
 class Budget : public QObject
 {
@@ -10,6 +11,7 @@ class Budget : public QObject
 public:
     explicit Budget(QObject *parent = 0);
     Q_INVOKABLE void addCategory(QUrl filePath, QString categoryName, int initialAmount);
+    Q_INVOKABLE QJsonArray getCategories(QUrl filePath, int month);
 
 signals:
 
