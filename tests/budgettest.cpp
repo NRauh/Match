@@ -117,3 +117,22 @@ TEST_CASE("Can get a list of only category names", "[getCategoryNames]") {
         REQUIRE(categories.at(1) == "Test Budget");
     }
 }
+
+TEST_CASE("Can subtract from remaining amount", "[subRemainingAmount]") {
+    SECTION("Give file path, category, month date, and amount; returns bool") {
+        QString currentMonth = QDate::currentDate().toString("yyyy-MM");
+        bool changeSuccess = budget.subRemainingAmount(budgetFilePath,
+                                                       "Test Budget",
+                                                       currentMonth, 5000);
+
+        REQUIRE(changeSuccess == true);
+
+        io::sqlite::db mbgt("BudgetTestAccount.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT monthOneRemaining FROM budgets WHERE id == 1");
+
+        while (query.step()) {
+            std::cout << "2: subRemainingAmount (1)\n";
+            REQUIRE(query.row().int32(0) == 5000);
+        }
+    }
+}

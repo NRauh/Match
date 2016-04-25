@@ -13,6 +13,7 @@ public:
     Q_INVOKABLE void addCategory(QUrl filePath, QString categoryName, int initialAmount);
     Q_INVOKABLE QJsonArray getCategories(QUrl filePath, int month);
     Q_INVOKABLE QList<QString> getCategoryNames(QUrl filePath);
+    Q_INVOKABLE bool subRemainingAmount(QUrl filePath, QString category, QString month, int amount);
 
 signals:
 

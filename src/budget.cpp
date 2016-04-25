@@ -117,3 +117,15 @@ QList<QString> Budget::getCategoryNames(QUrl filePath)
 
     return categoryList;
 }
+
+bool Budget::subRemainingAmount(QUrl filePath, QString category, QString month, int amount)
+{
+    io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(mbgt, "UPDATE budgets SET monthOneRemaining = monthOneRemaining - ? WHERE categoryName == ?");
+
+    query.bind().int32(1, amount);
+    query.bind().text(2, category.toStdString());
+    query.exec();
+
+    return true;
+}
