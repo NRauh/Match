@@ -14,13 +14,17 @@ Budget::Budget(QObject *parent) : QObject(parent)
 void Budget::addCategory(QUrl filePath, QString categoryName, int initialAmount)
 {
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
-    io::sqlite::stmt query(mbgt, "INSERT INTO budgets (categoryName, monthOne, monthOneDate,"
-                                 "monthTwo, monthTwoDate, monthThree, monthThreeDate,"
-                                 "prevOne, prevOneDate, prevTwo, prevTwoDate)"
-                                 "VALUES (?, ?, ?, 0, ?, 0, ?, 0, ?, 0, ?)");
+    io::sqlite::stmt query(mbgt, "INSERT INTO budgets (categoryName,"
+                                 "monthOne, monthOneRemaining, monthOneDate,"
+                                 "monthTwo, monthTwoRemaining, monthTwoDate,"
+                                 "monthThree, monthThreeRemaining, monthThreeDate,"
+                                 "prevOne, prevOneRemaining, prevOneDate,"
+                                 "prevTwo, prevTwoRemaining, prevTwoDate)"
+                                 "VALUES (?, ?, ?, ?, 0, 0, ?, 0, 0, ?, 0, 0, ?, 0, 0, ?)");
 
     query.bind().text(1, categoryName.toStdString());
     query.bind().int32(2, initialAmount);
+    query.bind().int32(3, initialAmount);
 
     QString currentMonth = QDate::currentDate().toString("yyyy-MM");
     QString monthPlusOne = QDate::currentDate().addMonths(1).toString("yyyy-MM");
@@ -28,11 +32,11 @@ void Budget::addCategory(QUrl filePath, QString categoryName, int initialAmount)
     QString monthSubOne = QDate::currentDate().addMonths(-1).toString("yyyy-MM");
     QString monthSubTwo = QDate::currentDate().addMonths(-2).toString("yyyy-MM");
 
-    query.bind().text(3, currentMonth.toStdString());
-    query.bind().text(4, monthPlusOne.toStdString());
-    query.bind().text(5, monthPlusTwo.toStdString());
-    query.bind().text(6, monthSubOne.toStdString());
-    query.bind().text(7, monthSubTwo.toStdString());
+    query.bind().text(4, currentMonth.toStdString());
+    query.bind().text(5, monthPlusOne.toStdString());
+    query.bind().text(6, monthPlusTwo.toStdString());
+    query.bind().text(7, monthSubOne.toStdString());
+    query.bind().text(8, monthSubTwo.toStdString());
 
     query.exec();
 }

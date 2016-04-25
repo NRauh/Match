@@ -20,9 +20,11 @@ TEST_CASE("Can add budget categories", "[addCategory]") {
 
         io::sqlite::db mbgt("BudgetTestAccount.mbgt");
         io::sqlite::stmt query(mbgt, "SELECT categoryName, monthOne,"
-                                     "monthOneDate, monthTwo, monthTwoDate,"
-                                     "monthThree, monthThreeDate, prevOne,"
-                                     "prevOneDate, prevTwo, prevTwoDate FROM budgets");
+                                     "monthOneRemaining, monthOneDate,"
+                                     "monthTwo, monthTwoRemaining, monthTwoDate,"
+                                     "monthThree, monthThreeRemaining, monthThreeDate,"
+                                     "prevOne, prevOneRemaining, prevOneDate,"
+                                     "prevTwo, prevTwoRemaining, prevTwoDate FROM budgets");
 
         QString currentMonth = QDate::currentDate().toString("yyyy-MM");
         QString monthPlusOne = QDate::currentDate().addMonths(1).toString("yyyy-MM");
@@ -36,24 +38,34 @@ TEST_CASE("Can add budget categories", "[addCategory]") {
             REQUIRE(query.row().text(0) == "Test Budget");
             // monthOne
             REQUIRE(query.row().int32(1) == 10000);
+            // monthOneRemaining
+            REQUIRE(query.row().int32(2) == 10000);
             // monthOneDate
-            REQUIRE(query.row().text(2) == currentMonth.toStdString());
+            REQUIRE(query.row().text(3) == currentMonth.toStdString());
             // monthTwo
-            REQUIRE(query.row().int32(3) == 0);
-            // monthTwoDate
-            REQUIRE(query.row().text(4) == monthPlusOne.toStdString());
-            // monthThree
+            REQUIRE(query.row().int32(4) == 0);
+            // monthTwoRemaining
             REQUIRE(query.row().int32(5) == 0);
-            // monthThreeDate
-            REQUIRE(query.row().text(6) == monthPlusTwo.toStdString());
-            // prevOne
+            // monthTwoDate
+            REQUIRE(query.row().text(6) == monthPlusOne.toStdString());
+            // monthThree
             REQUIRE(query.row().int32(7) == 0);
+            // monthThreeRemaining
+            REQUIRE(query.row().int32(8) == 0);
+            // monthThreeDate
+            REQUIRE(query.row().text(9) == monthPlusTwo.toStdString());
+            // prevOne
+            REQUIRE(query.row().int32(10) == 0);
+            // prevOneRemaining
+            REQUIRE(query.row().int32(11) == 0);
             // prevOneDate
-            REQUIRE(query.row().text(8) == monthMinusOne.toStdString());
+            REQUIRE(query.row().text(12) == monthMinusOne.toStdString());
             // prevTwo
-            REQUIRE(query.row().int32(9) == 0);
+            REQUIRE(query.row().int32(13) == 0);
+            // prevTwoRemaining
+            REQUIRE(query.row().int32(14) == 0);
             // prevTwoDate
-            REQUIRE(query.row().text(10) == monthMinusTwo.toStdString());
+            REQUIRE(query.row().text(15) == monthMinusTwo.toStdString());
         }
     }
 }
