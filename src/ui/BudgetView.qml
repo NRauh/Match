@@ -1,13 +1,24 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
+import com.nrauh 1.0
 
 Item {
     id: item1
     width: 770
     height: 720
     property var categories
+    property var lastFile
     Component.onCompleted: {
-        categories = [{name: "Category", remaining: "100.00"}]
+        lastFile = accManager.getLastFile();
+        categories = budget.getCategories(lastFile, 0);
+    }
+
+    AccountManager {
+        id: accManager
+    }
+
+    Budget {
+        id: budget
     }
 
     Rectangle {
@@ -153,49 +164,14 @@ Item {
             anchors.rightMargin: 69
         }
 
-        Button {
-            id: newCategoryButton
-            y: 685
-            text: qsTr("New Category")
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 10
-        }
-
-        Button {
-            id: cancelButton
-            x: 136
-            y: 683
-            width: 54
-            text: qsTr("Cancel")
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 10
-        }
-
-        TextField {
-            id: amountInput
-            y: 642
-            height: 25
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 53
-            placeholderText: qsTr("Amount")
-        }
-
         Label {
-            id: amountLabel
-            y: 619
-            text: qsTr("Amount")
+            id: categoryNameLabel
+            y: 555
+            text: qsTr("Category Name")
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 148
             anchors.left: parent.left
             anchors.leftMargin: 10
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 84
         }
 
         TextField {
@@ -212,14 +188,79 @@ Item {
         }
 
         Label {
-            id: categoryNameLabel
-            y: 555
-            text: qsTr("Category Name")
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 148
+            id: amountLabel
+            y: 619
+            text: qsTr("Amount")
             anchors.left: parent.left
             anchors.leftMargin: 10
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 84
         }
+
+        TextField {
+            id: amountInput
+            y: 642
+            height: 25
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 53
+            placeholderText: qsTr("0.00")
+            validator: RegExpValidator { regExp: /\d+\.\d\d/ }
+        }
+
+        Button {
+            id: newCategoryButton
+            y: 685
+            text: qsTr("New Category")
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 10
+            onClicked: {
+                var acceptable = true
+
+                if (!categoryNameInput.text) {
+                    acceptable = false
+                }
+                if (!amountInput.text) {
+                    acceptable = false
+                }
+
+                if (acceptable) {
+                    var categoryName = categoryNameInput.text
+                    var amount = parseFloat(amountInput.text) * 100
+
+                    budget.addCategory(lastFile, categoryName, amount);
+                    categories = budget.getCategories(lastFile, 0);
+
+                    categoryNameInput.text = ""
+                    amountInput.text = ""
+                }
+            }
+        }
+
+        Button {
+            id: cancelButton
+            x: 136
+            y: 683
+            width: 54
+            text: qsTr("Cancel")
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 10
+            onClicked: {
+                categoryNameInput.text = "";
+                amountInput.text = "";
+            }
+        }
+
+
+
+
     }
 
     Column {
@@ -236,7 +277,7 @@ Item {
                 Text {
                     id: categoryLabel
                     y: 10
-                    text: modelData.name
+                    text: modelData.categoryName
                     anchors.left: parent.left
                     anchors.leftMargin: 38
                     font.pixelSize: 15
@@ -254,10 +295,10 @@ Item {
                 }
 
                 Text {
-                    id: categoryRemainingBudget
+                    id: categoryBudgetAmount
                     x: 478
                     y: 10
-                    text: modelData.remaining
+                    text: modelData.amount
                     anchors.right: parent.right
                     anchors.rightMargin: 38
                     horizontalAlignment: Text.AlignRight
