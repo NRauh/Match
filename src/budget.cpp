@@ -98,3 +98,18 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
 
     return categoryArray;
 }
+
+QList<QString> Budget::getCategoryNames(QUrl filePath)
+{
+    QList<QString> categoryList;
+    io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(mbgt, "SELECT categoryName FROM budgets");
+
+    while (query.step()) {
+        categoryList << query.row().text(0).c_str();
+    }
+
+    categoryList.sort();
+
+    return categoryList;
+}

@@ -12,6 +12,7 @@ public:
     explicit Budget(QObject *parent = 0);
     Q_INVOKABLE void addCategory(QUrl filePath, QString categoryName, int initialAmount);
     Q_INVOKABLE QJsonArray getCategories(QUrl filePath, int month);
+    Q_INVOKABLE QList<QString> getCategoryNames(QUrl filePath);
 
 signals:
 
