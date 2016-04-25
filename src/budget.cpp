@@ -46,6 +46,7 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
     QJsonArray categoryArray;
     QDate selectedMonth = QDate::currentDate();
     std::string sqlQuery;
+    std::string selectedMonthRemaining;
 
     if (month < 3 && month > -3) {
         selectedMonth = selectedMonth.addMonths(month);
@@ -59,24 +60,32 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
     switch (month) {
     case -2:
         sqlQuery = "prevTwo";
+        selectedMonthRemaining = "prevTwoRemaining";
         break;
     case -1:
         sqlQuery = "prevOne";
+        selectedMonthRemaining = "prevOneRemaining";
         break;
     case 0:
         sqlQuery = "monthOne";
+        selectedMonthRemaining = "monthOneRemaining";
         break;
     case 1:
         sqlQuery = "monthTwo";
+        selectedMonthRemaining = "monthTwoRemaining";
         break;
     case 2:
         sqlQuery = "monthThree";
+        selectedMonthRemaining = "monthThreeRemaining";
         break;
     default:
         break;
     }
 
-    sqlQuery = "SELECT categoryName, " + sqlQuery + " FROM budgets WHERE " + sqlQuery + "Date == ?";
+    sqlQuery = "SELECT categoryName," +
+               sqlQuery + ", " + selectedMonthRemaining +
+               " FROM budgets WHERE " + sqlQuery + "Date == ?";
+
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(mbgt, sqlQuery.c_str());
     query.bind().text(1, selectedMonth.toString("yyyy-MM").toStdString());
@@ -85,6 +94,7 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
         QJsonObject category;
         QString categoryName = QString::fromStdString(query.row().text(0));
         QString amount = QString::number(query.row().int32(1));
+        QString remainingAmount = QString::number(query.row().int32(2));
 
         if (amount.length() == 1) {
             amount.prepend("00");
@@ -92,10 +102,18 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
             amount.prepend("0");
         }
 
+        if (remainingAmount.length() == 1) {
+            remainingAmount.prepend("00");
+        } else if (amount.length() == 2) {
+            remainingAmount.prepend("0");
+        }
+
         amount = amount.insert(amount.length() - 2, ".");
+        remainingAmount = remainingAmount.insert(remainingAmount.length() - 2, ".");
 
         category.insert("categoryName", categoryName);
         category.insert("amount", amount);
+        category.insert("remaining", remainingAmount);
 
         categoryArray.append(category);
     }

@@ -76,6 +76,7 @@ TEST_CASE("Can get a list of categories with amounts for a month at relative ind
 
         REQUIRE(categories[0].toObject()["categoryName"] == "Test Budget");
         REQUIRE(categories[0].toObject()["amount"] == "100.00");
+        REQUIRE(categories[0].toObject()["remaining"] == "100.00");
     }
 
     SECTION("Can go positive or negative up to 2 out") {
