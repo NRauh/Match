@@ -138,8 +138,27 @@ QList<QString> Budget::getCategoryNames(QUrl filePath)
 
 bool Budget::subRemainingAmount(QUrl filePath, QString category, QString month, int amount)
 {
+    QDate currentMonth = QDate::currentDate();
+    std::string toUpdate;
+
+    if (month == currentMonth.toString("yyyy-MM")) {
+        toUpdate = "monthOneRemaining";
+    } else if (month == currentMonth.addMonths(-2).toString("yyyy-MM")) {
+        toUpdate = "prevTwoRemaining";
+    } else if (month == currentMonth.addMonths(-1).toString("yyyy-MM")) {
+        toUpdate = "prevOneRemaining";
+    } else if (month == currentMonth.addMonths(1).toString("yyyy-MM")) {
+        toUpdate = "monthTwoRemaining";
+    } else if (month == currentMonth.addMonths(2).toString("yyyy-MM")) {
+        toUpdate = "monthThreeRemaining";
+    } else {
+        return false;
+    }
+
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
-    io::sqlite::stmt query(mbgt, "UPDATE budgets SET monthOneRemaining = monthOneRemaining - ? WHERE categoryName == ?");
+    std::string formattedQuery;
+    formattedQuery = "UPDATE budgets SET " + toUpdate + " = " + toUpdate + " - ? WHERE categoryName == ?";
+    io::sqlite::stmt query(mbgt, formattedQuery.c_str());
 
     query.bind().int32(1, amount);
     query.bind().text(2, category.toStdString());

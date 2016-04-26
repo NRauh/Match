@@ -14,6 +14,12 @@
 QUrl budgetFilePath = QUrl::fromLocalFile("BudgetTestAccount.mbgt");
 Budget budget;
 
+QString currentMonth = QDate::currentDate().toString("yyyy-MM");
+QString monthPlusOne = QDate::currentDate().addMonths(1).toString("yyyy-MM");
+QString monthPlusTwo = QDate::currentDate().addMonths(2).toString("yyyy-MM");
+QString monthMinusOne = QDate::currentDate().addMonths(-1).toString("yyyy-MM");
+QString monthMinusTwo = QDate::currentDate().addMonths(-2).toString("yyyy-MM");
+
 TEST_CASE("Can add budget categories", "[addCategory]") {
     SECTION("Give file path, name, and initial amount") {
         budget.addCategory(budgetFilePath, "Test Budget", 10000);
@@ -25,12 +31,6 @@ TEST_CASE("Can add budget categories", "[addCategory]") {
                                      "monthThree, monthThreeRemaining, monthThreeDate,"
                                      "prevOne, prevOneRemaining, prevOneDate,"
                                      "prevTwo, prevTwoRemaining, prevTwoDate FROM budgets");
-
-        QString currentMonth = QDate::currentDate().toString("yyyy-MM");
-        QString monthPlusOne = QDate::currentDate().addMonths(1).toString("yyyy-MM");
-        QString monthPlusTwo = QDate::currentDate().addMonths(2).toString("yyyy-MM");
-        QString monthMinusOne = QDate::currentDate().addMonths(-1).toString("yyyy-MM");
-        QString monthMinusTwo = QDate::currentDate().addMonths(-2).toString("yyyy-MM");
 
         while (query.step()) {
             std::cout << "1: addCategory(1)\n";
@@ -121,7 +121,6 @@ TEST_CASE("Can get a list of only category names", "[getCategoryNames]") {
 
 TEST_CASE("Can subtract from remaining amount", "[subRemainingAmount]") {
     SECTION("Give file path, category, month date, and amount; returns bool") {
-        QString currentMonth = QDate::currentDate().toString("yyyy-MM");
         bool changeSuccess = budget.subRemainingAmount(budgetFilePath,
                                                        "Test Budget",
                                                        currentMonth, 5000);
@@ -135,5 +134,41 @@ TEST_CASE("Can subtract from remaining amount", "[subRemainingAmount]") {
             std::cout << "2: subRemainingAmount (1)\n";
             REQUIRE(query.row().int32(0) == 5000);
         }
+    }
+
+    SECTION("It works with past and future months") {
+        budget.subRemainingAmount(budgetFilePath,
+                                  "Test Budget",
+                                  monthPlusOne, 5000);
+        budget.subRemainingAmount(budgetFilePath,
+                                  "Test Budget",
+                                  monthPlusTwo, 5000);
+        budget.subRemainingAmount(budgetFilePath,
+                                  "Test Budget",
+                                  monthMinusOne, 5000);
+        budget.subRemainingAmount(budgetFilePath,
+                                  "Test Budget",
+                                  monthMinusTwo, 5000);
+
+        io::sqlite::db mbgt("BudgetTestAccount.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT monthTwoRemaining, monthThreeRemaining,"
+                                     "prevOneRemaining, prevTwoRemaining "
+                                     "FROM budgets WHERE id == 1");
+
+        while (query.step()) {
+            std::cout << "2: subRemainingAmount (2)\n";
+            REQUIRE(query.row().int32(0) == -5000);
+            REQUIRE(query.row().int32(1) == -5000);
+            REQUIRE(query.row().int32(2) == -5000);
+            REQUIRE(query.row().int32(3) == -5000);
+        }
+    }
+
+    SECTION ("If the month is out of range, it returns false") {
+        QString outOfDate = QDate::currentDate().addMonths(4).toString("yyyy-MM");
+        bool changeStatus = budget.subRemainingAmount(budgetFilePath,
+                                                      "Test Budget",
+                                                      outOfDate, 5000);
+        REQUIRE(changeStatus == false);
     }
 }
