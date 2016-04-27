@@ -271,6 +271,24 @@ Item {
         }
 
         Button {
+            id: updateCategoryButton
+            y: 685
+            text: qsTr("Update")
+            visible: false
+            anchors.left:  parent.left
+            anchors.leftMargin: 10
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 10
+            onClicked: {
+                var category = categoryNameInput.text
+                var amount = parseFloat(amountInput.text) * 100
+
+                budget.updateBudget(lastFile, selectedMonth, category, amount)
+                categories = budget.getCategories(lastFile, selectedMonth)
+            }
+        }
+
+        Button {
             id: cancelButton
             x: 136
             y: 683
@@ -283,12 +301,10 @@ Item {
             onClicked: {
                 categoryNameInput.text = "";
                 amountInput.text = "";
+                updateCategoryButton.visible = false
+                newCategoryButton.visible = true
             }
         }
-
-
-
-
     }
 
     Column {
@@ -331,6 +347,16 @@ Item {
                     anchors.rightMargin: 38
                     horizontalAlignment: Text.AlignRight
                     font.pixelSize: 15
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        newCategoryButton.visible = false
+                        updateCategoryButton.visible = true
+                        categoryNameInput.text = modelData.categoryName
+                        amountInput.text = modelData.amount
+                    }
                 }
             }
         }
