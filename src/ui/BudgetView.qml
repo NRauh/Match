@@ -8,9 +8,11 @@ Item {
     height: 720
     property var categories
     property var lastFile
+    property var selectedMonth
     Component.onCompleted: {
         lastFile = accManager.getLastFile();
-        categories = budget.getCategories(lastFile, 0);
+        selectedMonth = 0;
+        categories = budget.getCategories(lastFile, selectedMonth);
     }
 
     AccountManager {
@@ -56,6 +58,19 @@ Item {
             anchors.left: parent.left
             anchors.leftMargin: 10
             source: "../assets/leftarrow.png"
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    selectedMonth = selectedMonth - 1
+                    categories = budget.getCategories(lastFile, selectedMonth)
+                    if (selectedMonth === -2) {
+                        parent.visible = false
+                    }
+                    if (selectedMonth < 2) {
+                        rightArrow.visible = true
+                    }
+                }
+            }
         }
 
         Label {
@@ -88,6 +103,19 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: 10
             source: "../assets/rightarrow.png"
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    selectedMonth = selectedMonth + 1
+                    categories = budget.getCategories(lastFile, selectedMonth)
+                    if (selectedMonth === 2) {
+                        parent.visible = false
+                    }
+                    if (selectedMonth > -2) {
+                        leftArrow.visible = true
+                    }
+                }
+            }
         }
 
         Label {
@@ -298,7 +326,7 @@ Item {
                     id: categoryBudgetAmount
                     x: 478
                     y: 10
-                    text: modelData.amount
+                    text: modelData.remaining
                     anchors.right: parent.right
                     anchors.rightMargin: 38
                     horizontalAlignment: Text.AlignRight
