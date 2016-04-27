@@ -172,3 +172,45 @@ TEST_CASE("Can subtract from remaining amount", "[subRemainingAmount]") {
         REQUIRE(changeStatus == false);
     }
 }
+
+TEST_CASE("Can update budget for month", "[updateBudget]") {
+    SECTION("File path, month number, categoryName, and updated amount") {
+        budget.updateBudget(budgetFilePath, -2, "Test Budget", 5000);
+        budget.updateBudget(budgetFilePath, -1, "Test Budget", 5000);
+        budget.updateBudget(budgetFilePath, 0, "Test Budget", 5000);
+        budget.updateBudget(budgetFilePath, 1, "Test Budget", 5000);
+        budget.updateBudget(budgetFilePath, 2, "Test Budget", 5000);
+
+        io::sqlite::db mbgt("BudgetTestAccount.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT "
+                                     "prevTwo, prevOne,"
+                                     "monthOne, monthTwo, monthThree "
+                                     "FROM budgets WHERE id == 1");
+
+        while (query.step()) {
+            std::cout << "3: updateBudget (1)\n";
+            REQUIRE(query.row().int32(0) == 5000);
+            REQUIRE(query.row().int32(1) == 5000);
+            REQUIRE(query.row().int32(2) == 5000);
+            REQUIRE(query.row().int32(3) == 5000);
+            REQUIRE(query.row().int32(4) == 5000);
+        }
+    }
+
+    SECTION("It updates the remaining amount too") {
+        io::sqlite::db mbgt("BudgetTestAccount.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT "
+                                     "prevTwoRemaining, prevOneRemaining,"
+                                     "monthOneRemaining, monthTwoRemaining, monthThreeRemaining "
+                                     "FROM budgets WHERE id == 1");
+
+        while (query.step()) {
+            std::cout << "3: updateBudget (2)\n";
+            REQUIRE(query.row().int32(0) == 0);
+            REQUIRE(query.row().int32(1) == 0);
+            REQUIRE(query.row().int32(2) == 10000);
+            REQUIRE(query.row().int32(3) == 0);
+            REQUIRE(query.row().int32(4) == 0);
+        }
+    }
+}

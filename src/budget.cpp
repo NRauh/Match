@@ -166,3 +166,48 @@ bool Budget::subRemainingAmount(QUrl filePath, QString category, QString month, 
 
     return true;
 }
+
+void Budget::updateBudget(QUrl filePath, int month, QString category, int amount)
+{
+    std::string selectedMonth;
+    std::string selectedMonthRemaining;
+
+    switch (month) {
+    case -2:
+        selectedMonth = "prevTwo";
+        selectedMonthRemaining = "prevTwoRemaining";
+        break;
+    case -1:
+        selectedMonth = "prevOne";
+        selectedMonthRemaining = "prevOneRemaining";
+        break;
+    case 0:
+        selectedMonth = "monthOne";
+        selectedMonthRemaining = "monthOneRemaining";
+        break;
+    case 1:
+        selectedMonth = "monthTwo";
+        selectedMonthRemaining = "monthTwoRemaining";
+        break;
+    case 2:
+        selectedMonth = "monthThree";
+        selectedMonthRemaining = "monthThreeRemaining";
+        break;
+    default:
+        break;
+    }
+
+    std::string prepQuery;
+    prepQuery = "UPDATE budgets SET " +
+            selectedMonth + " = ?, " +
+            selectedMonthRemaining + " = ? + " + selectedMonthRemaining +
+            " WHERE categoryName == ?";
+
+    io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(mbgt, prepQuery.c_str());
+
+    query.bind().int32(1, amount);
+    query.bind().int32(2, amount);
+    query.bind().text(3, category.toStdString());
+    query.exec();
+}
