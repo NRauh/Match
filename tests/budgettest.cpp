@@ -26,11 +26,11 @@ TEST_CASE("Can add budget categories", "[addCategory]") {
 
         io::sqlite::db mbgt("BudgetTestAccount.mbgt");
         io::sqlite::stmt query(mbgt, "SELECT categoryName, monthOne,"
-                                     "monthOneRemaining, monthOneDate,"
-                                     "monthTwo, monthTwoRemaining, monthTwoDate,"
-                                     "monthThree, monthThreeRemaining, monthThreeDate,"
-                                     "prevOne, prevOneRemaining, prevOneDate,"
-                                     "prevTwo, prevTwoRemaining, prevTwoDate FROM budgets");
+                                     "monthOneSpent, monthOneDate,"
+                                     "monthTwo, monthTwoSpent, monthTwoDate,"
+                                     "monthThree, monthThreeSpent, monthThreeDate,"
+                                     "prevOne, prevOneSpent, prevOneDate,"
+                                     "prevTwo, prevTwoSpent, prevTwoDate FROM budgets");
 
         while (query.step()) {
             std::cout << "1: addCategory(1)\n";
@@ -38,31 +38,31 @@ TEST_CASE("Can add budget categories", "[addCategory]") {
             REQUIRE(query.row().text(0) == "Test Budget");
             // monthOne
             REQUIRE(query.row().int32(1) == 10000);
-            // monthOneRemaining
-            REQUIRE(query.row().int32(2) == 10000);
+            // monthOneSpent
+            REQUIRE(query.row().int32(2) == 0);
             // monthOneDate
             REQUIRE(query.row().text(3) == currentMonth.toStdString());
             // monthTwo
             REQUIRE(query.row().int32(4) == 0);
-            // monthTwoRemaining
+            // monthTwoSpent
             REQUIRE(query.row().int32(5) == 0);
             // monthTwoDate
             REQUIRE(query.row().text(6) == monthPlusOne.toStdString());
             // monthThree
             REQUIRE(query.row().int32(7) == 0);
-            // monthThreeRemaining
+            // monthThreeSpent
             REQUIRE(query.row().int32(8) == 0);
             // monthThreeDate
             REQUIRE(query.row().text(9) == monthPlusTwo.toStdString());
             // prevOne
             REQUIRE(query.row().int32(10) == 0);
-            // prevOneRemaining
+            // prevOneSpent
             REQUIRE(query.row().int32(11) == 0);
             // prevOneDate
             REQUIRE(query.row().text(12) == monthMinusOne.toStdString());
             // prevTwo
             REQUIRE(query.row().int32(13) == 0);
-            // prevTwoRemaining
+            // prevTwoSpent
             REQUIRE(query.row().int32(14) == 0);
             // prevTwoDate
             REQUIRE(query.row().text(15) == monthMinusTwo.toStdString());
@@ -119,54 +119,54 @@ TEST_CASE("Can get a list of only category names", "[getCategoryNames]") {
     }
 }
 
-TEST_CASE("Can subtract from remaining amount", "[subRemainingAmount]") {
+TEST_CASE("Can subtract from remaining amount", "[addToSpent]") {
     SECTION("Give file path, category, month date, and amount; returns bool") {
-        bool changeSuccess = budget.subRemainingAmount(budgetFilePath,
+        bool changeSuccess = budget.addToSpent(budgetFilePath,
                                                        "Test Budget",
                                                        currentMonth, 5000);
 
         REQUIRE(changeSuccess == true);
 
         io::sqlite::db mbgt("BudgetTestAccount.mbgt");
-        io::sqlite::stmt query(mbgt, "SELECT monthOneRemaining FROM budgets WHERE id == 1");
+        io::sqlite::stmt query(mbgt, "SELECT monthOneSpent FROM budgets WHERE id == 1");
 
         while (query.step()) {
-            std::cout << "2: subRemainingAmount (1)\n";
+            std::cout << "2: addToSpent(1)\n";
             REQUIRE(query.row().int32(0) == 5000);
         }
     }
 
     SECTION("It works with past and future months") {
-        budget.subRemainingAmount(budgetFilePath,
+        budget.addToSpent(budgetFilePath,
                                   "Test Budget",
                                   monthPlusOne, 5000);
-        budget.subRemainingAmount(budgetFilePath,
+        budget.addToSpent(budgetFilePath,
                                   "Test Budget",
                                   monthPlusTwo, 5000);
-        budget.subRemainingAmount(budgetFilePath,
+        budget.addToSpent(budgetFilePath,
                                   "Test Budget",
                                   monthMinusOne, 5000);
-        budget.subRemainingAmount(budgetFilePath,
+        budget.addToSpent(budgetFilePath,
                                   "Test Budget",
                                   monthMinusTwo, 5000);
 
         io::sqlite::db mbgt("BudgetTestAccount.mbgt");
-        io::sqlite::stmt query(mbgt, "SELECT monthTwoRemaining, monthThreeRemaining,"
-                                     "prevOneRemaining, prevTwoRemaining "
-                                     "FROM budgets WHERE id == 1");
+        io::sqlite::stmt query(mbgt, "SELECT monthTwoSpent, monthThreeSpent,"
+                                     "prevOneSpent, prevTwoSpent"
+                                     " FROM budgets WHERE id == 1");
 
         while (query.step()) {
-            std::cout << "2: subRemainingAmount (2)\n";
-            REQUIRE(query.row().int32(0) == -5000);
-            REQUIRE(query.row().int32(1) == -5000);
-            REQUIRE(query.row().int32(2) == -5000);
-            REQUIRE(query.row().int32(3) == -5000);
+            std::cout << "2: addToSpent(2)\n";
+            REQUIRE(query.row().int32(0) == 5000);
+            REQUIRE(query.row().int32(1) == 5000);
+            REQUIRE(query.row().int32(2) == 5000);
+            REQUIRE(query.row().int32(3) == 5000);
         }
     }
 
     SECTION ("If the month is out of range, it returns false") {
         QString outOfDate = QDate::currentDate().addMonths(4).toString("yyyy-MM");
-        bool changeStatus = budget.subRemainingAmount(budgetFilePath,
+        bool changeStatus = budget.addToSpent(budgetFilePath,
                                                       "Test Budget",
                                                       outOfDate, 5000);
         REQUIRE(changeStatus == false);
@@ -194,23 +194,6 @@ TEST_CASE("Can update budget for month", "[updateBudget]") {
             REQUIRE(query.row().int32(2) == 5000);
             REQUIRE(query.row().int32(3) == 5000);
             REQUIRE(query.row().int32(4) == 5000);
-        }
-    }
-
-    SECTION("It updates the remaining amount too") {
-        io::sqlite::db mbgt("BudgetTestAccount.mbgt");
-        io::sqlite::stmt query(mbgt, "SELECT "
-                                     "prevTwoRemaining, prevOneRemaining,"
-                                     "monthOneRemaining, monthTwoRemaining, monthThreeRemaining "
-                                     "FROM budgets WHERE id == 1");
-
-        while (query.step()) {
-            std::cout << "3: updateBudget (2)\n";
-            REQUIRE(query.row().int32(0) == 0);
-            REQUIRE(query.row().int32(1) == 0);
-            REQUIRE(query.row().int32(2) == 10000);
-            REQUIRE(query.row().int32(3) == 0);
-            REQUIRE(query.row().int32(4) == 0);
         }
     }
 }

@@ -17,11 +17,11 @@ void AccountManager::createBudget(QUrl filePath, QString accountName)
     budget.exec("CREATE TABLE IF NOT EXISTS transactions(id integer primary key, toAccount integer,"
                 "transactionDate text, payee text, amount integer, outflow integer, note text)");
     budget.exec("CREATE TABLE IF NOT EXISTS budgets(id integer primary key, categoryName text,"
-                "monthOne integer, monthOneRemaining integer, monthOneDate text,"
-                "monthTwo integer, monthTwoRemaining integer, monthTwoDate text,"
-                "monthThree integer, monthThreeRemaining integer, monthThreeDate text,"
-                "prevOne integer, prevOneRemaining integer, prevOneDate text,"
-                "prevTwo integer, prevTwoRemaining integer, prevTwoDate text)");
+                "monthOne integer, monthOneSpent integer, monthOneDate text,"
+                "monthTwo integer, monthTwoSpent integer, monthTwoDate text,"
+                "monthThree integer, monthThreeSpent integer, monthThreeDate text,"
+                "prevOne integer, prevOneSpent integer, prevOneDate text,"
+                "prevTwo integer, prevTwoSpent integer, prevTwoDate text)");
 }
 
 void AccountManager::setLastFile(QUrl lastFilePath)

@@ -15,16 +15,15 @@ void Budget::addCategory(QUrl filePath, QString categoryName, int initialAmount)
 {
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(mbgt, "INSERT INTO budgets (categoryName,"
-                                 "monthOne, monthOneRemaining, monthOneDate,"
-                                 "monthTwo, monthTwoRemaining, monthTwoDate,"
-                                 "monthThree, monthThreeRemaining, monthThreeDate,"
-                                 "prevOne, prevOneRemaining, prevOneDate,"
-                                 "prevTwo, prevTwoRemaining, prevTwoDate)"
-                                 "VALUES (?, ?, ?, ?, 0, 0, ?, 0, 0, ?, 0, 0, ?, 0, 0, ?)");
+                                 "monthOne, monthOneSpent, monthOneDate,"
+                                 "monthTwo, monthTwoSpent, monthTwoDate,"
+                                 "monthThree, monthThreeSpent, monthThreeDate,"
+                                 "prevOne, prevOneSpent, prevOneDate,"
+                                 "prevTwo, prevTwoSpent, prevTwoDate)"
+                                 "VALUES (?, ?, 0, ?, 0, 0, ?, 0, 0, ?, 0, 0, ?, 0, 0, ?)");
 
     query.bind().text(1, categoryName.toStdString());
     query.bind().int32(2, initialAmount);
-    query.bind().int32(3, initialAmount);
 
     QString currentMonth = QDate::currentDate().toString("yyyy-MM");
     QString monthPlusOne = QDate::currentDate().addMonths(1).toString("yyyy-MM");
@@ -32,11 +31,11 @@ void Budget::addCategory(QUrl filePath, QString categoryName, int initialAmount)
     QString monthSubOne = QDate::currentDate().addMonths(-1).toString("yyyy-MM");
     QString monthSubTwo = QDate::currentDate().addMonths(-2).toString("yyyy-MM");
 
-    query.bind().text(4, currentMonth.toStdString());
-    query.bind().text(5, monthPlusOne.toStdString());
-    query.bind().text(6, monthPlusTwo.toStdString());
-    query.bind().text(7, monthSubOne.toStdString());
-    query.bind().text(8, monthSubTwo.toStdString());
+    query.bind().text(3, currentMonth.toStdString());
+    query.bind().text(4, monthPlusOne.toStdString());
+    query.bind().text(5, monthPlusTwo.toStdString());
+    query.bind().text(6, monthSubOne.toStdString());
+    query.bind().text(7, monthSubTwo.toStdString());
 
     query.exec();
 }
@@ -46,7 +45,7 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
     QJsonArray categoryArray;
     QDate selectedMonth = QDate::currentDate();
     std::string sqlQuery;
-    std::string selectedMonthRemaining;
+    std::string selectedMonthSpent;
 
     if (month < 3 && month > -3) {
         selectedMonth = selectedMonth.addMonths(month);
@@ -60,30 +59,30 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
     switch (month) {
     case -2:
         sqlQuery = "prevTwo";
-        selectedMonthRemaining = "prevTwoRemaining";
+        selectedMonthSpent = "prevTwoSpent";
         break;
     case -1:
         sqlQuery = "prevOne";
-        selectedMonthRemaining = "prevOneRemaining";
+        selectedMonthSpent = "prevOneSpent";
         break;
     case 0:
         sqlQuery = "monthOne";
-        selectedMonthRemaining = "monthOneRemaining";
+        selectedMonthSpent = "monthOneSpent";
         break;
     case 1:
         sqlQuery = "monthTwo";
-        selectedMonthRemaining = "monthTwoRemaining";
+        selectedMonthSpent = "monthTwoSpent";
         break;
     case 2:
         sqlQuery = "monthThree";
-        selectedMonthRemaining = "monthThreeRemaining";
+        selectedMonthSpent = "monthThreeSpent";
         break;
     default:
         break;
     }
 
     sqlQuery = "SELECT categoryName," +
-               sqlQuery + ", " + selectedMonthRemaining +
+               sqlQuery + ", " + selectedMonthSpent +
                " FROM budgets WHERE " + sqlQuery + "Date == ?";
 
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
@@ -91,10 +90,12 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
     query.bind().text(1, selectedMonth.toString("yyyy-MM").toStdString());
 
     while (query.step()) {
+        int initialAmount = query.row().int32(1);
+        int remainingAmount = query.row().int32(2);
         QJsonObject category;
         QString categoryName = QString::fromStdString(query.row().text(0));
-        QString amount = QString::number(query.row().int32(1));
-        QString remainingAmount = QString::number(query.row().int32(2));
+        QString amount = QString::number(initialAmount);
+        QString remaining = QString::number(initialAmount - remainingAmount);
 
         if (amount.length() == 1) {
             amount.prepend("00");
@@ -102,18 +103,18 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
             amount.prepend("0");
         }
 
-        if (remainingAmount.length() == 1) {
-            remainingAmount.prepend("00");
-        } else if (amount.length() == 2) {
-            remainingAmount.prepend("0");
+        if (remaining.length() == 1) {
+            remaining.prepend("00");
+        } else if (remaining.length() == 2) {
+            remaining.prepend("0");
         }
 
         amount = amount.insert(amount.length() - 2, ".");
-        remainingAmount = remainingAmount.insert(remainingAmount.length() - 2, ".");
+        remaining = remaining.insert(remaining.length() - 2, ".");
 
         category.insert("categoryName", categoryName);
         category.insert("amount", amount);
-        category.insert("remaining", remainingAmount);
+        category.insert("remaining", remaining);
 
         categoryArray.append(category);
     }
@@ -136,28 +137,28 @@ QList<QString> Budget::getCategoryNames(QUrl filePath)
     return categoryList;
 }
 
-bool Budget::subRemainingAmount(QUrl filePath, QString category, QString month, int amount)
+bool Budget::addToSpent(QUrl filePath, QString category, QString month, int amount)
 {
     QDate currentMonth = QDate::currentDate();
     std::string toUpdate;
 
     if (month == currentMonth.toString("yyyy-MM")) {
-        toUpdate = "monthOneRemaining";
+        toUpdate = "monthOneSpent";
     } else if (month == currentMonth.addMonths(-2).toString("yyyy-MM")) {
-        toUpdate = "prevTwoRemaining";
+        toUpdate = "prevTwoSpent";
     } else if (month == currentMonth.addMonths(-1).toString("yyyy-MM")) {
-        toUpdate = "prevOneRemaining";
+        toUpdate = "prevOneSpent";
     } else if (month == currentMonth.addMonths(1).toString("yyyy-MM")) {
-        toUpdate = "monthTwoRemaining";
+        toUpdate = "monthTwoSpent";
     } else if (month == currentMonth.addMonths(2).toString("yyyy-MM")) {
-        toUpdate = "monthThreeRemaining";
+        toUpdate = "monthThreeSpent";
     } else {
         return false;
     }
 
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
     std::string formattedQuery;
-    formattedQuery = "UPDATE budgets SET " + toUpdate + " = " + toUpdate + " - ? WHERE categoryName == ?";
+    formattedQuery = "UPDATE budgets SET " + toUpdate + " = " + toUpdate + " + ? WHERE categoryName == ?";
     io::sqlite::stmt query(mbgt, formattedQuery.c_str());
 
     query.bind().int32(1, amount);
@@ -170,44 +171,34 @@ bool Budget::subRemainingAmount(QUrl filePath, QString category, QString month, 
 void Budget::updateBudget(QUrl filePath, int month, QString category, int amount)
 {
     std::string selectedMonth;
-    std::string selectedMonthRemaining;
 
     switch (month) {
     case -2:
         selectedMonth = "prevTwo";
-        selectedMonthRemaining = "prevTwoRemaining";
         break;
     case -1:
         selectedMonth = "prevOne";
-        selectedMonthRemaining = "prevOneRemaining";
         break;
     case 0:
         selectedMonth = "monthOne";
-        selectedMonthRemaining = "monthOneRemaining";
         break;
     case 1:
         selectedMonth = "monthTwo";
-        selectedMonthRemaining = "monthTwoRemaining";
         break;
     case 2:
         selectedMonth = "monthThree";
-        selectedMonthRemaining = "monthThreeRemaining";
         break;
     default:
         break;
     }
 
     std::string prepQuery;
-    prepQuery = "UPDATE budgets SET " +
-            selectedMonth + " = ?, " +
-            selectedMonthRemaining + " = ? + " + selectedMonthRemaining +
-            " WHERE categoryName == ?";
+    prepQuery = "UPDATE budgets SET " + selectedMonth + " = ? WHERE categoryName == ?";
 
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(mbgt, prepQuery.c_str());
 
     query.bind().int32(1, amount);
-    query.bind().int32(2, amount);
-    query.bind().text(3, category.toStdString());
+    query.bind().text(2, category.toStdString());
     query.exec();
 }
