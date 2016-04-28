@@ -11,9 +11,14 @@ Rectangle {
     property var accountName
     property var transactions
     property var selectedTransactionId
+    property var categories
     Component.onCompleted: {
         var lastFile = accManager.getLastFile()
         transactions = account.getTransactions(lastFile, accountId)
+        // TODO: fix this returning a weird not quite array
+        categories = budget.getCategoryNames(lastFile);
+        categories = categories.toString();
+        categories = categories.split(",");
     }
 
     AccountManager {
@@ -21,6 +26,9 @@ Rectangle {
     }
     Account {
         id: account
+    }
+    Budget {
+        id: budget
     }
 
 
@@ -187,6 +195,7 @@ Rectangle {
         ComboBox {
             id: categoryInput
             height: 25
+            model: categories
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.right: parent.right
@@ -221,13 +230,13 @@ Rectangle {
                                            payeeInput.text,
                                            outflowInput.checked,
                                            parseFloat(amountInput.text) * 100,
+                                           categoryInput.currentText,
                                            noteInput.text)
                     payeeInput.text = ""
                     outflowInput.checked = true
                     amountInput.text = ""
                     noteInput.text = ""
-                    // TODO: would this be faster than appending temporarially?
-                    // TODO: Should actually do this and arrange by date
+                    // TODO: Should arrange by date
                     transactions = account.getTransactions(lastFile, accountId);
                 }
             }
@@ -377,11 +386,11 @@ Rectangle {
             title: "Amount"
             width: 70
         }
-        //TableViewColumn {
-            //role: "category"
-            //title: "Category"
-            //width: 120
-        //}
+        TableViewColumn {
+            role: "category"
+            title: "Category"
+            width: 120
+        }
         model: transactions["transactions"]
         onClicked: {
             updateTransactionButton.visible = true
