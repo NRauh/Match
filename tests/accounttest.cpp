@@ -9,13 +9,16 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QJsonArray>
+#include "../src/budget.h"
 
 QString fooCuId;
 QString testTransactionId;
 
 Account account;
+Budget setupBudget;
 QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
-QDate transactionDate = QDate(2016, 2, 29);
+QDate transactionDate = QDate::currentDate();
+
 
 TEST_CASE("Can add checking accounts", "[addChecking]") {
     SECTION("File path, account name, balance, and balance date are given") {
@@ -42,17 +45,22 @@ TEST_CASE("Can add checking accounts", "[addChecking]") {
 
 TEST_CASE("Can add transactions to account", "[addTransaction]") {
     SECTION("Given file path, account ID, date, payee, if outflow, amount, and note") {
-        account.addTransaction(filePath, 1, transactionDate, "Caffe Nero", true, 125, "Espresso");
+        setupBudget.addCategory(filePath, "Eating Out", 10000);
+        account.addTransaction(filePath, 1, transactionDate, "Caffe Nero", true, 125, "Eating Out", "Espresso");
         io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT toAccount, transactionDate, payee, amount, outflow, note FROM transactions WHERE id == 2");
+        io::sqlite::stmt query(budget, "SELECT toAccount, transactionDate,"
+                                       "payee, amount, outflow, category, note"
+                                       " FROM transactions WHERE id == 2");
         while (query.step()) {
             std::cout << "2: addTransaction (1)\n";
             REQUIRE(query.row().int32(0) == 1);
-            REQUIRE(query.row().text(1) == "2016-02-29");
+            //REQUIRE(query.row().text(1) == "2016-02-29");
+            REQUIRE(query.row().text(1) == transactionDate.toString("yyyy-MM-dd").toStdString());
             REQUIRE(query.row().text(2) == "Caffe Nero");
             REQUIRE(query.row().int32(3) == 125);
             REQUIRE(query.row().int32(4) == 1);
-            REQUIRE(query.row().text(5) == "Espresso");
+            REQUIRE(query.row().text(5) == "Eating Out");
+            REQUIRE(query.row().text(6) == "Espresso");
         }
         io::sqlite::stmt q(budget, "SELECT balance FROM accounts WHERE id == 1");
         while (q.step()) {
@@ -61,12 +69,22 @@ TEST_CASE("Can add transactions to account", "[addTransaction]") {
         }
     }
 
+    SECTION("It adds to the spent amount for the budget") {
+        io::sqlite::db budget("Foo Budget.mbgt");
+        io::sqlite::stmt query(budget, "SELECT monthOneSpent FROM budgets WHERE id == 1");
+
+        while(query.step()) {
+            std::cout << "2: addTransaction (3)\n";
+            REQUIRE(query.row().int32(0) == 125);
+        }
+    }
+
     SECTION("If outflow is false, then it's income and should be added") {
-        account.addTransaction(filePath, 1, transactionDate, "Tip", false, 1000, "");
+        account.addTransaction(filePath, 1, transactionDate, "Tip", false, 1000, "Income", "");
         io::sqlite::db budget("Foo Budget.mbgt");
         io::sqlite::stmt query(budget, "SELECT balance FROM accounts WHERE id == 1");
         while (query.step()) {
-            std::cout << "2: addTransaction (3)\n";
+            std::cout << "2: addTransaction (4)\n";
             REQUIRE(query.row().int32(0) == 80875);
         }
     }
@@ -116,7 +134,8 @@ TEST_CASE("Can delete transactions", "[deleteTransaction]") {
             REQUIRE(query.row().int32(0) == 79875);
         }
 
-        account.addTransaction(filePath, 1, transactionDate, "Gas Station", 1, 1100, "Some gas");
+        //budget.addCategory(filePath, "Fuel", 10000);
+        account.addTransaction(filePath, 1, transactionDate, "Gas Station", 1, 1100, "Fuel", "Some gas");
         account.deleteTransaction(filePath, 3);
         query.exec();
         while (query.step()) {
@@ -139,15 +158,17 @@ TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
 TEST_CASE("Can get list of transactions and balance for account", "[getTransactions]") {
     SECTION("Filepath, and accountId returns balance and array of transactions") {
         QJsonObject transactions = account.getTransactions(filePath, 1);
+        QString date = transactionDate.toString("M/d/yy");
+        QString longDate = transactionDate.toString("yyyy-MM-dd");
 
         REQUIRE(transactions["balance"] == "798.75");
         REQUIRE(transactions["transactions"].toArray()[0].toObject()["amount"] == "+800.00");
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["date"] == "2/29/16");
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["date"] == date);
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["payee"] == "Caffe Nero");
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["note"] == "Espresso");
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["amount"] == "-1.25");
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["outflow"] == true);
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["intDate"] == "2016-02-29");
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["intDate"] == longDate);
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["id"] == 2);
     }
 }

@@ -4,6 +4,7 @@
 #include "sqlite/sqlite.hpp"
 #include <iostream>
 #include <QJsonArray>
+#include "budget.h"
 
 Account::Account(QObject *parent) : QObject(parent)
 {
@@ -26,28 +27,31 @@ void Account::addChecking(QUrl filePath, QString accountName, int balance, QDate
         accountId = query.row().int32(0);
     }
 
-    addTransaction(filePath, accountId, balanceDate, "Self", false, balance, "Initial Balance");
+    addTransaction(filePath, accountId, balanceDate, "Self", false, balance, "Income", "Initial Balance");
 }
 
-void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString payee, bool outflow, int amount, QString note)
+void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString payee, bool outflow, int amount, QString category, QString note)
 {
+    Budget mbgt;
     QString formattedDate = date.toString("yyyy-MM-dd");
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(budget, "INSERT INTO transactions"
-                                   "(toAccount, transactionDate, payee, amount, outflow, note)"
-                                   "VALUES (?, ?, ?, ?, ?, ?)");
+                                   "(toAccount, transactionDate, payee, amount, outflow, category, note)"
+                                   "VALUES (?, ?, ?, ?, ?, ?, ?)");
     query.bind().int32(1, accountId);
     query.bind().text(2, formattedDate.toStdString());
     query.bind().text(3, payee.toStdString());
     query.bind().int32(4, amount);
     query.bind().int32(5, outflow);
-    query.bind().text(6, note.toStdString());
+    query.bind().text(6, category.toStdString());
+    query.bind().text(7, note.toStdString());
     query.exec();
 
     query.reset();
 
     if (outflow) {
         query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance - ? WHERE id == ?");
+        mbgt.addToSpent(filePath, category, date.toString("yyyy-MM"), amount);
     } else {
         query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance + ? WHERE id == ?");
     }

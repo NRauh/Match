@@ -15,7 +15,7 @@ void AccountManager::createBudget(QUrl filePath, QString accountName)
     io::sqlite::db budget(budgetFilePath.toStdString());
     budget.exec("CREATE TABLE IF NOT EXISTS accounts(id integer primary key, accountName text, balance integer)");
     budget.exec("CREATE TABLE IF NOT EXISTS transactions(id integer primary key, toAccount integer,"
-                "transactionDate text, payee text, amount integer, outflow integer, note text)");
+                "transactionDate text, payee text, amount integer, outflow integer, category text, note text)");
     budget.exec("CREATE TABLE IF NOT EXISTS budgets(id integer primary key, categoryName text,"
                 "monthOne integer, monthOneSpent integer, monthOneDate text,"
                 "monthTwo integer, monthTwoSpent integer, monthTwoDate text,"
