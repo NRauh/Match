@@ -167,6 +167,7 @@ TEST_CASE("Can get list of transactions and balance for account", "[getTransacti
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["payee"] == "Caffe Nero");
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["note"] == "Espresso");
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["amount"] == "-1.25");
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["category"] == "Eating Out");
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["outflow"] == true);
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["intDate"] == longDate);
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["id"] == 2);

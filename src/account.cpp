@@ -203,14 +203,16 @@ QJsonObject Account::getTransactions(QUrl filePath, int accountId)
     }
 
     query.reset();
-    query = io::sqlite::stmt(budget, "SELECT transactionDate, payee, amount, outflow, note, id FROM transactions WHERE toAccount == ?");
+    query = io::sqlite::stmt(budget, "SELECT transactionDate, payee, amount,"
+                                     "category, outflow, note, id"
+                                     " FROM transactions WHERE toAccount == ?");
     query.bind().int32(1, accountId);
     query.exec();
 
     QJsonArray transactions;
     while (query.step()) {
         QJsonObject transaction;
-        bool outflow = query.row().int32(3);
+        bool outflow = query.row().int32(4);
         QString formattedAmount = QString::fromStdString(query.row().text(2));
         formattedAmount.insert(formattedAmount.length() - 2, ".");
         if (outflow) {
@@ -223,12 +225,14 @@ QJsonObject Account::getTransactions(QUrl filePath, int accountId)
         QDate formattedDate = QDate::fromString(date, QString("yyyy-MM-dd"));
 
         QString payee = QString::fromStdString(query.row().text(1));
-        QString note = QString::fromStdString(query.row().text(4));
-        int transactionId = query.row().int32(5);
+        QString category = QString::fromStdString(query.row().text(3));
+        QString note = QString::fromStdString(query.row().text(5));
+        int transactionId = query.row().int32(6);
 
         transaction.insert("amount", formattedAmount);
         transaction.insert("date", formattedDate.toString("M/d/yy"));
         transaction.insert("payee", payee);
+        transaction.insert("category", category);
         transaction.insert("note", note);
         transaction.insert("outflow", outflow);
         transaction.insert("intDate", date);
