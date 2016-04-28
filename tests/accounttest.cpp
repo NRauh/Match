@@ -134,13 +134,23 @@ TEST_CASE("Can delete transactions", "[deleteTransaction]") {
             REQUIRE(query.row().int32(0) == 79875);
         }
 
-        //budget.addCategory(filePath, "Fuel", 10000);
+        setupBudget.addCategory(filePath, "Fuel", 10000);
         account.addTransaction(filePath, 1, transactionDate, "Gas Station", 1, 1100, "Fuel", "Some gas");
         account.deleteTransaction(filePath, 3);
         query.exec();
         while (query.step()) {
             std::cout << "4: deleteTransaction (2)\n";
             REQUIRE(query.row().int32(0) == 79875);
+        }
+    }
+
+    SECTION("It removes from the budget spent") {
+        io::sqlite::db budget("Foo Budget.mbgt");
+        io::sqlite::stmt query(budget, "SELECT monthOneSpent FROM budgets WHERE id == 2");
+
+        while (query.step()) {
+            std::cout << "4: deleteTransaction (3)\n";
+            REQUIRE(query.row().int32(0) == 0);
         }
     }
 }

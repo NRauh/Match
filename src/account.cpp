@@ -5,6 +5,7 @@
 #include <iostream>
 #include <QJsonArray>
 #include "budget.h"
+#include <QDebug>
 
 Account::Account(QObject *parent) : QObject(parent)
 {
@@ -111,23 +112,32 @@ void Account::updateTransaction(QUrl filePath, int transactionId, QDate date, QS
 
 void Account::deleteTransaction(QUrl filePath, int transactionId)
 {
+    Budget mbgt;
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
-    io::sqlite::stmt query(budget, "SELECT toAccount, amount, outflow FROM transactions WHERE id == ?");
+    io::sqlite::stmt query(budget, "SELECT toAccount, amount, outflow, category, transactionDate FROM transactions WHERE id == ?");
     query.bind().int32(1, transactionId);
     query.exec();
 
     int account;
     int amount;
     bool outflow;
+    QString category;
+    QDate date;
+    QString month;
+
     while (query.step()) {
         account = query.row().int32(0);
         amount = query.row().int32(1);
         outflow = query.row().int32(2);
+        category = QString::fromStdString(query.row().text(3));
+        date = QDate::fromString(query.row().text(4).c_str(), "yyyy-MM-dd");
+        month = date.toString("yyyy-MM");
     }
 
     query.reset();
     if (outflow) {
         query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance + ? WHERE id == ?");
+        mbgt.addToSpent(filePath, category, month, amount * -1);
     } else {
         query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance - ? WHERE id == ?");
     }
