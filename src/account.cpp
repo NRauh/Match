@@ -176,22 +176,8 @@ QJsonObject Account::getAccountList(QUrl filePath)
 
 QJsonObject Account::getTransactions(QUrl filePath, int accountId)
 {
-    //AccountManager accManager;
-    //Json::Value budget = accManager.loadFile(filePath);
-
-    //for (int i = 0; i < (int)budget["onBudgetAccounts"].size(); i++) {
-        //if (budget["onBudgetAccounts"][i]["accountId"].asString() == accountId.toStdString()) {
-            //budget = budget["onBudgetAccounts"][i];
-            //break;
-        //}
-    //}
-
-    //Json::Value transactions;
     QJsonObject transactionList;
     int balance;
-    //std::string accountBalance = budget["balance"].asString();
-
-    //transactions["balance"] = accountBalance.insert(accountBalance.length() - 2, ".");
 
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(budget, "SELECT balance FROM accounts WHERE id == ?");
