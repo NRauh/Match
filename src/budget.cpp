@@ -210,8 +210,8 @@ QJsonObject Budget::getMeta(QUrl filePath, int month)
     meta.insert("month", monthLongform.toString("MMMM, yyyy"));
 
     std::string selectedMonth;
-    int amount;
-    int spentAmount;
+    int amount = 0;
+    int spentAmount = 0;
 
     switch (month) {
     case -2:
@@ -277,7 +277,7 @@ QString Budget::getAvailableMoney(QUrl filePath)
 
     while (query.step()) {
         int budgetUpcoming = query.row().int32(0) + query.row().int32(1) + query.row().int32(2);
-        totalBudgets = totalBudgets + budgetUpcoming;
+        totalBudgets += budgetUpcoming;
     }
 
     available = QString::number(totalBalance - totalBudgets);
