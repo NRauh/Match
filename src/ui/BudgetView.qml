@@ -9,10 +9,12 @@ Item {
     property var categories
     property var lastFile
     property var selectedMonth
+    property var meta
     Component.onCompleted: {
         lastFile = accManager.getLastFile();
         selectedMonth = 0;
         categories = budget.getCategories(lastFile, selectedMonth);
+        meta = budget.getMeta(lastFile, selectedMonth);
     }
 
     AccountManager {
@@ -38,7 +40,7 @@ Item {
         Label {
             id: monthLabel
             height: 27
-            text: "March, 2016"
+            text: meta["month"]
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.right: parent.right
@@ -63,6 +65,7 @@ Item {
                 onClicked: {
                     selectedMonth = selectedMonth - 1
                     categories = budget.getCategories(lastFile, selectedMonth)
+                    meta = budget.getMeta(lastFile, selectedMonth);
                     if (selectedMonth === -2) {
                         parent.visible = false
                     }
@@ -76,21 +79,13 @@ Item {
         Label {
             id: previousMonthLabel
             x: 41
-            y: 50
+            y: 62
             width: 53
             height: 35
             text: qsTr("Previous Month")
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignLeft
             wrapMode: Text.WordWrap
-        }
-
-        Label {
-            id: previousMonthBudget
-            x: 41
-            y: 91
-            text: qsTr("(444.32)")
-            horizontalAlignment: Text.AlignLeft
         }
 
         Image {
@@ -108,6 +103,7 @@ Item {
                 onClicked: {
                     selectedMonth = selectedMonth + 1
                     categories = budget.getCategories(lastFile, selectedMonth)
+                    meta = budget.getMeta(lastFile, selectedMonth)
                     if (selectedMonth === 2) {
                         parent.visible = false
                     }
@@ -121,7 +117,7 @@ Item {
         Label {
             id: nextMonthLabel
             x: 113
-            y: 50
+            y: 62
             width: 46
             height: 35
             text: qsTr("Next Month")
@@ -131,18 +127,9 @@ Item {
         }
 
         Label {
-            id: nextMonthBudget
-            x: 116
-            y: 91
-            text: qsTr("(444.32)")
-            horizontalAlignment: Text.AlignRight
-        }
-
-
-        Label {
             id: remainingBudget
             height: 33
-            text: qsTr("220.35")
+            text: meta["remaining"]
             anchors.top: parent.top
             anchors.topMargin: 160
             anchors.left: parent.left

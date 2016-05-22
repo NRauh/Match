@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QUrl>
 #include <QJsonArray>
+#include <QJsonObject>
 
 class Budget : public QObject
 {
@@ -15,6 +16,7 @@ public:
     Q_INVOKABLE QList<QString> getCategoryNames(QUrl filePath);
     Q_INVOKABLE bool addToSpent(QUrl filePath, QString category, QString month, int amount);
     Q_INVOKABLE void updateBudget(QUrl filePath, int month, QString category, int amount);
+    Q_INVOKABLE QJsonObject getMeta(QUrl filePath, int month);
 
 signals:
 

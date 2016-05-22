@@ -3,7 +3,6 @@
 #include <iostream>
 #include <QDate>
 #include <QDebug>
-#include <QJsonObject>
 #include <QJsonValue>
 
 Budget::Budget(QObject *parent) : QObject(parent)
@@ -201,4 +200,62 @@ void Budget::updateBudget(QUrl filePath, int month, QString category, int amount
     query.bind().int32(1, amount);
     query.bind().text(2, category.toStdString());
     query.exec();
+}
+
+QJsonObject Budget::getMeta(QUrl filePath, int month)
+{
+    QJsonObject meta;
+
+    QDate monthLongform = QDate::currentDate().addMonths(month);
+    meta.insert("month", monthLongform.toString("MMMM, yyyy"));
+
+    std::string selectedMonth;
+    int amount;
+    int spentAmount;
+
+    switch (month) {
+    case -2:
+        selectedMonth = "prevTwo";
+        break;
+    case -1:
+        selectedMonth = "prevOne";
+        break;
+    case 0:
+        selectedMonth = "monthOne";
+        break;
+    case 1:
+        selectedMonth = "monthTwo";
+        break;
+    case 2:
+        selectedMonth = "monthThree";
+        break;
+    default:
+        break;
+    }
+
+    std::string prepQuery;
+    prepQuery = "SELECT " + selectedMonth + "Spent, " + selectedMonth + " FROM budgets";
+
+    io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(mbgt, prepQuery.c_str());
+
+    while (query.step()) {
+        spentAmount += query.row().int32(0);
+        amount += query.row().int32(1);
+    }
+
+    int remainingAmount = amount - spentAmount;
+    QString remainingAmountString = QString::number(remainingAmount);
+
+    if (remainingAmountString.length() == 1) {
+        remainingAmountString.prepend("00");
+    } else if (remainingAmountString.length() == 2) {
+        remainingAmountString.prepend("0");
+    }
+
+    remainingAmountString.insert(remainingAmountString.length() - 2, ".");
+
+    meta.insert("remaining", remainingAmountString);
+
+    return meta;
 }

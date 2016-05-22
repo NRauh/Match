@@ -197,3 +197,13 @@ TEST_CASE("Can update budget for month", "[updateBudget]") {
         }
     }
 }
+
+TEST_CASE("Can get the month and remaing amount to spend", "[getMeta]") {
+    SECTION("File path, month number") {
+        QJsonObject meta = budget.getMeta(budgetFilePath, 0);
+        QDate month = QDate::currentDate();
+
+        REQUIRE(meta["month"] == month.toString("MMMM, yyyy"));
+        REQUIRE(meta["remaining"] == "200.00");
+    }
+}
