@@ -260,42 +260,6 @@ Rectangle {
         }
 
         Button {
-            id: updateTransactionButton
-            x: -5
-            y: 7
-            height: 27
-            text: qsTr("Update Transaction")
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.rightMargin: 54
-            anchors.topMargin: 647
-            anchors.leftMargin: 10
-            anchors.left: parent.left
-            visible: false
-            onClicked: {
-                var lastFile = accManager.getLastFile();
-                account.updateTransaction(lastFile, selectedTransactionId,
-                                          dateInput.selectedDate,
-                                          payeeInput.text,
-                                          outflowInput.checked,
-                                          parseFloat(amountInput.text) * 100,
-                                          noteInput.text)
-
-                updateTransactionButton.visible = false
-                doneButton.visible = false
-                deleteButton.visible = false
-                addTransactionButton.visible = true
-                resetButton.visible = true
-                payeeInput.text = ""
-                noteInput.text = ""
-                amountInput.text = ""
-                outflowInput.checked = true
-
-                transactions = account.getTransactions(lastFile, accountId);
-            }
-        }
-
-        Button {
             id: doneButton
             x: -2
             y: -6
@@ -308,7 +272,6 @@ Rectangle {
             anchors.left: parent.left
             visible: false
             onClicked: {
-                updateTransactionButton.visible = false
                 doneButton.visible = false
                 deleteButton.visible = false
                 addTransactionButton.visible = true
@@ -336,7 +299,6 @@ Rectangle {
                 var lastFile = accManager.getLastFile()
                 account.deleteTransaction(lastFile, selectedTransactionId)
 
-                updateTransactionButton.visible = false
                 doneButton.visible = false
                 deleteButton.visible = false
                 addTransactionButton.visible = true
@@ -393,7 +355,6 @@ Rectangle {
         }
         model: transactions["transactions"]
         onClicked: {
-            updateTransactionButton.visible = true
             doneButton.visible = true
             deleteButton.visible = true
             addTransactionButton.visible = false
