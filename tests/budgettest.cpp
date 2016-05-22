@@ -207,3 +207,12 @@ TEST_CASE("Can get the month and remaing amount to spend", "[getMeta]") {
         REQUIRE(meta["remaining"] == "200.00");
     }
 }
+
+TEST_CASE("Can get amount of unbudgeted money", "[getAvailableMoney]") {
+    SECTION("File path") {
+        QString unbudgeted = budget.getAvailableMoney(budgetFilePath);
+
+        qDebug() << unbudgeted;
+        REQUIRE(unbudgeted == "1650.00");
+    }
+}

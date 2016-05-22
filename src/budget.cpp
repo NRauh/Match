@@ -259,3 +259,36 @@ QJsonObject Budget::getMeta(QUrl filePath, int month)
 
     return meta;
 }
+
+QString Budget::getAvailableMoney(QUrl filePath)
+{
+    QString available;
+    int totalBalance = 0;
+    int totalBudgets = 0;
+
+    io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(mbgt, "SELECT balance FROM accounts");
+
+    while (query.step()) {
+        totalBalance += query.row().int32(0);
+    }
+
+    query = io::sqlite::stmt(mbgt, "SELECT monthOne, monthTwo, monthThree FROM budgets");
+
+    while (query.step()) {
+        int budgetUpcoming = query.row().int32(0) + query.row().int32(1) + query.row().int32(2);
+        totalBudgets = totalBudgets + budgetUpcoming;
+    }
+
+    available = QString::number(totalBalance - totalBudgets);
+
+    if (available.length() == 1) {
+        available.prepend("00");
+    } else if (available.length() == 2) {
+        available.prepend("0");
+    }
+
+    available.insert(available.length() - 2, ".");
+
+    return available;
+}

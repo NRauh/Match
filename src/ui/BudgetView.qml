@@ -10,11 +10,13 @@ Item {
     property var lastFile
     property var selectedMonth
     property var meta
+    property var available
     Component.onCompleted: {
         lastFile = accManager.getLastFile();
         selectedMonth = 0;
         categories = budget.getCategories(lastFile, selectedMonth);
         meta = budget.getMeta(lastFile, selectedMonth);
+        available = budget.getAvailableMoney(lastFile);
     }
 
     AccountManager {
@@ -157,7 +159,7 @@ Item {
             x: -8
             y: -7
             height: 26
-            text: qsTr("500.00")
+            text: available
             font.pointSize: 14
             anchors.top: parent.top
             horizontalAlignment: Text.AlignHCenter

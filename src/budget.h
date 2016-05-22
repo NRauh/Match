@@ -17,6 +17,7 @@ public:
     Q_INVOKABLE bool addToSpent(QUrl filePath, QString category, QString month, int amount);
     Q_INVOKABLE void updateBudget(QUrl filePath, int month, QString category, int amount);
     Q_INVOKABLE QJsonObject getMeta(QUrl filePath, int month);
+    Q_INVOKABLE QString getAvailableMoney(QUrl filePath);
 
 signals:
 
