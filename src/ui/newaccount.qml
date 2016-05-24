@@ -7,16 +7,16 @@ import com.nrauh 1.0
 Window {
     id: newCheckingWindow
     width: 600
-    height: 500
+    height: 525
     visible: true
     //modality: Qt.WindowModal
     property var updateList
 
     Label {
         id: newCheckingLabel
-        width: 232
-        height: 50
-        text: qsTr("New Checking Account")
+        width: 545
+        height: 63
+        text: qsTr("New  Account")
         anchors.left: parent.left
         anchors.leftMargin: 30
         anchors.top: parent.top
@@ -27,7 +27,7 @@ Window {
 
     Label {
         id: nameLabel
-        text: qsTr("Checking Account Name")
+        text: qsTr("Account Name")
         anchors.left: parent.left
         anchors.leftMargin: 50
         anchors.top: parent.top
@@ -82,7 +82,10 @@ Window {
         onClicked: {
             var filePath = accManager.getLastFile()
             var accountBalanceInt = parseFloat(accountBalance.text) * 100
-            account.addChecking(filePath, accountName.text, accountBalanceInt, accountBalanceDate.selectedDate)
+            var balanceDate = accountBalanceDate.selectedDate
+            var onBudgetStatus = onBudget.checked
+            account.addAccount(filePath, accountName.text, accountBalanceInt, balanceDate, onBudgetStatus)
+
             var accountList = account.getAccountList(filePath)
             updateList.accountData = accountList
             newCheckingWindow.close()
@@ -140,6 +143,17 @@ Window {
         anchors.topMargin: 257
         anchors.right: parent.right
         anchors.rightMargin: 50
+    }
+
+    CheckBox {
+        id: onBudget
+        x: 464
+        text: qsTr("On Budget")
+        checked: true
+        anchors.right: parent.right
+        anchors.rightMargin: 50
+        anchors.top: parent.top
+        anchors.topMargin: 440
     }
 }
 

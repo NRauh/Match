@@ -3,7 +3,7 @@
         <file>main.qml</file>
         <file>newbudget.qml</file>
         <file>Sidebar.qml</file>
-        <file>newchecking.qml</file>
+        <file>newaccount.qml</file>
         <file>AccountView.qml</file>
         <file>BudgetView.qml</file>
         <file>../assets/search.png</file>

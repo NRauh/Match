@@ -15,15 +15,12 @@ ApplicationWindow {
             MenuItem {
                 text: qsTr("&Open")
             }
-            Menu {
-                title: qsTr("&New Account")
-                MenuItem {
-                    text: qsTr("&Checking")
-                    onTriggered: {
-                        var component = Qt.createComponent("newchecking.qml")
-                        var win = component.createObject(matchWindow, {updateList: mainSidebar})
-                        win.show()
-                    }
+            MenuItem {
+                text: qsTr("&New Account")
+                onTriggered: {
+                    var component = Qt.createComponent("newaccount.qml")
+                    var win = component.createObject(matchWindow, {updateList: mainSidebar})
+                    win.show()
                 }
             }
             MenuItem {

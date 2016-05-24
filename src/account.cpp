@@ -94,7 +94,10 @@ void Account::deleteTransaction(QUrl filePath, int transactionId)
 
     if (outflow) {
         query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance + ? WHERE id == ?");
-        mbgt.addToSpent(filePath, category, month, amount * -1);
+
+        if (isOnBudget(filePath, account)) {
+            mbgt.addToSpent(filePath, category, month, amount * -1);
+        }
     } else {
         query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance - ? WHERE id == ?");
     }

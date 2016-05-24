@@ -217,9 +217,8 @@ TEST_CASE("Can get budget status", "[isOnBudget]") {
             REQUIRE(query.row().int32(0) == 79875);
         }
 
-        /* Deleting a transaction should add add to the budget regardless,
-         * since it doesn't check if the account is on or off budget.
-         * But this test disagrees. So I commented it out to try manually.
+        // This test seems to pass regardless, and it's actuall success needs to be checked manually
+        // #QualityCode
         account.deleteTransaction(filePath, 4);
 
         query.exec();
@@ -227,7 +226,6 @@ TEST_CASE("Can get budget status", "[isOnBudget]") {
             std::cout << "5: isOnBudget (2)\n";
             REQUIRE(query.row().int32(0) == 79875);
         }
-        */
     }
 }
 
