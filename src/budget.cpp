@@ -267,7 +267,7 @@ QString Budget::getAvailableMoney(QUrl filePath)
     int totalBudgets = 0;
 
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
-    io::sqlite::stmt query(mbgt, "SELECT balance FROM accounts");
+    io::sqlite::stmt query(mbgt, "SELECT balance FROM accounts WHERE onBudget == 1");
 
     while (query.step()) {
         totalBalance += query.row().int32(0);

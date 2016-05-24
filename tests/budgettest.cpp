@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QJsonArray>
 #include <QJsonObject>
+#include "../src/account.h"
 
 // Budget account and stuff made in matchtest file
 // Separated to make sure there's a control
@@ -212,7 +213,16 @@ TEST_CASE("Can get amount of unbudgeted money", "[getAvailableMoney]") {
     SECTION("File path") {
         QString unbudgeted = budget.getAvailableMoney(budgetFilePath);
 
-        qDebug() << unbudgeted;
+        REQUIRE(unbudgeted == "1650.00");
+    }
+
+    SECTION("It doesn't count off budget accounts") {
+        Account account;
+        QDate transactionDate = QDate::currentDate();
+
+        account.addAccount(budgetFilePath, "Hello Bank", 100000, transactionDate, false);
+        QString unbudgeted = budget.getAvailableMoney(budgetFilePath);
+
         REQUIRE(unbudgeted == "1650.00");
     }
 }
