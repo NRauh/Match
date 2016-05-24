@@ -20,14 +20,14 @@ QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
 QDate transactionDate = QDate::currentDate();
 
 
-TEST_CASE("Can add checking accounts", "[addChecking]") {
+TEST_CASE("Can add checking accounts", "[addAccount]") {
     SECTION("File path, account name, balance, and balance date are given") {
-        account.addChecking(filePath, "Foo CU", 80000, transactionDate);
+        account.addAccount(filePath, "Foo CU", 80000, transactionDate);
 
         io::sqlite::db budget("Foo Budget.mbgt");
         io::sqlite::stmt query(budget, "SELECT accountName, balance FROM accounts");
         while (query.step()) {
-            std::cout << "1: addChecking (1)\n";
+            std::cout << "1: addAccount (1)\n";
             REQUIRE(query.row().text(0) == "Foo CU");
             REQUIRE(query.row().int32(1) == 80000);
         }
@@ -36,7 +36,7 @@ TEST_CASE("Can add checking accounts", "[addChecking]") {
         query = io::sqlite::stmt(budget, "SELECT toAccount, amount FROM transactions WHERE id == 1");
         query.exec();
         while (query.step()) {
-            std::cout << "1: addChecking (2)\n";
+            std::cout << "1: addAccount (2)\n";
             REQUIRE(query.row().int32(0) == 1);
             REQUIRE(query.row().int32(1) == 80000);
         }

@@ -12,7 +12,7 @@ Account::Account(QObject *parent) : QObject(parent)
 
 }
 
-void Account::addChecking(QUrl filePath, QString accountName, int balance, QDate balanceDate)
+void Account::addAccount(QUrl filePath, QString accountName, int balance, QDate balanceDate)
 {
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(budget, "INSERT INTO accounts (accountName, balance) VALUES (?, 0)");
