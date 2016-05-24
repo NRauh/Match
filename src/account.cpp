@@ -53,7 +53,10 @@ void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString p
 
     if (outflow) {
         query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance - ? WHERE id == ?");
-        mbgt.addToSpent(filePath, category, date.toString("yyyy-MM"), amount);
+
+        if (isOnBudget(filePath, accountId)) {
+            mbgt.addToSpent(filePath, category, date.toString("yyyy-MM"), amount);
+        }
     } else {
         query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance + ? WHERE id == ?");
     }
@@ -88,12 +91,14 @@ void Account::deleteTransaction(QUrl filePath, int transactionId)
     }
 
     query.reset();
+
     if (outflow) {
         query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance + ? WHERE id == ?");
         mbgt.addToSpent(filePath, category, month, amount * -1);
     } else {
         query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance - ? WHERE id == ?");
     }
+
     query.bind().int32(1, amount);
     query.bind().int32(2, account);
     query.exec();
@@ -195,4 +200,19 @@ QJsonObject Account::getTransactions(QUrl filePath, int accountId)
     transactionList.insert("transactions", transactions);
 
     return transactionList;
+}
+
+bool Account::isOnBudget(QUrl filePath, int accountId)
+{
+    bool onBudgetStatus;
+    io::sqlite::db budget(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(budget, "SELECT onBudget FROM accounts WHERE id == ?");
+
+    query.bind().int32(1, accountId);
+    query.exec();
+
+    while (query.step()) {
+        onBudgetStatus = query.row().int32(0);
+    }
+    return onBudgetStatus;
 }
