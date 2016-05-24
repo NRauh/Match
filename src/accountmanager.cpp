@@ -13,7 +13,7 @@ void AccountManager::createBudget(QUrl filePath, QString accountName)
 {
     QString budgetFilePath = filePath.toLocalFile() + "/" + accountName + ".mbgt";
     io::sqlite::db budget(budgetFilePath.toStdString());
-    budget.exec("CREATE TABLE IF NOT EXISTS accounts(id integer primary key, accountName text, balance integer)");
+    budget.exec("CREATE TABLE IF NOT EXISTS accounts(id integer primary key, accountName text, balance integer, onBudget integer)");
     budget.exec("CREATE TABLE IF NOT EXISTS transactions(id integer primary key, toAccount integer,"
                 "transactionDate text, payee text, amount integer, outflow integer, category text, note text)");
     budget.exec("CREATE TABLE IF NOT EXISTS budgets(id integer primary key, categoryName text,"

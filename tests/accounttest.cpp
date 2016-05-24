@@ -22,7 +22,7 @@ QDate transactionDate = QDate::currentDate();
 
 TEST_CASE("Can add checking accounts", "[addAccount]") {
     SECTION("File path, account name, balance, and balance date are given") {
-        account.addAccount(filePath, "Foo CU", 80000, transactionDate);
+        account.addAccount(filePath, "Foo CU", 80000, transactionDate, true);
 
         io::sqlite::db budget("Foo Budget.mbgt");
         io::sqlite::stmt query(budget, "SELECT accountName, balance FROM accounts");
@@ -39,6 +39,16 @@ TEST_CASE("Can add checking accounts", "[addAccount]") {
             std::cout << "1: addAccount (2)\n";
             REQUIRE(query.row().int32(0) == 1);
             REQUIRE(query.row().int32(1) == 80000);
+        }
+    }
+
+    SECTION("Accounts can be off budget") {
+        io::sqlite::db budget("Foo Budget.mbgt");
+        io::sqlite::stmt query(budget, "SELECT onBudget FROM accounts WHERE id == 1");
+
+        while (query.step()) {
+            std::cout << "1: addAccount (3)\n";
+            REQUIRE(query.row().int32(0) == 1);
         }
     }
 }

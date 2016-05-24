@@ -10,7 +10,7 @@ int main(int argc, char* const argv[]) {
     accManager.createBudget(filePath, "Foo Budget");
 
     accManager.createBudget(filePath, "BudgetTestAccount");
-    account.addAccount(QUrl::fromLocalFile("BudgetTestAccount.mbgt"), "Foo CU", 200000, QDate(2016, 4, 23));
+    account.addAccount(QUrl::fromLocalFile("BudgetTestAccount.mbgt"), "Foo CU", 200000, QDate(2016, 4, 23), true);
 
     int result = Catch::Session().run( argc, argv );
 
