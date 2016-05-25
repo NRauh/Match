@@ -23,25 +23,25 @@ TEST_CASE("Can create budget/save files", "[createBudget]") {
 }
 
 TEST_CASE("Can shift budget one month", "[shiftOneMonth]") {
+    AccountManager accManager;
+    Budget budget;
+    QDate currentDate = QDate::currentDate();
+    accManager.createBudget(QUrl::fromLocalFile("."), "FooBar");
+    QUrl filePath = QUrl::fromLocalFile("FooBar.mbgt");
+
+    budget.addCategory(filePath, "Test Category", 3000);
+    budget.updateBudget(filePath, -2, "Test Category", 1000);
+    budget.updateBudget(filePath, -1, "Test Category", 2000);
+    budget.updateBudget(filePath, 1, "Test Category", 4000);
+    budget.updateBudget(filePath, 2, "Test Category", 5000);
+
+    budget.addToSpent(filePath, "Test Category", currentDate.addMonths(-2).toString("yyyy-MM"), 1);
+    budget.addToSpent(filePath, "Test Category", currentDate.addMonths(-1).toString("yyyy-MM"), 2);
+    budget.addToSpent(filePath, "Test Category", currentDate.toString("yyyy-MM"), 3);
+    budget.addToSpent(filePath, "Test Category", currentDate.addMonths(1).toString("yyyy-MM"), 4);
+    budget.addToSpent(filePath, "Test Category", currentDate.addMonths(2).toString("yyyy-MM"), 5);
+
     SECTION("A path is given") {
-        AccountManager accManager;
-        Budget budget;
-        QDate currentDate = QDate::currentDate();
-        accManager.createBudget(QUrl::fromLocalFile("."), "FooBar");
-        QUrl filePath = QUrl::fromLocalFile("FooBar.mbgt");
-
-        budget.addCategory(filePath, "Test Category", 3000);
-        budget.updateBudget(filePath, -2, "Test Category", 1000);
-        budget.updateBudget(filePath, -1, "Test Category", 2000);
-        budget.updateBudget(filePath, 1, "Test Category", 4000);
-        budget.updateBudget(filePath, 2, "Test Category", 5000);
-
-        budget.addToSpent(filePath, "Test Category", currentDate.addMonths(-2).toString("yyyy-MM"), 1);
-        budget.addToSpent(filePath, "Test Category", currentDate.addMonths(-1).toString("yyyy-MM"), 2);
-        budget.addToSpent(filePath, "Test Category", currentDate.toString("yyyy-MM"), 3);
-        budget.addToSpent(filePath, "Test Category", currentDate.addMonths(1).toString("yyyy-MM"), 4);
-        budget.addToSpent(filePath, "Test Category", currentDate.addMonths(2).toString("yyyy-MM"), 5);
-
         accManager.shiftOneMonth(filePath);
 
         io::sqlite::db mbgt("FooBar.mbgt");
@@ -75,6 +75,102 @@ TEST_CASE("Can shift budget one month", "[shiftOneMonth]") {
             REQUIRE(query.row().text(14) == currentDate.addMonths(3).toString("yyyy-MM").toStdString());
         }
     }
+
+    remove("FooBar.mbgt");
+}
+
+TEST_CASE("Can shift budgets", "[shiftBudget]") {
+    AccountManager accManager;
+    Budget budget;
+    QDate currentDate = QDate::currentDate();
+    accManager.createBudget(QUrl::fromLocalFile("."), "FooBar");
+    QUrl filePath = QUrl::fromLocalFile("FooBar.mbgt");
+
+    budget.addCategory(filePath, "Test Category", 3000);
+    budget.updateBudget(filePath, -2, "Test Category", 1000);
+    budget.updateBudget(filePath, -1, "Test Category", 2000);
+    budget.updateBudget(filePath, 1, "Test Category", 4000);
+    budget.updateBudget(filePath, 2, "Test Category", 5000);
+
+    budget.addToSpent(filePath, "Test Category", currentDate.addMonths(-2).toString("yyyy-MM"), 1);
+    budget.addToSpent(filePath, "Test Category", currentDate.addMonths(-1).toString("yyyy-MM"), 2);
+    budget.addToSpent(filePath, "Test Category", currentDate.toString("yyyy-MM"), 3);
+    budget.addToSpent(filePath, "Test Category", currentDate.addMonths(1).toString("yyyy-MM"), 4);
+    budget.addToSpent(filePath, "Test Category", currentDate.addMonths(2).toString("yyyy-MM"), 5);
+
+    SECTION("Give path and date") {
+        accManager.shiftBudget(filePath, currentDate.addMonths(1));
+
+        io::sqlite::db mbgt("FooBar.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT prevTwoDate, prevOneDate,"
+                                     "monthOneDate, monthTwoDate,"
+                                     "monthThreeDate FROM budgets WHERE id == 1");
+
+        while (query.step()) {
+            // Only checking dates, because shiftOneMonth has been tested
+            REQUIRE(query.row().text(0) == currentDate.addMonths(-1).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(1) == currentDate.toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(2) == currentDate.addMonths(1).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(3) == currentDate.addMonths(2).toString("yyyy-MM").toStdString());
+            // Spent will be blank for dates below
+            REQUIRE(query.row().text(4) == currentDate.addMonths(3).toString("yyyy-MM").toStdString());
+        }
+    }
+
+    SECTION("It goes for two months out") {
+        accManager.shiftBudget(filePath, currentDate.addMonths(2));
+
+        io::sqlite::db mbgt("FooBar.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT prevTwoDate, prevOneDate,"
+                                     "monthOneDate, monthTwoDate,"
+                                     "monthThreeDate FROM budgets WHERE id == 1");
+
+        while (query.step()) {
+            REQUIRE(query.row().text(0) == currentDate.toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(1) == currentDate.addMonths(1).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(2) == currentDate.addMonths(2).toString("yyyy-MM").toStdString());
+            // Spent will be blank for dates below
+            REQUIRE(query.row().text(3) == currentDate.addMonths(3).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(4) == currentDate.addMonths(4).toString("yyyy-MM").toStdString());
+        }
+
+        accManager.shiftBudget(filePath, currentDate.addMonths(3));
+        query.exec();
+
+        while (query.step()) {
+            REQUIRE(query.row().text(0) == currentDate.addMonths(1).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(1) == currentDate.addMonths(2).toString("yyyy-MM").toStdString());
+            // Spent will be blank for dates below
+            REQUIRE(query.row().text(2) == currentDate.addMonths(3).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(3) == currentDate.addMonths(4).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(4) == currentDate.addMonths(5).toString("yyyy-MM").toStdString());
+        }
+
+        accManager.shiftBudget(filePath, currentDate.addMonths(4));
+        query.exec();
+
+        while (query.step()) {
+            REQUIRE(query.row().text(0) == currentDate.addMonths(2).toString("yyyy-MM").toStdString());
+            // Spent will be blank for dates below
+            REQUIRE(query.row().text(1) == currentDate.addMonths(3).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(2) == currentDate.addMonths(4).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(3) == currentDate.addMonths(5).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(4) == currentDate.addMonths(6).toString("yyyy-MM").toStdString());
+        }
+
+        accManager.shiftBudget(filePath, currentDate.addMonths(5));
+        query.exec();
+
+        while (query.step()) {
+            // Spent will be blank for dates below
+            REQUIRE(query.row().text(0) == currentDate.addMonths(3).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(1) == currentDate.addMonths(4).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(2) == currentDate.addMonths(5).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(3) == currentDate.addMonths(6).toString("yyyy-MM").toStdString());
+            REQUIRE(query.row().text(4) == currentDate.addMonths(7).toString("yyyy-MM").toStdString());
+        }
+   }
+
     remove("FooBar.mbgt");
 }
 

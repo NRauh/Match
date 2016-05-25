@@ -14,7 +14,8 @@ public:
     Q_INVOKABLE void createBudget(QUrl filePath, QString accountName);
     Q_INVOKABLE void setLastFile(QUrl lastFilePath);
     Q_INVOKABLE QUrl getLastFile();
-    void shiftOneMonth(QUrl filePath);
+    void shiftOneMonth(QUrl filePath, QDate month = QDate::currentDate());
+    Q_INVOKABLE void shiftBudget(QUrl filePath, QDate date);
 
 signals:
 
