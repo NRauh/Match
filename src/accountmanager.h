@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QUrl>
 #include "json/json.h"
+#include <QDate>
 
 class AccountManager : public QObject
 {
@@ -13,6 +14,7 @@ public:
     Q_INVOKABLE void createBudget(QUrl filePath, QString accountName);
     Q_INVOKABLE void setLastFile(QUrl lastFilePath);
     Q_INVOKABLE QUrl getLastFile();
+    void shiftOneMonth(QUrl filePath);
 
 signals:
 

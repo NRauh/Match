@@ -35,3 +35,30 @@ QUrl AccountManager::getLastFile()
     QSettings settings("nrauh", "Match");
     return settings.value("lastOpenedFile").value<QUrl>();
 }
+
+void AccountManager::shiftOneMonth(QUrl filePath)
+{
+    io::sqlite::db budget(filePath.toLocalFile().toStdString());
+
+    io::sqlite::stmt query(budget, "UPDATE budgets SET "
+                                   "prevTwo = prevOne,"
+                                   "prevTwoSpent = prevOneSpent,"
+                                   "prevTwoDate = prevOneDate,"
+                                   "prevOne = monthOne,"
+                                   "prevOneSpent = monthOneSpent,"
+                                   "prevOneDate = monthOneDate,"
+                                   "monthOne = monthTwo,"
+                                   "monthOneSpent = monthTwoSpent,"
+                                   "monthOneDate = monthTwoDate,"
+                                   "monthTwo = monthThree,"
+                                   "monthTwoSpent = monthThreeSpent,"
+                                   "monthTwoDate = monthThreeDate,"
+                                   "monthThreeSpent = 0,"
+                                   "monthThreeDate = ?");
+
+    QDate newMonth = QDate::currentDate().addMonths(3);
+    std::string monthString = newMonth.toString("yyyy-MM").toStdString();
+
+    query.bind().text(1, monthString);
+    query.exec();
+}
