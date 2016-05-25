@@ -38,9 +38,9 @@ QUrl AccountManager::getLastFile()
 
 void AccountManager::shiftOneMonth(QUrl filePath, QDate month)
 {
-    io::sqlite::db budget(filePath.toLocalFile().toStdString());
+    io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
 
-    io::sqlite::stmt query(budget, "UPDATE budgets SET "
+    io::sqlite::stmt query(mbgt, "UPDATE budgets SET "
                                    "prevTwo = prevOne,"
                                    "prevTwoSpent = prevOneSpent,"
                                    "prevTwoDate = prevOneDate,"
@@ -62,7 +62,34 @@ void AccountManager::shiftOneMonth(QUrl filePath, QDate month)
     query.exec();
 }
 
-void AccountManager::shiftBudget(QUrl filePath, QDate date)
+void AccountManager::shiftMany(QUrl filePath, QDate month)
+{
+    io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(mbgt, "UPDATE budgets SET "
+                                 "prevTwo = monthThree,"
+                                 "prevTwoSpent = 0,"
+                                 "prevTwoDate = ?,"
+                                 "prevOne = monthThree,"
+                                 "prevOneSpent = 0,"
+                                 "prevOneDate = ?,"
+                                 "monthOne = monthThree,"
+                                 "monthOneSpent = 0,"
+                                 "monthOneDate = ?,"
+                                 "monthTwo = monthThree,"
+                                 "monthTwoSpent = 0,"
+                                 "monthTwoDate = ?,"
+                                 "monthThreeSpent = 0,"
+                                 "monthThreeDate = ?");
+
+    query.bind().text(1, month.addMonths(-2).toString("yyyy-MM").toStdString());
+    query.bind().text(2, month.addMonths(-1).toString("yyyy-MM").toStdString());
+    query.bind().text(3, month.toString("yyyy-MM").toStdString());
+    query.bind().text(4, month.addMonths(1).toString("yyyy-MM").toStdString());
+    query.bind().text(5, month.addMonths(2).toString("yyyy-MM").toStdString());
+    query.exec();
+}
+
+void AccountManager::shiftBudget(QUrl filePath, QDate date, int step)
 {
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(mbgt, "SELECT monthOneDate FROM budgets WHERE id == 1");
@@ -72,8 +99,10 @@ void AccountManager::shiftBudget(QUrl filePath, QDate date)
         lastCurrentMonth = query.row().text(0);
     }
 
-    if (lastCurrentMonth != date.toString("yyyy-MM").toStdString()) {
+    if (lastCurrentMonth != date.toString("yyyy-MM").toStdString() && step < 4) {
         shiftOneMonth(filePath, QDate::fromString(lastCurrentMonth.c_str(), "yyyy-MM"));
-        shiftBudget(filePath, date);
+        shiftBudget(filePath, date, step + 1);
+    } else if (step >= 4) {
+        shiftMany(filePath, date);
     }
 }
