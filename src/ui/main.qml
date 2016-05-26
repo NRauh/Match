@@ -13,17 +13,6 @@ ApplicationWindow {
         Menu {
             title: qsTr("&File")
             MenuItem {
-                text: qsTr("&Open")
-            }
-            MenuItem {
-                text: qsTr("&New Account")
-                onTriggered: {
-                    var component = Qt.createComponent("newaccount.qml")
-                    var win = component.createObject(matchWindow, {updateList: mainSidebar})
-                    win.show()
-                }
-            }
-            MenuItem {
                 text: qsTr("&New Budget");
                 onTriggered: {
                     var component = Qt.createComponent("newbudget.qml")
@@ -32,8 +21,25 @@ ApplicationWindow {
                 }
             }
             MenuItem {
+                text: qsTr("&Open Budget")
+            }
+           MenuItem {
                 text: qsTr("E&xit")
                 onTriggered: Qt.quit();
+            }
+        }
+        Menu {
+            title: qsTr("&Accounts")
+            MenuItem {
+               text: qsTr("&New Account")
+               onTriggered: {
+                   var component = Qt.createComponent("newaccount.qml")
+                   var win = component.createObject(matchWindow, {updateList: mainSidebar})
+                   win.show()
+               }
+           }
+            MenuItem {
+                text: qsTr("&Account Settings")
             }
         }
     }

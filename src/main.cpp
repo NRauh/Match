@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 
     if (lastFile.fileName() != "" && lastFile.exists()) {
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+        accManager.shiftBudget(lastFilePath, QDate::currentDate());
     } else {
         engine.load(QUrl(QStringLiteral("qrc:/newbudget.qml")));
     }
