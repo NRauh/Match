@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
     QFile lastFile(lastFilePath.toLocalFile());
 
     if (lastFile.fileName() != "" && lastFile.exists()) {
-        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
         accManager.shiftBudget(lastFilePath, QDate::currentDate());
+        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     } else {
         engine.load(QUrl(QStringLiteral("qrc:/newbudget.qml")));
     }
