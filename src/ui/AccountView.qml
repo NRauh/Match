@@ -12,21 +12,19 @@ Rectangle {
     property var transactions
     property var selectedTransactionId
     property var categories
+    property var activeFile
     Component.onCompleted: {
-        var lastFile = accManager.getLastFile()
-        transactions = account.getTransactions(lastFile, accountId)
+        transactions = account.getTransactions(activeFile, accountId)
         // TODO: fix this returning a weird not quite array
-        categories = budget.getCategoryNames(lastFile);
+        categories = budget.getCategoryNames(activeFile);
         categories = categories.toString();
         categories = categories.split(",");
     }
 
-    AccountManager {
-        id: accManager
-    }
     Account {
         id: account
     }
+
     Budget {
         id: budget
     }
@@ -214,7 +212,6 @@ Rectangle {
             anchors.top: parent.top
             anchors.topMargin: 647
             onClicked: {
-                var lastFile = accManager.getLastFile();
                 var acceptable = true
 
                 if (!payeeInput.text) {
@@ -225,7 +222,7 @@ Rectangle {
                 }
 
                 if (acceptable) {
-                    account.addTransaction(lastFile, accountId,
+                    account.addTransaction(activeFile, accountId,
                                            dateInput.selectedDate,
                                            payeeInput.text,
                                            outflowInput.checked,
@@ -237,7 +234,7 @@ Rectangle {
                     amountInput.text = ""
                     noteInput.text = ""
                     // TODO: Should arrange by date
-                    transactions = account.getTransactions(lastFile, accountId);
+                    transactions = account.getTransactions(activeFile, accountId);
                 }
             }
         }
@@ -296,8 +293,7 @@ Rectangle {
             anchors.left: parent.left
             visible: false
             onClicked: {
-                var lastFile = accManager.getLastFile()
-                account.deleteTransaction(lastFile, selectedTransactionId)
+                account.deleteTransaction(activeFile, selectedTransactionId)
 
                 doneButton.visible = false
                 deleteButton.visible = false
@@ -308,7 +304,7 @@ Rectangle {
                 amountInput.text = ""
                 outflowInput.checked = true
 
-                transactions = account.getTransactions(lastFile, accountId)
+                transactions = account.getTransactions(activeFile, accountId)
             }
         }
     }

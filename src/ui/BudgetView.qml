@@ -7,20 +7,15 @@ Item {
     width: 770
     height: 720
     property var categories
-    property var lastFile
+    property var activeFile
     property var selectedMonth
     property var meta
     property var available
     Component.onCompleted: {
-        lastFile = accManager.getLastFile();
         selectedMonth = 0;
-        categories = budget.getCategories(lastFile, selectedMonth);
-        meta = budget.getMeta(lastFile, selectedMonth);
-        available = budget.getAvailableMoney(lastFile);
-    }
-
-    AccountManager {
-        id: accManager
+        categories = budget.getCategories(activeFile, selectedMonth);
+        meta = budget.getMeta(activeFile, selectedMonth);
+        available = budget.getAvailableMoney(activeFile);
     }
 
     Budget {
@@ -66,8 +61,8 @@ Item {
                 anchors.fill: parent
                 onClicked: {
                     selectedMonth = selectedMonth - 1
-                    categories = budget.getCategories(lastFile, selectedMonth)
-                    meta = budget.getMeta(lastFile, selectedMonth);
+                    categories = budget.getCategories(activeFile, selectedMonth)
+                    meta = budget.getMeta(activeFile, selectedMonth);
                     if (selectedMonth === -2) {
                         parent.visible = false
                     }
@@ -104,8 +99,8 @@ Item {
                 anchors.fill: parent
                 onClicked: {
                     selectedMonth = selectedMonth + 1
-                    categories = budget.getCategories(lastFile, selectedMonth)
-                    meta = budget.getMeta(lastFile, selectedMonth)
+                    categories = budget.getCategories(activeFile, selectedMonth)
+                    meta = budget.getMeta(activeFile, selectedMonth)
                     if (selectedMonth === 2) {
                         parent.visible = false
                     }
@@ -250,8 +245,8 @@ Item {
                     var categoryName = categoryNameInput.text
                     var amount = parseFloat(amountInput.text) * 100
 
-                    budget.addCategory(lastFile, categoryName, amount);
-                    categories = budget.getCategories(lastFile, 0);
+                    budget.addCategory(activeFile, categoryName, amount);
+                    categories = budget.getCategories(activeFile, 0);
 
                     categoryNameInput.text = ""
                     amountInput.text = ""
@@ -272,8 +267,8 @@ Item {
                 var category = categoryNameInput.text
                 var amount = parseFloat(amountInput.text) * 100
 
-                budget.updateBudget(lastFile, selectedMonth, category, amount)
-                categories = budget.getCategories(lastFile, selectedMonth)
+                budget.updateBudget(activeFile, selectedMonth, category, amount)
+                categories = budget.getCategories(activeFile, selectedMonth)
             }
         }
 

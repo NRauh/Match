@@ -1,6 +1,7 @@
 import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
+import com.nrauh 1.0
 
 ApplicationWindow {
     title: qsTr("Match")
@@ -8,6 +9,26 @@ ApplicationWindow {
     height: 735
     visible: true
     id: matchWindow
+    property var activeFile
+    Component.onCompleted: {
+        activeFile = accManager.getLastFile()
+        var accountList = account.getAccountList(activeFile)
+
+        contentLoader.setSource("BudgetView.qml", {activeFile: activeFile});
+        mainSidebar.setSource("Sidebar.qml", {
+                                  activeFile: activeFile,
+                                  targetLoader: contentLoader,
+                                  accountData: accountList
+                              })
+    }
+
+    AccountManager {
+        id: accManager
+    }
+
+    Account {
+        id: account
+    }
 
     menuBar: MenuBar {
         Menu {
@@ -44,17 +65,15 @@ ApplicationWindow {
         }
     }
 
-    Sidebar {
+    Loader {
         id: mainSidebar
         width: 225
-        height: 725
         anchors.left: parent.left
         anchors.leftMargin: 0
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 0
         anchors.top: parent.top
         anchors.topMargin: 0
-        targetLoader: contentLoader
     }
 
     Loader {
@@ -67,6 +86,5 @@ ApplicationWindow {
         anchors.bottomMargin: 0
         anchors.right: parent.right
         anchors.rightMargin: 0
-        source: "BudgetView.qml"
     }
 }

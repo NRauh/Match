@@ -1,6 +1,5 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
-import com.nrauh 1.0
 
 Rectangle {
     id: sidebar
@@ -9,10 +8,7 @@ Rectangle {
     color: "#c3d9e6"
     property var accountData
     property var targetLoader
-    Component.onCompleted: {
-        var filePath = accManager.getLastFile()
-        accountData = account.getAccountList(filePath)
-    }
+    property var activeFile
 
     Label {
         id: logo
@@ -27,10 +23,6 @@ Rectangle {
         anchors.leftMargin: 67
         font.family: "Arial"
         font.pointSize: 32
-    }
-
-    AccountManager {
-        id: accManager
     }
 
     Rectangle {
@@ -59,7 +51,7 @@ Rectangle {
             hoverEnabled: true
             onEntered: parent.color = "#99b1bf"
             onExited: parent.color = "#adc9d9"
-            onClicked: targetLoader.setSource("BudgetView.qml")
+            onClicked: targetLoader.setSource("BudgetView.qml", {activeFile: activeFile})
         }
     }
 
@@ -74,11 +66,6 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: 10
     }
-
-    Account {
-        id: account
-    }
-
 
     Label {
         id: accountsLabel
@@ -134,13 +121,13 @@ Rectangle {
                     hoverEnabled: true
                     onEntered: parent.color = "#99b1bf"
                     onExited: parent.color = "#adc9d9"
-                    onClicked: targetLoader.setSource("AccountView.qml", {accountId: modelData.accountId,
-                                                          accountName: accountNameLabel.text})
+                    onClicked: targetLoader.setSource("AccountView.qml", {
+                                                          activeFile: activeFile,
+                                                          accountId: modelData.accountId,
+                                                          accountName: accountNameLabel.text
+                                                      })
                 }
             }
         }
     }
-
-
-
 }
