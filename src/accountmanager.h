@@ -17,6 +17,7 @@ public:
     void shiftOneMonth(QUrl filePath, QDate month = QDate::currentDate());
     void shiftMany(QUrl filePath, QDate month);
     Q_INVOKABLE void shiftBudget(QUrl filePath, QDate date, int step = 0);
+    Q_INVOKABLE bool haveLastFile();
 
 signals:
 

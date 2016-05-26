@@ -237,6 +237,21 @@ TEST_CASE("Can shift budgets", "[shiftBudget]") {
     remove("FooBar.mbgt");
 }
 
+TEST_CASE("Can check if the file exists", "[haveLastFile]") {
+    SECTION("If the file exists it returns true, otherwise false") {
+        AccountManager accManager;
+        accManager.createBudget(QUrl::fromLocalFile("."), "FooBar");
+        accManager.setLastFile(QUrl::fromLocalFile("FooBar.mbgt"));
+
+        bool exists = accManager.haveLastFile();
+        REQUIRE(exists == true);
+
+        remove("FooBar.mbgt");
+        exists = accManager.haveLastFile();
+        REQUIRE(exists == false);
+    }
+}
+
 /* setLastFile and getLastFile tests fail and work seemingly randomly
  * so are commented out to make tests run nicely since they do work
  * (top notch code there)

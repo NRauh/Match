@@ -106,3 +106,15 @@ void AccountManager::shiftBudget(QUrl filePath, QDate date, int step)
         shiftMany(filePath, date);
     }
 }
+
+bool AccountManager::haveLastFile()
+{
+    QUrl lastFilePath = getLastFile();
+    QFile lastFile(lastFilePath.toLocalFile());
+
+    if (lastFile.fileName() != "" && lastFile.exists()) {
+        return true;
+    } else {
+        return false;
+    }
+}
