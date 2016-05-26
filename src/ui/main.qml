@@ -67,5 +67,6 @@ ApplicationWindow {
         anchors.bottomMargin: 0
         anchors.right: parent.right
         anchors.rightMargin: 0
+        source: "BudgetView.qml"
     }
 }
