@@ -48,17 +48,41 @@ Item {
             font.pointSize: 16
         }
 
-        Image {
-            id: leftArrow
-            width: 25
-            height: 58
+        Rectangle {
+            id: previousMonth
+            width: 100
+            height: 60
+            color: "#00000000"
             anchors.top: parent.top
             anchors.topMargin: 50
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            source: "../assets/leftarrow.png"
+            Image {
+                id: leftArrow
+                width: 25
+                height: 58
+                anchors.top: parent.top
+                anchors.topMargin: 1
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                source: "../assets/leftarrow.png"
+
+            }
+
+            Label {
+                id: previousMonthLabel
+                x: 39
+                y: 13
+                width: 53
+                height: 35
+                text: qsTr("Previous Month")
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignLeft
+                wrapMode: Text.WordWrap
+            }
             MouseArea {
                 anchors.fill: parent
+                hoverEnabled: true
+                onEntered: parent.color = "#c8ced4"
+                onExited: parent.color = "#00000000"
                 onClicked: {
                     selectedMonth = selectedMonth - 1
                     categories = budget.getCategories(activeFile, selectedMonth)
@@ -73,30 +97,42 @@ Item {
             }
         }
 
-        Label {
-            id: previousMonthLabel
-            x: 41
-            y: 62
-            width: 53
-            height: 35
-            text: qsTr("Previous Month")
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignLeft
-            wrapMode: Text.WordWrap
-        }
-
-        Image {
-            id: rightArrow
-            x: 165
-            width: 25
-            height: 58
+        Rectangle {
+            id: nextMonth
+            x: 100
+            width: 100
+            height: 60
+            color: "#00000000"
             anchors.top: parent.top
             anchors.topMargin: 50
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            source: "../assets/rightarrow.png"
+            Image {
+                id: rightArrow
+                width: 25
+                height: 58
+                anchors.top: parent.top
+                anchors.topMargin: 1
+                anchors.right: parent.right
+                anchors.rightMargin: 10
+                source: "../assets/rightarrow.png"
+            }
+
+            Label {
+                id: nextMonthLabel
+                x: 15
+                y: 13
+                width: 46
+                height: 35
+                text: qsTr("Next Month")
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignRight
+                verticalAlignment: Text.AlignVCenter
+            }
+
             MouseArea {
                 anchors.fill: parent
+                hoverEnabled: true
+                onEntered: parent.color = "#c8ced4"
+                onExited: parent.color = "#00000000"
                 onClicked: {
                     selectedMonth = selectedMonth + 1
                     categories = budget.getCategories(activeFile, selectedMonth)
@@ -109,18 +145,6 @@ Item {
                     }
                 }
             }
-        }
-
-        Label {
-            id: nextMonthLabel
-            x: 113
-            y: 62
-            width: 46
-            height: 35
-            text: qsTr("Next Month")
-            wrapMode: Text.WordWrap
-            horizontalAlignment: Text.AlignRight
-            verticalAlignment: Text.AlignVCenter
         }
 
         Label {
@@ -304,9 +328,9 @@ Item {
                 id: categoryBackground
                 height: 40
                 color: "#ffffff"
-                anchors.left: parent.left
+                anchors.left: categoryColumn.left
                 anchors.leftMargin: 0
-                anchors.right: parent.right
+                anchors.right: categoryColumn.right
                 anchors.rightMargin: 0
                 border.width: 5
                 border.color: "#dadfe6"
@@ -344,6 +368,9 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: parent.color = "#e6e6e6"
+                    onExited: parent.color = "#ffffff"
                     onClicked: {
                         newCategoryButton.visible = false
                         updateCategoryButton.visible = true
