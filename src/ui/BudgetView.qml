@@ -292,13 +292,22 @@ Item {
     }
 
     Column {
+        id: categoryColumn
+        anchors.right: parent.right
+        anchors.rightMargin: 200
+        anchors.left: parent.left
+        anchors.leftMargin: 0
         Repeater {
             model: categories
+
             Rectangle {
                 id: categoryBackground
-                width: 570
                 height: 40
                 color: "#ffffff"
+                anchors.left: parent.left
+                anchors.leftMargin: 0
+                anchors.right: parent.right
+                anchors.rightMargin: 0
                 border.width: 5
                 border.color: "#dadfe6"
 
@@ -311,6 +320,17 @@ Item {
                     font.pixelSize: 15
                 }
 
+                Text {
+                    id: categoryBudgetAmount
+                    x: 478
+                    y: 10
+                    text: modelData.remaining
+                    anchors.right: parent.right
+                    anchors.rightMargin: 38
+                    horizontalAlignment: text.AlignRight
+                    font.pixelSize: 15
+                }
+
                 Image {
                     id: categorySearch
                     x: 538
@@ -320,17 +340,6 @@ Item {
                     anchors.right: parent.right
                     anchors.rightMargin: 8
                     source: "../assets/search.png"
-                }
-
-                Text {
-                    id: categoryBudgetAmount
-                    x: 478
-                    y: 10
-                    text: modelData.remaining
-                    anchors.right: parent.right
-                    anchors.rightMargin: 38
-                    horizontalAlignment: Text.AlignRight
-                    font.pixelSize: 15
                 }
 
                 MouseArea {
