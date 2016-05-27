@@ -1,6 +1,7 @@
 import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
+import QtQuick.Dialogs 1.2
 import com.nrauh 1.0
 
 ApplicationWindow {
@@ -22,6 +23,8 @@ ApplicationWindow {
    }
 
     function initialize(file) {
+        var now = new Date()
+        accManager.shiftBudget(file, now)
         var accountList = account.getAccountList(file)
         contentLoader.setSource("BudgetView.qml", {activeFile: file});
         mainSidebar.setSource("Sidebar.qml", {
@@ -53,6 +56,9 @@ ApplicationWindow {
             }
             MenuItem {
                 text: qsTr("&Open Budget")
+                onTriggered: {
+                    openDialog.open()
+                }
             }
            MenuItem {
                 text: qsTr("E&xit")
@@ -72,6 +78,17 @@ ApplicationWindow {
             MenuItem {
                 text: qsTr("&Account Settings")
             }
+        }
+    }
+
+    FileDialog {
+        id: openDialog
+        title: "Select budget file to open"
+        folder: shortcuts.documents
+        nameFilters: ["Match budget file (*.mbgt)"]
+        onAccepted: {
+            accManager.setLastFile(openDialog.fileUrl)
+            initialize(openDialog.fileUrl)
         }
     }
 
