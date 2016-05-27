@@ -271,6 +271,8 @@ Item {
 
                     budget.addCategory(activeFile, categoryName, amount);
                     categories = budget.getCategories(activeFile, 0);
+                    meta = budget.getMeta(activeFile, selectedMonth)
+                    available = budget.getAvailableMoney(activeFile)
 
                     categoryNameInput.text = ""
                     amountInput.text = ""
@@ -293,6 +295,8 @@ Item {
 
                 budget.updateBudget(activeFile, selectedMonth, category, amount)
                 categories = budget.getCategories(activeFile, selectedMonth)
+                meta = budget.getMeta(activeFile, selectedMonth)
+                available = budget.getAvailableMoney(activeFile)
             }
         }
 
