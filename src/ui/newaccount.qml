@@ -118,7 +118,7 @@ Window {
         font.family: "Arial"
         anchors.right: parent.right
         placeholderText: qsTr("Balance")
-        validator: RegExpValidator { regExp: /\d+\.\d\d/ }
+        validator: RegExpValidator { regExp: /-?\d+\.\d\d/ }
     }
 
     Label {
