@@ -94,11 +94,6 @@ Rectangle {
             anchors.leftMargin: 10
             anchors.top: parent.top
             anchors.topMargin: 153
-            navigationBarVisible: true
-            frameVisible: false
-            dayOfWeekFormat: 1
-            weekNumbersVisible: false
-            visibleMonth: 2
         }
 
         Label {
