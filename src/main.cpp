@@ -15,16 +15,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<Account>("com.nrauh", 1, 0, "Account");
     qmlRegisterType<Budget>("com.nrauh", 1, 0, "Budget");
 
-    AccountManager accManager;
-    QUrl lastFilePath = accManager.getLastFile();
-    QFile lastFile(lastFilePath.toLocalFile());
-
-    if (lastFile.fileName() != "" && lastFile.exists()) {
-        accManager.shiftBudget(lastFilePath, QDate::currentDate());
-        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-    } else {
-        engine.load(QUrl(QStringLiteral("qrc:/newbudget.qml")));
-    }
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return app.exec();
 }

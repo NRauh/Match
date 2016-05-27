@@ -9,6 +9,7 @@ Window {
     width: 600
     height: 500
     visible: true
+    property var reloadParent
 
     Label {
         id: newBudgetLabel
@@ -116,9 +117,11 @@ Window {
             accManager.createBudget(pathDialog.fileUrl, budgetName.text)
             var filePath = pathDialog.fileUrl.toString() + "/" + budgetName.text + ".mbgt";
             accManager.setLastFile(filePath)
+            reloadParent(filePath)
             newBudgetWindow.close()
         }
     }
+
 
     Button {
         id: cancelButton

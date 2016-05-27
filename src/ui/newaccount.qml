@@ -16,7 +16,7 @@ Window {
         id: newCheckingLabel
         width: 545
         height: 63
-        text: qsTr("New  Account")
+        text: qsTr("New Account")
         anchors.left: parent.left
         anchors.leftMargin: 30
         anchors.top: parent.top

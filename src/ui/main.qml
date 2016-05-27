@@ -9,14 +9,23 @@ ApplicationWindow {
     height: 735
     visible: true
     id: matchWindow
-    property var activeFile
     Component.onCompleted: {
-        activeFile = accManager.getLastFile()
-        var accountList = account.getAccountList(activeFile)
+        var lastFile = accManager.getLastFile()
 
-        contentLoader.setSource("BudgetView.qml", {activeFile: activeFile});
+        if (accManager.haveLastFile()) {
+            initialize(lastFile);
+        } else {
+            var newBudget = Qt.createComponent("newbudget.qml")
+            var win = newBudget.createObject(matchWindow, {reloadParent: initialize})
+            win.show()
+        }
+   }
+
+    function initialize(file) {
+        var accountList = account.getAccountList(file)
+        contentLoader.setSource("BudgetView.qml", {activeFile: file});
         mainSidebar.setSource("Sidebar.qml", {
-                                  activeFile: activeFile,
+                                  activeFile: file,
                                   targetLoader: contentLoader,
                                   accountData: accountList
                               })
@@ -38,6 +47,7 @@ ApplicationWindow {
                 onTriggered: {
                     var component = Qt.createComponent("newbudget.qml")
                     var win = component.createObject(matchWindow)
+                    win.reloadParent = initialize
                     win.show()
                 }
             }
@@ -55,7 +65,7 @@ ApplicationWindow {
                text: qsTr("&New Account")
                onTriggered: {
                    var component = Qt.createComponent("newaccount.qml")
-                   var win = component.createObject(matchWindow, {updateList: mainSidebar})
+                   var win = component.createObject(matchWindow, {updateList: mainSidebar.item})
                    win.show()
                }
            }
