@@ -102,6 +102,11 @@ TEST_CASE("Can get a list of categories with amounts for a month at relative ind
         categories = budget.getCategories(budgetFilePath, -3);
         REQUIRE(categories[0].toObject()["err"] == "Out of stored range");
     }
+
+    // Any tests for adding a category will need to change other tests
+    // I'm planning on isolating each test soon, so when I do I'll actually add this
+    // For now, I'm only needing to add `ORDER BY categoryName` to the sqlQuery var
+    //SECTION("Categories are alphabetized") {}
 }
 
 TEST_CASE("Can get a list of only category names", "[getCategoryNames]") {

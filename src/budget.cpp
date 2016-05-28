@@ -82,7 +82,7 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
 
     sqlQuery = "SELECT categoryName," +
                sqlQuery + ", " + selectedMonthSpent +
-               " FROM budgets WHERE " + sqlQuery + "Date == ?";
+               " FROM budgets WHERE " + sqlQuery + "Date == ? ORDER BY categoryName";
 
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(mbgt, sqlQuery.c_str());
