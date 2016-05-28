@@ -25,12 +25,14 @@ ApplicationWindow {
     function initialize(file) {
         var now = new Date()
         accManager.shiftBudget(file, now)
-        var accountList = account.getAccountList(file)
+        var accountList = account.getAccountList(file, 1)
+        var offBudgetList = account.getAccountList(file, 2)
         contentLoader.setSource("BudgetView.qml", {activeFile: file});
         mainSidebar.setSource("Sidebar.qml", {
                                   activeFile: file,
                                   targetLoader: contentLoader,
-                                  accountData: accountList
+                                  accountData: accountList,
+                                  offBudgetData: offBudgetList
                               })
     }
 

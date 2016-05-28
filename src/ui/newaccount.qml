@@ -86,8 +86,10 @@ Window {
             var onBudgetStatus = onBudget.checked
             account.addAccount(filePath, accountName.text, accountBalanceInt, balanceDate, onBudgetStatus)
 
-            var accountList = account.getAccountList(filePath)
+            var accountList = account.getAccountList(filePath, 1)
+            var offBudgetList = account.getAccountList(filePath, 2)
             updateList.accountData = accountList
+            updateList.offBudgetData = offBudgetList
             newCheckingWindow.close()
         }
     }
