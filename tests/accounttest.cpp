@@ -176,6 +176,23 @@ TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
         REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountName"] == "Foo CU");
         REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountBalance"] == "798.75");
     }
+
+    SECTION("If selection is set to 2, then it gets off budget accounts") {
+        account.addAccount(filePath, "A bank", 10000, transactionDate, false);
+        QJsonObject accountList = account.getAccountList(filePath, 2);
+        REQUIRE(accountList["accounts"].toArray().size() == 1);
+    }
+
+    SECTION("If selection is set to 1, then it gets on budget accounts") {
+        QJsonObject accountList = account.getAccountList(filePath, 1);
+        REQUIRE(accountList["accounts"].toArray().size() == 1);
+    }
+
+    SECTION("Accounts are alphabetized") {
+        QJsonObject accountList = account.getAccountList(filePath);
+        REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountName"] == "A bank");
+        REQUIRE(accountList["accounts"].toArray()[1].toObject()["accountName"] == "Foo CU");
+    }
 }
 
 TEST_CASE("Can get list of transactions and balance for account", "[getTransactions]") {

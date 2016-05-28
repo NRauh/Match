@@ -15,7 +15,7 @@ public:
     Q_INVOKABLE void addAccount(QUrl filePath, QString accountName, int balance, QDate balanceDate, bool onBudget);
     Q_INVOKABLE void addTransaction(QUrl filePath, int accountId, QDate date, QString payee, bool outflow, int amount, QString category, QString note);
     Q_INVOKABLE void deleteTransaction(QUrl filePath, int transactionId);
-    Q_INVOKABLE QJsonObject getAccountList(QUrl filePath);
+    Q_INVOKABLE QJsonObject getAccountList(QUrl filePath, int selection = 0);
     Q_INVOKABLE QJsonObject getTransactions(QUrl filePath, int accountId);
     Q_INVOKABLE bool isOnBudget(QUrl filePath, int accountId);
     /*

@@ -111,14 +111,23 @@ void Account::deleteTransaction(QUrl filePath, int transactionId)
     query.exec();
 }
 
-QJsonObject Account::getAccountList(QUrl filePath)
+QJsonObject Account::getAccountList(QUrl filePath, int selection)
 {
     QJsonObject accountList;
     QJsonArray accounts;
     int totalBalance = 0;
+    std::string prepQuery;
+
+    if (selection == 2) {
+        prepQuery = "SELECT id, accountName, balance FROM accounts WHERE onBudget == 0 ORDER BY accountName";
+    } else if (selection == 1) {
+        prepQuery = "SELECT id, accountName, balance FROM accounts WHERE onBudget == 1 ORDER BY accountName";
+    } else {
+        prepQuery = "SELECT id, accountName, balance FROM accounts ORDER BY accountName";
+    }
 
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
-    io::sqlite::stmt query(budget, "SELECT id, accountName, balance FROM accounts");
+    io::sqlite::stmt query(budget, prepQuery.c_str());
 
     while (query.step()) {
         QJsonObject account;
