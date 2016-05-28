@@ -18,6 +18,7 @@ public:
     Q_INVOKABLE QJsonObject getAccountList(QUrl filePath, int selection = 0);
     Q_INVOKABLE QJsonObject getTransactions(QUrl filePath, int accountId);
     Q_INVOKABLE bool isOnBudget(QUrl filePath, int accountId);
+    Q_INVOKABLE void changeOnBudget(QUrl filePath, int accountId, bool newStatus);
     /*
     Q_INVOKABLE QString getAccountListString(QUrl filePath);
     Q_INVOKABLE QString getTransactionsString(QUrl filePath, QString accountId);

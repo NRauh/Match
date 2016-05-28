@@ -169,12 +169,17 @@ TEST_CASE("Can delete transactions", "[deleteTransaction]") {
 }
 
 TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
-    SECTION("Give file path, returns name, balance, and id") {
+    // Getting it's budget status is to make the account settings look pretty, by having a toggle
+    // But it may be useless to have the selection option because of that
+    // If someone wants to do some funky sorting for the side bar I'd be fine removing the selection option
+
+    SECTION("Give file path, returns name, balance, id, and if it's on or off budget") {
         QJsonObject accountList = account.getAccountList(filePath);
         REQUIRE(accountList["balance"] == "798.75");
         REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountId"] == 1);
         REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountName"] == "Foo CU");
         REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountBalance"] == "798.75");
+        REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountOnBudget"] == true);
     }
 
     SECTION("If selection is set to 2, then it gets off budget accounts") {
@@ -242,6 +247,19 @@ TEST_CASE("Can get budget status", "[isOnBudget]") {
         while (query.step()) {
             std::cout << "5: isOnBudget (2)\n";
             REQUIRE(query.row().int32(0) == 79875);
+        }
+    }
+}
+
+TEST_CASE("Can set an account to be on or off budget (for the future)", "[changeOnBudget]") {
+    SECTION("Give file path, account id and bool of new status") {
+        account.changeOnBudget(filePath, 2, true);
+
+        io::sqlite::db budget("Foo Budget.mbgt");
+        io::sqlite::stmt query(budget, "SELECT onBudget FROM accounts WHERE id == 2");
+
+        while(query.step()) {
+            REQUIRE(query.row().int32(0) == 1);
         }
     }
 }

@@ -119,11 +119,11 @@ QJsonObject Account::getAccountList(QUrl filePath, int selection)
     std::string prepQuery;
 
     if (selection == 2) {
-        prepQuery = "SELECT id, accountName, balance FROM accounts WHERE onBudget == 0 ORDER BY accountName";
+        prepQuery = "SELECT id, accountName, balance, onBudget FROM accounts WHERE onBudget == 0 ORDER BY accountName";
     } else if (selection == 1) {
-        prepQuery = "SELECT id, accountName, balance FROM accounts WHERE onBudget == 1 ORDER BY accountName";
+        prepQuery = "SELECT id, accountName, balance, onBudget FROM accounts WHERE onBudget == 1 ORDER BY accountName";
     } else {
-        prepQuery = "SELECT id, accountName, balance FROM accounts ORDER BY accountName";
+        prepQuery = "SELECT id, accountName, balance, onBudget FROM accounts ORDER BY accountName";
     }
 
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
@@ -138,6 +138,7 @@ QJsonObject Account::getAccountList(QUrl filePath, int selection)
         account.insert("accountId", query.row().int32(0));
         account.insert("accountName", accountName);
         account.insert("accountBalance", accountBalance);
+        account.insert("accountOnBudget", (bool) query.row().int32(3));
 
         QJsonValue accountValue(account);
         accounts.append(accountValue);
@@ -227,4 +228,14 @@ bool Account::isOnBudget(QUrl filePath, int accountId)
         onBudgetStatus = query.row().int32(0);
     }
     return onBudgetStatus;
+}
+
+void Account::changeOnBudget(QUrl filePath, int accountId, bool newStatus)
+{
+    io::sqlite::db budget(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(budget, "UPDATE accounts SET onBudget = ? WHERE id == ?");
+
+    query.bind().int32(1, newStatus);
+    query.bind().int32(2, accountId);
+    query.exec();
 }
