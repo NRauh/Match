@@ -264,3 +264,23 @@ TEST_CASE("Can set an account to be on or off budget (for the future)", "[change
     }
 }
 
+TEST_CASE("Can delete accounts", "[deleteAccount]") {
+    AccountManager accManager;
+    accManager.createBudget(QUrl::fromLocalFile("."), "Delete Test");
+    Account acc;
+    acc.addAccount(QUrl::fromLocalFile("Delete Test.mbgt"), "Foo", 1000, QDate::currentDate(), true);
+
+    SECTION("Give file path and account id, then it deletes all transactions and the account") {
+        acc.deleteAccount(QUrl::fromLocalFile("Delete Test.mbgt"), 1);
+
+        io::sqlite::db mbgt("Delete Test.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT transactionDate FROM transactions WHERE toAccount == 1");
+        REQUIRE(query.step() == false);
+
+        query = io::sqlite::stmt(mbgt, "SELECT accountName FROM accounts WHERE id == 1");
+        REQUIRE(query.step() == false);
+    }
+
+    remove("Delete Test.mbgt");
+}
+

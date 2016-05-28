@@ -239,3 +239,26 @@ void Account::changeOnBudget(QUrl filePath, int accountId, bool newStatus)
     query.bind().int32(2, accountId);
     query.exec();
 }
+
+void Account::deleteAccount(QUrl filePath, int accountId)
+{
+    QVector<int> transactions;
+    io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(mbgt, "SELECT id FROM transactions WHERE toAccount == ?");
+
+    query.bind().int32(1, accountId);
+    query.exec();
+
+    // for some reason just deleting the transaction in this loop resulted in a SQL error
+    while (query.step()) {
+        transactions.append(query.row().int32(0));
+    }
+
+    for (int i = 0; i < transactions.size(); i++) {
+        deleteTransaction(filePath, transactions.at(i));
+    }
+
+    query = io::sqlite::stmt(mbgt, "DELETE FROM accounts WHERE id == ?");
+    query.bind().int32(1, accountId);
+    query.exec();
+}
