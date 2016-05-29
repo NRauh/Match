@@ -8,6 +8,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include "../src/account.h"
+#include "../src/accountmanager.h"
 
 // Budget account and stuff made in matchtest file
 // Separated to make sure there's a control
@@ -230,4 +231,29 @@ TEST_CASE("Can get amount of unbudgeted money", "[getAvailableMoney]") {
 
         REQUIRE(unbudgeted == "1650.00");
     }
+}
+
+TEST_CASE("Can get transactions for a category", "[getCategoryTransactions]") {
+    AccountManager accManager;
+    Account account;
+    Budget budget;
+    accManager.createBudget(QUrl::fromLocalFile("."), "Transaction Test");
+    account.addAccount(QUrl::fromLocalFile("Transaction Test.mbgt"), "Foo", 1000, QDate::currentDate(), true);
+    account.addAccount(QUrl::fromLocalFile("Transaction Test.mbgt"), "Bar", 1000, QDate::currentDate(), false);
+    budget.addCategory(QUrl::fromLocalFile("Transaction Test.mbgt"), "Test", 3000);
+    account.addTransaction(QUrl::fromLocalFile("Transaction Test.mbgt"), 1, QDate::currentDate(), "Corner Shop", true, 200, "Test", "Test transaction");
+    account.addTransaction(QUrl::fromLocalFile("Transaction Test.mbgt"), 2, QDate::currentDate(), "Corner Shop", true, 200, "Test", "Other test");
+
+    SECTION("It gets the transactions for a budget") {
+        QJsonArray transactions = budget.getCategoryTransactions(QUrl::fromLocalFile("Transaction Test.mbgt"), "Test", QDate::currentDate().toString("yyyy-MM"));
+
+        REQUIRE(transactions[0].toObject()["date"] == QDate::currentDate().toString("M/d/yy"));
+        REQUIRE(transactions[0].toObject()["payee"] == "Corner Shop");
+        REQUIRE(transactions[0].toObject()["note"] == "Test transaction");
+        REQUIRE(transactions[0].toObject()["amount"] == "2.00");
+        REQUIRE(transactions[0].toObject()["account"] == "Foo");
+        REQUIRE(transactions.size() == 1);
+    }
+
+    remove("Transaction Test.mbgt");
 }

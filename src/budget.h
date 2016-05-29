@@ -18,6 +18,7 @@ public:
     Q_INVOKABLE void updateBudget(QUrl filePath, int month, QString category, int amount);
     Q_INVOKABLE QJsonObject getMeta(QUrl filePath, int month);
     Q_INVOKABLE QString getAvailableMoney(QUrl filePath);
+    Q_INVOKABLE QJsonArray getCategoryTransactions(QUrl filePath, QString category, QString date);
 
 signals:
 

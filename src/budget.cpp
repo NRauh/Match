@@ -292,3 +292,44 @@ QString Budget::getAvailableMoney(QUrl filePath)
 
     return available;
 }
+
+QJsonArray Budget::getCategoryTransactions(QUrl filePath, QString category, QString date)
+{
+    QJsonArray transactions;
+    io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
+    io::sqlite::stmt query(mbgt, "SELECT transactionDate, payee, note, amount, accounts.accountName"
+                                 " FROM transactions JOIN accounts ON"
+                                 " accounts.id == transactions.toAccount"
+                                 " WHERE category == ?"
+                                 " AND transactionDate LIKE ? || '%'"
+                                 " AND accounts.onBudget == 1");
+    // the LIKE bit isn't tested
+
+    query.bind().text(1, category.toStdString());
+    query.bind().text(2, date.toStdString());
+    query.exec();
+
+    while (query.step()) {
+        QJsonObject transaction;
+        QDate formattedDate = QDate::fromString(query.row().text(0).c_str(), "yyyy-MM-dd");
+        QString toAccount;
+
+        QString formattedAmount = query.row().text(3).c_str();
+        if (formattedAmount.length() == 1) {
+            formattedAmount.prepend("00");
+        } else if (formattedAmount.length() == 2) {
+            formattedAmount.prepend("0");
+        }
+        formattedAmount.insert(formattedAmount.length() - 2, ".");
+
+        transaction.insert("date", formattedDate.toString("M/d/yy"));
+        transaction.insert("payee", query.row().text(1).c_str());
+        transaction.insert("note", query.row().text(2).c_str());
+        transaction.insert("amount", formattedAmount);
+        transaction.insert("account", toAccount);
+        transaction.insert("account", query.row().text(4).c_str());
+        transactions.append(transaction);
+    }
+
+    return transactions;
+}
