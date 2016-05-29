@@ -10,5 +10,6 @@
         <file>../assets/chevron.png</file>
         <file>../assets/leftarrow.png</file>
         <file>../assets/rightarrow.png</file>
+        <file>AccountSettings.qml</file>
     </qresource>
 </RCC>

@@ -79,6 +79,11 @@ ApplicationWindow {
            }
             MenuItem {
                 text: qsTr("&Account Settings")
+                onTriggered: {
+                    var component = Qt.createComponent("AccountSettings.qml")
+                    var accSettings = component.createObject(matchWindow, {updateList: mainSidebar.item})
+                    accSettings.show()
+                }
             }
         }
     }
