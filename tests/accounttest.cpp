@@ -179,7 +179,6 @@ TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
         REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountId"] == 1);
         REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountName"] == "Foo CU");
         REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountBalance"] == "798.75");
-        REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountOnBudget"] == true);
     }
 
     SECTION("If selection is set to 2, then it gets off budget accounts") {
