@@ -52,7 +52,10 @@ Rectangle {
             hoverEnabled: true
             onEntered: parent.color = "#99b1bf"
             onExited: parent.color = "#adc9d9"
-            onClicked: targetLoader.setSource("BudgetView.qml", {activeFile: activeFile})
+            onClicked: targetLoader.setSource("BudgetView.qml", {
+                                                  activeFile: activeFile,
+                                                  targetLoader: targetLoader
+                                              })
         }
     }
 
@@ -131,7 +134,6 @@ Rectangle {
             }
         }
     }
-
     Label {
         id: offBudgetLabel
         x: -7

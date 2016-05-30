@@ -212,6 +212,7 @@ TEST_CASE("Can get the month and remaing amount to spend", "[getMeta]") {
 
         REQUIRE(meta["month"] == month.toString("MMMM, yyyy"));
         REQUIRE(meta["remaining"] == "200.00");
+        REQUIRE(meta["monthInt"] == month.toString("yyyy-MM"));
     }
 }
 

@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import com.nrauh 1.0
 
 Item {
-    id: item1
+    id: budgetView
     width: 770
     height: 720
     property var categories
@@ -11,6 +11,7 @@ Item {
     property var selectedMonth
     property var meta
     property var available
+    property var targetLoader
     Component.onCompleted: {
         selectedMonth = 0;
         categories = budget.getCategories(activeFile, selectedMonth);
@@ -366,12 +367,28 @@ Item {
                     width: 24
                     height: 24
                     anchors.right: parent.right
-                    anchors.rightMargin: 8
+                    anchors.rightMargin: 9
                     source: "../assets/search.png"
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            targetLoader.setSource("BudgetTransactionList.qml", {
+                                                       budgetName: modelData.categoryName,
+                                                       month: meta["month"],
+                                                       monthInt: meta["monthInt"],
+                                                       starting: modelData.amount,
+                                                       remaining: modelData.remaining,
+                                                       targetLoader: targetLoader,
+                                                       activeFile: activeFile
+                                                   })
+                        }
+                    }
                 }
 
                 MouseArea {
                     anchors.fill: parent
+                    anchors.rightMargin: 38
                     hoverEnabled: true
                     onEntered: parent.color = "#e6e6e6"
                     onExited: parent.color = "#ffffff"

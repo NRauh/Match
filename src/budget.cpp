@@ -208,6 +208,7 @@ QJsonObject Budget::getMeta(QUrl filePath, int month)
 
     QDate monthLongform = QDate::currentDate().addMonths(month);
     meta.insert("month", monthLongform.toString("MMMM, yyyy"));
+    meta.insert("monthInt", monthLongform.toString("yyyy-MM"));
 
     std::string selectedMonth;
     int amount = 0;

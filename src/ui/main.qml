@@ -27,7 +27,7 @@ ApplicationWindow {
         accManager.shiftBudget(file, now)
         var accountList = account.getAccountList(file, 1)
         var offBudgetList = account.getAccountList(file, 2)
-        contentLoader.setSource("BudgetView.qml", {activeFile: file});
+        contentLoader.setSource("BudgetView.qml", {activeFile: file, targetLoader: contentLoader});
         mainSidebar.setSource("Sidebar.qml", {
                                   activeFile: file,
                                   targetLoader: contentLoader,

@@ -11,5 +11,6 @@
         <file>../assets/leftarrow.png</file>
         <file>../assets/rightarrow.png</file>
         <file>AccountSettings.qml</file>
+        <file>BudgetTransactionList.qml</file>
     </qresource>
 </RCC>
