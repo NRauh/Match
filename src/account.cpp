@@ -36,6 +36,7 @@ void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString p
 {
     Budget mbgt;
     QString formattedDate = date.toString("yyyy-MM-dd");
+    std::string queryPrep;
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(budget, "INSERT INTO transactions"
                                    "(toAccount, transactionDate, payee, amount, outflow, category, note)"
@@ -52,14 +53,16 @@ void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString p
     query.reset();
 
     if (outflow) {
-        query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance - ? WHERE id == ?");
+        queryPrep = "UPDATE accounts SET balance = balance - ? WHERE id == ?";
 
         if (isOnBudget(filePath, accountId)) {
             mbgt.addToSpent(filePath, category, date.toString("yyyy-MM"), amount);
         }
     } else {
-        query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance + ? WHERE id == ?");
+        queryPrep = "UPDATE accounts SET balance = balance + ? WHERE id == ?";
     }
+
+    query = io::sqlite::stmt(budget, queryPrep.c_str());
 
     query.bind().int32(1, amount);
     query.bind().int32(2, accountId);

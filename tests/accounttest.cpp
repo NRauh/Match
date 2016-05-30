@@ -14,27 +14,35 @@
 QString fooCuId;
 QString testTransactionId;
 
-Account account;
-Budget setupBudget;
-QUrl filePath = QUrl::fromLocalFile("Foo Budget.mbgt");
-QDate transactionDate = QDate::currentDate();
-
+//Account account;
+//Budget setupBudget;
+QUrl pathToDir = QUrl::fromLocalFile(".");
+QUrl accountTestPath = QUrl::fromLocalFile("AccountTestFile.mbgt");
+QDate now = QDate::currentDate();
 
 TEST_CASE("Can add checking accounts", "[addAccount]") {
-    SECTION("File path, account name, balance, and balance date are given") {
-        account.addAccount(filePath, "Foo CU", 80000, transactionDate, true);
+    AccountManager accManager;
+    Account account;
+    accManager.createBudget(pathToDir, "AccountTestFile");
 
-        io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT accountName, balance FROM accounts");
+    SECTION("File path, account name, balance, and balance date are given") {
+        account.addAccount(accountTestPath, "Foo CU", 10000, now, true);
+
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT accountName, balance FROM accounts");
+
         while (query.step()) {
             std::cout << "1: addAccount (1)\n";
             REQUIRE(query.row().text(0) == "Foo CU");
-            REQUIRE(query.row().int32(1) == 80000);
+            REQUIRE(query.row().int32(1) == 10000);
         }
 
-        query.reset();
-        query = io::sqlite::stmt(budget, "SELECT toAccount, amount FROM transactions WHERE id == 1");
-        query.exec();
+    }
+
+    SECTION("It adds an initial balance transaction") {
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT toAccount, amount FROM transactions WHERE id == 1");
+
         while (query.step()) {
             std::cout << "1: addAccount (2)\n";
             REQUIRE(query.row().int32(0) == 1);
@@ -43,45 +51,58 @@ TEST_CASE("Can add checking accounts", "[addAccount]") {
     }
 
     SECTION("Accounts can be off budget") {
-        io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT onBudget FROM accounts WHERE id == 1");
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT onBudget FROM accounts WHERE id == 1");
 
         while (query.step()) {
             std::cout << "1: addAccount (3)\n";
             REQUIRE(query.row().int32(0) == 1);
         }
     }
+
+    remove("AccountTestFile.mbgt");
 }
 
 TEST_CASE("Can add transactions to account", "[addTransaction]") {
+    AccountManager accManager;
+    Account account;
+    Budget budget;
+    accManager.createBudget(pathToDir, "AccountTestFile");
+    account.addAccount(accountTestPath, "Foo CU", 10000, now, true);
+    budget.addCategory(accountTestPath, "Eating Out", 1000);
+
+    account.addTransaction(accountTestPath, 1, now, "Caffe Nero", true, 125, "Eating Out", "Espresso");
+
     SECTION("Given file path, account ID, date, payee, if outflow, amount, and note") {
-        setupBudget.addCategory(filePath, "Eating Out", 10000);
-        account.addTransaction(filePath, 1, transactionDate, "Caffe Nero", true, 125, "Eating Out", "Espresso");
-        io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT toAccount, transactionDate,"
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT toAccount, transactionDate,"
                                        "payee, amount, outflow, category, note"
                                        " FROM transactions WHERE id == 2");
         while (query.step()) {
             std::cout << "2: addTransaction (1)\n";
             REQUIRE(query.row().int32(0) == 1);
-            //REQUIRE(query.row().text(1) == "2016-02-29");
-            REQUIRE(query.row().text(1) == transactionDate.toString("yyyy-MM-dd").toStdString());
+            REQUIRE(query.row().text(1) == now.toString("yyyy-MM-dd").toStdString());
             REQUIRE(query.row().text(2) == "Caffe Nero");
             REQUIRE(query.row().int32(3) == 125);
             REQUIRE(query.row().int32(4) == 1);
             REQUIRE(query.row().text(5) == "Eating Out");
             REQUIRE(query.row().text(6) == "Espresso");
         }
-        io::sqlite::stmt q(budget, "SELECT balance FROM accounts WHERE id == 1");
-        while (q.step()) {
+    }
+
+    SECTION("It removes the amount from the account balance") {
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT balance FROM accounts WHERE id == 1");
+
+        while (query.step()) {
             std::cout << "2: addTransaction (2)\n";
-            REQUIRE(q.row().int32(0) == 79875);
+            REQUIRE(query.row().int32(0) == 9875);
         }
     }
 
     SECTION("It adds to the spent amount for the budget") {
-        io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT monthOneSpent FROM budgets WHERE id == 1");
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT monthOneSpent FROM budgets WHERE id == 1");
 
         while(query.step()) {
             std::cout << "2: addTransaction (3)\n";
@@ -90,189 +111,195 @@ TEST_CASE("Can add transactions to account", "[addTransaction]") {
     }
 
     SECTION("If outflow is false, then it's income and should be added") {
-        account.addTransaction(filePath, 1, transactionDate, "Tip", false, 1000, "Income", "");
-        io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT balance FROM accounts WHERE id == 1");
+        account.addTransaction(accountTestPath, 1, now, "Tip", false, 1000, "Income", "");
+
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT balance FROM accounts WHERE id == 1");
+
         while (query.step()) {
             std::cout << "2: addTransaction (4)\n";
-            REQUIRE(query.row().int32(0) == 80875);
+            REQUIRE(query.row().int32(0) == 10875);
         }
     }
+
+    remove("AccountTestFile.mbgt");
 }
-
-/*
-TEST_CASE("Can update a transaction", "[updateTransaction]") {
-    SECTION("Filepath, transaction ID, date, payee, outflow, amount, and note") {
-        QDate transactionDate = QDate(2016, 2, 28);
-
-        account.updateTransaction(filePath, 3, transactionDate, "Tips", true, 1100, "Eating Out", "Tip I guess");
-
-        io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT transactionDate, payee, amount, outflow, note FROM transactions WHERE id == 3");
-        while (query.step()) {
-            std::cout << "3: updateTransaction (1)\n";
-            REQUIRE(query.row().text(0) == "2016-02-28");
-            REQUIRE(query.row().text(1) == "Tips");
-            REQUIRE(query.row().int32(2) == 1100);
-            REQUIRE(query.row().int32(3) == true);
-            REQUIRE(query.row().text(4) == "Tip I guess");
-        }
-    }
-
-    SECTION("It shows on the balance") {
-        io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT balance FROM accounts WHERE id == 1");
-        while (query.step()) {
-            std::cout << "3: updateTransaction (3)\n";
-            REQUIRE(query.row().int32(0) == 78775);
-        }
-        //changing it back
-        account.updateTransaction(filePath, 3, transactionDate, "Tip", false, 1000, "Income", "");
-    }
-}
-*/
 
 TEST_CASE("Can delete transactions", "[deleteTransaction]") {
-    SECTION("Filepath, and transaction ID will delete that transaction") {
-        account.deleteTransaction(filePath, 3);
+    AccountManager accManager;
+    Account account;
+    Budget budget;
+    accManager.createBudget(pathToDir, "AccountTestFile");
+    budget.addCategory(accountTestPath, "Test Category", 1000);
+    account.addAccount(accountTestPath, "Foo CU", 10000, now, true);
+    account.addTransaction(accountTestPath, 1, now, "Gas Station", true, 500, "Test Category", "Some gas");
 
-        io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT * FROM transactions WHERE id == 3");
+    account.deleteTransaction(accountTestPath, 2);
+
+    SECTION("Filepath, and transaction ID will delete that transaction") {
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT * FROM transactions WHERE id == 2");
         REQUIRE(query.step() == false);
-        query.reset();
-        query = io::sqlite::stmt(budget, "SELECT balance FROM accounts WHERE id == 1");
-        query.exec();
+    }
+
+    SECTION("It will add the deleted amount back to the balance") {
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT balance FROM accounts WHERE id == 1");
+
         while (query.step()) {
             std::cout << "4: deleteTransaction\n";
-            REQUIRE(query.row().int32(0) == 79875);
-        }
-
-        setupBudget.addCategory(filePath, "Fuel", 10000);
-        account.addTransaction(filePath, 1, transactionDate, "Gas Station", 1, 1100, "Fuel", "Some gas");
-        account.deleteTransaction(filePath, 3);
-        query.exec();
-        while (query.step()) {
-            std::cout << "4: deleteTransaction (2)\n";
-            REQUIRE(query.row().int32(0) == 79875);
+            REQUIRE(query.row().int32(0) == 10000);
         }
     }
 
     SECTION("It removes from the budget spent") {
-        io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT monthOneSpent FROM budgets WHERE id == 2");
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT monthOneSpent FROM budgets WHERE id == 2");
 
         while (query.step()) {
             std::cout << "4: deleteTransaction (3)\n";
             REQUIRE(query.row().int32(0) == 0);
         }
     }
+
+    remove("AccountTestFile.mbgt");
 }
 
 TEST_CASE("Can get a list of accounts and balances", "[getAccountList]") {
-    // Getting it's budget status is to make the account settings look pretty, by having a toggle
-    // But it may be useless to have the selection option because of that
-    // If someone wants to do some funky sorting for the side bar I'd be fine removing the selection option
+    AccountManager accManager;
+    Account account;
+    accManager.createBudget(pathToDir, "AccountTestFile");
+    account.addAccount(accountTestPath, "Foo CU", 10000, now, true);
+    account.addAccount(accountTestPath, "A Bank", 20000, now, false);
 
-    SECTION("Give file path, returns name, balance, id, and if it's on or off budget") {
-        QJsonObject accountList = account.getAccountList(filePath);
-        REQUIRE(accountList["balance"] == "798.75");
-        REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountId"] == 1);
-        REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountName"] == "Foo CU");
-        REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountBalance"] == "798.75");
+    SECTION("Give file path, returns name, balance, id alphabetically ordered") {
+        QJsonObject accountList = account.getAccountList(accountTestPath);
+
+        REQUIRE(accountList["balance"] == "300.00");
+        REQUIRE(accountList["accounts"].toArray()[1].toObject()["accountId"] == 1);
+        REQUIRE(accountList["accounts"].toArray()[1].toObject()["accountName"] == "Foo CU");
+        REQUIRE(accountList["accounts"].toArray()[1].toObject()["accountBalance"] == "100.00");
     }
 
     SECTION("If selection is set to 2, then it gets off budget accounts") {
-        account.addAccount(filePath, "A bank", 10000, transactionDate, false);
-        QJsonObject accountList = account.getAccountList(filePath, 2);
+        QJsonObject accountList = account.getAccountList(accountTestPath, 2);
         REQUIRE(accountList["accounts"].toArray().size() == 1);
     }
 
     SECTION("If selection is set to 1, then it gets on budget accounts") {
-        QJsonObject accountList = account.getAccountList(filePath, 1);
+        QJsonObject accountList = account.getAccountList(accountTestPath, 1);
         REQUIRE(accountList["accounts"].toArray().size() == 1);
     }
 
-    SECTION("Accounts are alphabetized") {
-        QJsonObject accountList = account.getAccountList(filePath);
-        REQUIRE(accountList["accounts"].toArray()[0].toObject()["accountName"] == "A bank");
-        REQUIRE(accountList["accounts"].toArray()[1].toObject()["accountName"] == "Foo CU");
-    }
+    remove("AccountTestFile.mbgt");
 }
 
 TEST_CASE("Can get list of transactions and balance for account", "[getTransactions]") {
-    SECTION("Filepath, and accountId returns balance and array of transactions") {
-        QJsonObject transactions = account.getTransactions(filePath, 1);
-        QString date = transactionDate.toString("M/d/yy");
-        QString longDate = transactionDate.toString("yyyy-MM-dd");
+    AccountManager accManager;
+    Account account;
+    Budget budget;
+    accManager.createBudget(pathToDir, "AccountTestFile");
+    budget.addCategory(accountTestPath, "Eating Out", 1000);
+    account.addAccount(accountTestPath, "Foo CU", 10000, now, true);
+    account.addTransaction(accountTestPath, 1, now, "Caffe Nero", true, 125, "Eating Out", "Espresso");
 
-        REQUIRE(transactions["balance"] == "798.75");
-        REQUIRE(transactions["transactions"].toArray()[0].toObject()["amount"] == "+800.00");
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["date"] == date);
+    SECTION("Filepath, and accountId returns balance and array of transactions") {
+        QJsonObject transactions = account.getTransactions(accountTestPath, 1);
+
+        REQUIRE(transactions["balance"] == "98.75");
+        REQUIRE(transactions["transactions"].toArray()[0].toObject()["amount"] == "+100.00");
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["date"] == now.toString("M/d/yy"));
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["payee"] == "Caffe Nero");
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["note"] == "Espresso");
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["amount"] == "-1.25");
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["category"] == "Eating Out");
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["outflow"] == true);
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["intDate"] == longDate);
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["intDate"] == now.toString("yyyy-MM-dd"));
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["id"] == 2);
     }
+
+    remove("AccountTestFile.mbgt");
 }
 
 TEST_CASE("Can get budget status", "[isOnBudget]") {
+    AccountManager accManager;
+    Account account;
+    Budget budget;
+    accManager.createBudget(pathToDir, "AccountTestFile");
+    budget.addCategory(accountTestPath, "Eating Out", 1000);
+    account.addAccount(accountTestPath, "Foo CU", 10000, now, true);
+    account.addAccount(accountTestPath, "Hello Bank", 20000, now, false);
+
     SECTION("File path and account ID returns a bool for it's on budget status") {
-        bool onBudget = account.isOnBudget(filePath, 1);
+        bool onBudget = account.isOnBudget(accountTestPath, 1);
         REQUIRE(onBudget == true);
 
-        account.addAccount(filePath, "Hello Bank", 50000, transactionDate, false);
-        onBudget = account.isOnBudget(filePath, 2);
+        onBudget = account.isOnBudget(accountTestPath, 2);
         REQUIRE(onBudget == false);
     }
 
     SECTION("Off budget accounts, don't affect the budget") {
-        account.addTransaction(filePath, 2, transactionDate, "Caffe Nero", true, 125, "Eating Out", "Espresso");
+        account.addTransaction(accountTestPath, 2, now, "Caffe Nero", true, 125, "Eating Out", "Espresso");
 
-        io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT balance FROM accounts WHERE id == 1");
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT monthOneSpent FROM budgets");
+
         while (query.step()) {
             std::cout << "5: isOnBudget (1)\n";
-            REQUIRE(query.row().int32(0) == 79875);
+            REQUIRE(query.row().int32(0) == 0);
         }
 
-        // This test seems to pass regardless, and it's actuall success needs to be checked manually
-        // #QualityCode
-        account.deleteTransaction(filePath, 4);
+        account.deleteAccount(accountTestPath, 3);
 
         query.exec();
         while (query.step()) {
             std::cout << "5: isOnBudget (2)\n";
-            REQUIRE(query.row().int32(0) == 79875);
+            REQUIRE(query.row().int32(0) == 0);
         }
     }
+
+    remove("AccountTestFile.mbgt");
 }
 
 TEST_CASE("Can set an account to be on or off budget (for the future)", "[changeOnBudget]") {
+    AccountManager accManager;
+    Account account;
+    accManager.createBudget(pathToDir, "AccountTestFile");
+    account.addAccount(accountTestPath, "Foo CU", 10000, now, false);
+    account.addAccount(accountTestPath, "Hello Bank", 20000, now, true);
+
     SECTION("Give file path, account id and bool of new status") {
-        account.changeOnBudget(filePath, 2, true);
+        account.changeOnBudget(accountTestPath, 1, true);
 
-        io::sqlite::db budget("Foo Budget.mbgt");
-        io::sqlite::stmt query(budget, "SELECT onBudget FROM accounts WHERE id == 2");
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
+        io::sqlite::stmt query(mbgt, "SELECT onBudget FROM accounts WHERE id == 1");
 
-        while(query.step()) {
+        while (query.step()) {
             REQUIRE(query.row().int32(0) == 1);
         }
+
+        account.changeOnBudget(accountTestPath, 2, false);
+
+        query = io::sqlite::stmt(mbgt, "SELECT onBudget FROM accounts WHERE id == 2");
+
+        while (query.step()) {
+            REQUIRE(query.row().int32(0) == 0);
+        }
     }
+
+    remove("AccountTestFile.mbgt");
 }
 
 TEST_CASE("Can delete accounts", "[deleteAccount]") {
     AccountManager accManager;
-    accManager.createBudget(QUrl::fromLocalFile("."), "Delete Test");
-    Account acc;
-    acc.addAccount(QUrl::fromLocalFile("Delete Test.mbgt"), "Foo", 1000, QDate::currentDate(), true);
+    Account account;
+    accManager.createBudget(pathToDir, "AccountTestFile");
+    account.addAccount(accountTestPath, "Foo CU", 10000, now, true);
 
     SECTION("Give file path and account id, then it deletes all transactions and the account") {
-        acc.deleteAccount(QUrl::fromLocalFile("Delete Test.mbgt"), 1);
+        account.deleteAccount(accountTestPath, 1);
 
-        io::sqlite::db mbgt("Delete Test.mbgt");
+        io::sqlite::db mbgt("AccountTestFile.mbgt");
         io::sqlite::stmt query(mbgt, "SELECT transactionDate FROM transactions WHERE toAccount == 1");
         REQUIRE(query.step() == false);
 
@@ -280,6 +307,5 @@ TEST_CASE("Can delete accounts", "[deleteAccount]") {
         REQUIRE(query.step() == false);
     }
 
-    remove("Delete Test.mbgt");
+    remove("AccountTestFile.mbgt");
 }
-
