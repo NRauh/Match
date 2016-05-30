@@ -10,19 +10,21 @@
 #include "../src/account.h"
 #include "../src/accountmanager.h"
 
-// Budget account and stuff made in matchtest file
-// Separated to make sure there's a control
-
+QUrl dirPath = QUrl::fromLocalFile(".");
 QUrl budgetFilePath = QUrl::fromLocalFile("BudgetTestAccount.mbgt");
-Budget budget;
 
-QString currentMonth = QDate::currentDate().toString("yyyy-MM");
-QString monthPlusOne = QDate::currentDate().addMonths(1).toString("yyyy-MM");
-QString monthPlusTwo = QDate::currentDate().addMonths(2).toString("yyyy-MM");
-QString monthMinusOne = QDate::currentDate().addMonths(-1).toString("yyyy-MM");
-QString monthMinusTwo = QDate::currentDate().addMonths(-2).toString("yyyy-MM");
+QDate currentDate = QDate::currentDate();
+QString currentMonth = currentDate.toString("yyyy-MM");
+QString monthPlusOne = currentDate.addMonths(1).toString("yyyy-MM");
+QString monthPlusTwo = currentDate.addMonths(2).toString("yyyy-MM");
+QString monthMinusOne = currentDate.addMonths(-1).toString("yyyy-MM");
+QString monthMinusTwo = currentDate.addMonths(-2).toString("yyyy-MM");
 
 TEST_CASE("Can add budget categories", "[addCategory]") {
+    AccountManager accManager;
+    Budget budget;
+    accManager.createBudget(dirPath, "BudgetTestAccount");
+
     SECTION("Give file path, name, and initial amount") {
         budget.addCategory(budgetFilePath, "Test Budget", 10000);
 
@@ -70,32 +72,40 @@ TEST_CASE("Can add budget categories", "[addCategory]") {
             REQUIRE(query.row().text(15) == monthMinusTwo.toStdString());
         }
     }
+
+    remove("BudgetTestAccount.mbgt");
 }
 
 TEST_CASE("Can get a list of categories with amounts for a month at relative index", "[getCategories]") {
+    AccountManager accManager;
+    Budget budget;
+    accManager.createBudget(dirPath, "BudgetTestAccount");
+    budget.addCategory(budgetFilePath, "Test Category", 10000);
+
     SECTION("Zero is current month") {
         QJsonArray categories = budget.getCategories(budgetFilePath, 0);
 
-        REQUIRE(categories[0].toObject()["categoryName"] == "Test Budget");
+        REQUIRE(categories[0].toObject()["categoryName"] == "Test Category");
         REQUIRE(categories[0].toObject()["amount"] == "100.00");
         REQUIRE(categories[0].toObject()["remaining"] == "100.00");
     }
 
     SECTION("Can go positive or negative up to 2 out") {
         QJsonArray categories = budget.getCategories(budgetFilePath, 1);
-        REQUIRE(categories[0].toObject()["categoryName"] == "Test Budget");
+        REQUIRE(categories[0].toObject()["categoryName"] == "Test Category");
         REQUIRE(categories[0].toObject()["amount"] == "0.00");
 
         categories = budget.getCategories(budgetFilePath, 2);
-        REQUIRE(categories[0].toObject()["categoryName"] == "Test Budget");
+        REQUIRE(categories[0].toObject()["categoryName"] == "Test Category");
 
         categories = budget.getCategories(budgetFilePath, -1);
-        REQUIRE(categories[0].toObject()["categoryName"] == "Test Budget");
+        REQUIRE(categories[0].toObject()["categoryName"] == "Test Category");
 
         categories = budget.getCategories(budgetFilePath, -2);
-        REQUIRE(categories[0].toObject()["categoryName"] == "Test Budget");
+        REQUIRE(categories[0].toObject()["categoryName"] == "Test Category");
     }
 
+    //This error is probably pointless
     SECTION("Out of that range, has error") {
         QJsonArray categories = budget.getCategories(budgetFilePath, 3);
         REQUIRE(categories[0].toObject()["err"] == "Out of stored range");
@@ -108,13 +118,19 @@ TEST_CASE("Can get a list of categories with amounts for a month at relative ind
     // I'm planning on isolating each test soon, so when I do I'll actually add this
     // For now, I'm only needing to add `ORDER BY categoryName` to the sqlQuery var
     //SECTION("Categories are alphabetized") {}
+
+    remove("BudgetTestAccount.mbgt");
 }
 
 TEST_CASE("Can get a list of only category names", "[getCategoryNames]") {
+    AccountManager accManager;
+    Budget budget;
+    accManager.createBudget(dirPath, "BudgetTestAccount");
+    budget.addCategory(budgetFilePath, "Test Category", 10000);
+
     SECTION("Returns an QList of the category names") {
         QList<QString> categories = budget.getCategoryNames(budgetFilePath);
-
-        REQUIRE(categories.at(0) == "Test Budget");
+        REQUIRE(categories.at(0) == "Test Category");
     }
 
     SECTION("The list is alphabetized") {
@@ -122,15 +138,20 @@ TEST_CASE("Can get a list of only category names", "[getCategoryNames]") {
         QList<QString> categories = budget.getCategoryNames(budgetFilePath);
 
         REQUIRE(categories.at(0) == "Hello World");
-        REQUIRE(categories.at(1) == "Test Budget");
+        REQUIRE(categories.at(1) == "Test Category");
     }
+
+    remove("BudgetTestAccount.mbgt");
 }
 
 TEST_CASE("Can subtract from remaining amount", "[addToSpent]") {
+    AccountManager accManager;
+    Budget budget;
+    accManager.createBudget(dirPath, "BudgetTestAccount");
+    budget.addCategory(budgetFilePath, "Test Category", 10000);
+
     SECTION("Give file path, category, month date, and amount; returns bool") {
-        bool changeSuccess = budget.addToSpent(budgetFilePath,
-                                                       "Test Budget",
-                                                       currentMonth, 5000);
+        bool changeSuccess = budget.addToSpent(budgetFilePath, "Test Category", currentMonth, 5000);
 
         REQUIRE(changeSuccess == true);
 
@@ -144,18 +165,10 @@ TEST_CASE("Can subtract from remaining amount", "[addToSpent]") {
     }
 
     SECTION("It works with past and future months") {
-        budget.addToSpent(budgetFilePath,
-                                  "Test Budget",
-                                  monthPlusOne, 5000);
-        budget.addToSpent(budgetFilePath,
-                                  "Test Budget",
-                                  monthPlusTwo, 5000);
-        budget.addToSpent(budgetFilePath,
-                                  "Test Budget",
-                                  monthMinusOne, 5000);
-        budget.addToSpent(budgetFilePath,
-                                  "Test Budget",
-                                  monthMinusTwo, 5000);
+        budget.addToSpent(budgetFilePath, "Test Category", monthPlusOne, 5000);
+        budget.addToSpent(budgetFilePath, "Test Category", monthPlusTwo, 5000);
+        budget.addToSpent(budgetFilePath, "Test Category", monthMinusOne, 5000);
+        budget.addToSpent(budgetFilePath, "Test Category", monthMinusTwo, 5000);
 
         io::sqlite::db mbgt("BudgetTestAccount.mbgt");
         io::sqlite::stmt query(mbgt, "SELECT monthTwoSpent, monthThreeSpent,"
@@ -172,21 +185,26 @@ TEST_CASE("Can subtract from remaining amount", "[addToSpent]") {
     }
 
     SECTION ("If the month is out of range, it returns false") {
-        QString outOfDate = QDate::currentDate().addMonths(4).toString("yyyy-MM");
-        bool changeStatus = budget.addToSpent(budgetFilePath,
-                                                      "Test Budget",
-                                                      outOfDate, 5000);
+        QString outOfDate = currentDate.addMonths(4).toString("yyyy-MM");
+        bool changeStatus = budget.addToSpent(budgetFilePath, "Test Category", outOfDate, 5000);
         REQUIRE(changeStatus == false);
     }
+
+    remove("BudgetTestAccount.mbgt");
 }
 
 TEST_CASE("Can update budget for month", "[updateBudget]") {
+    AccountManager accManager;
+    Budget budget;
+    accManager.createBudget(dirPath, "BudgetTestAccount");
+    budget.addCategory(budgetFilePath, "Test Category", 10000);
+
     SECTION("File path, month number, categoryName, and updated amount") {
-        budget.updateBudget(budgetFilePath, -2, "Test Budget", 5000);
-        budget.updateBudget(budgetFilePath, -1, "Test Budget", 5000);
-        budget.updateBudget(budgetFilePath, 0, "Test Budget", 5000);
-        budget.updateBudget(budgetFilePath, 1, "Test Budget", 5000);
-        budget.updateBudget(budgetFilePath, 2, "Test Budget", 5000);
+        budget.updateBudget(budgetFilePath, -2, "Test Category", 9000);
+        budget.updateBudget(budgetFilePath, -1, "Test Category", 8000);
+        budget.updateBudget(budgetFilePath, 0, "Test Category", 7000);
+        budget.updateBudget(budgetFilePath, 1, "Test Category", 6000);
+        budget.updateBudget(budgetFilePath, 2, "Test Category", 5000);
 
         io::sqlite::db mbgt("BudgetTestAccount.mbgt");
         io::sqlite::stmt query(mbgt, "SELECT "
@@ -196,59 +214,76 @@ TEST_CASE("Can update budget for month", "[updateBudget]") {
 
         while (query.step()) {
             std::cout << "3: updateBudget (1)\n";
-            REQUIRE(query.row().int32(0) == 5000);
-            REQUIRE(query.row().int32(1) == 5000);
-            REQUIRE(query.row().int32(2) == 5000);
-            REQUIRE(query.row().int32(3) == 5000);
+            REQUIRE(query.row().int32(0) == 9000);
+            REQUIRE(query.row().int32(1) == 8000);
+            REQUIRE(query.row().int32(2) == 7000);
+            REQUIRE(query.row().int32(3) == 6000);
             REQUIRE(query.row().int32(4) == 5000);
         }
     }
+
+    remove("BudgetTestAccount.mbgt");
 }
 
 TEST_CASE("Can get the month and remaing amount to spend", "[getMeta]") {
+    AccountManager accManager;
+    Budget budget;
+    accManager.createBudget(dirPath, "BudgetTestAccount");
+    budget.addCategory(budgetFilePath, "Test Category", 10000);
+    budget.addToSpent(budgetFilePath, "Test Category", currentMonth, 5000);
+
     SECTION("File path, month number") {
         QJsonObject meta = budget.getMeta(budgetFilePath, 0);
-        QDate month = QDate::currentDate();
 
-        REQUIRE(meta["month"] == month.toString("MMMM, yyyy"));
-        REQUIRE(meta["remaining"] == "200.00");
-        REQUIRE(meta["monthInt"] == month.toString("yyyy-MM"));
+        REQUIRE(meta["month"] == currentDate.toString("MMMM, yyyy"));
+        REQUIRE(meta["remaining"] == "50.00");
+        REQUIRE(meta["monthInt"] == currentDate.toString("yyyy-MM"));
     }
+
+    remove("BudgetTestAccount.mbgt");
 }
 
 TEST_CASE("Can get amount of unbudgeted money", "[getAvailableMoney]") {
+    AccountManager accManager;
+    Account account;
+    Budget budget;
+    accManager.createBudget(dirPath, "BudgetTestAccount");
+    budget.addCategory(budgetFilePath, "Test Category", 10000);
+    account.addAccount(budgetFilePath, "Foo CU", 20000, currentDate, true);
+
     SECTION("File path") {
         QString unbudgeted = budget.getAvailableMoney(budgetFilePath);
 
-        REQUIRE(unbudgeted == "1650.00");
+        REQUIRE(unbudgeted == "100.00");
     }
 
     SECTION("It doesn't count off budget accounts") {
         Account account;
-        QDate transactionDate = QDate::currentDate();
 
-        account.addAccount(budgetFilePath, "Hello Bank", 100000, transactionDate, false);
+        account.addAccount(budgetFilePath, "Hello Bank", 30000, currentDate, false);
         QString unbudgeted = budget.getAvailableMoney(budgetFilePath);
 
-        REQUIRE(unbudgeted == "1650.00");
+        REQUIRE(unbudgeted == "100.00");
     }
+
+    remove("BudgetTestAccount.mbgt");
 }
 
 TEST_CASE("Can get transactions for a category", "[getCategoryTransactions]") {
     AccountManager accManager;
     Account account;
     Budget budget;
-    accManager.createBudget(QUrl::fromLocalFile("."), "Transaction Test");
-    account.addAccount(QUrl::fromLocalFile("Transaction Test.mbgt"), "Foo", 1000, QDate::currentDate(), true);
-    account.addAccount(QUrl::fromLocalFile("Transaction Test.mbgt"), "Bar", 1000, QDate::currentDate(), false);
-    budget.addCategory(QUrl::fromLocalFile("Transaction Test.mbgt"), "Test", 3000);
-    account.addTransaction(QUrl::fromLocalFile("Transaction Test.mbgt"), 1, QDate::currentDate(), "Corner Shop", true, 200, "Test", "Test transaction");
-    account.addTransaction(QUrl::fromLocalFile("Transaction Test.mbgt"), 2, QDate::currentDate(), "Corner Shop", true, 200, "Test", "Other test");
+    accManager.createBudget(dirPath, "BudgetTestAccount");
+    account.addAccount(budgetFilePath, "Foo", 1000, currentDate, true);
+    account.addAccount(budgetFilePath, "Bar", 1000, currentDate, false);
+    budget.addCategory(budgetFilePath, "Test", 3000);
+    account.addTransaction(budgetFilePath, 1, currentDate, "Corner Shop", true, 200, "Test", "Test transaction");
+    account.addTransaction(budgetFilePath, 2, currentDate, "Corner Shop", true, 200, "Test", "Other test");
 
     SECTION("It gets the transactions for a budget") {
-        QJsonArray transactions = budget.getCategoryTransactions(QUrl::fromLocalFile("Transaction Test.mbgt"), "Test", QDate::currentDate().toString("yyyy-MM"));
+        QJsonArray transactions = budget.getCategoryTransactions(budgetFilePath, "Test", currentDate.toString("yyyy-MM"));
 
-        REQUIRE(transactions[0].toObject()["date"] == QDate::currentDate().toString("M/d/yy"));
+        REQUIRE(transactions[0].toObject()["date"] == currentDate.toString("M/d/yy"));
         REQUIRE(transactions[0].toObject()["payee"] == "Corner Shop");
         REQUIRE(transactions[0].toObject()["note"] == "Test transaction");
         REQUIRE(transactions[0].toObject()["amount"] == "2.00");
@@ -256,5 +291,5 @@ TEST_CASE("Can get transactions for a category", "[getCategoryTransactions]") {
         REQUIRE(transactions.size() == 1);
     }
 
-    remove("Transaction Test.mbgt");
+    remove("BudgetTestAccount.mbgt");
 }
