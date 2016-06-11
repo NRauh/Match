@@ -174,7 +174,7 @@ QJsonObject Account::getTransactions(QUrl filePath, int accountId)
     query.reset();
     query = io::sqlite::stmt(budget, "SELECT transactionDate, payee, amount,"
                                      "category, outflow, note, id"
-                                     " FROM transactions WHERE toAccount == ?");
+                                     " FROM transactions WHERE toAccount == ? ORDER BY transactionDate DESC");
     query.bind().int32(1, accountId);
     query.exec();
 

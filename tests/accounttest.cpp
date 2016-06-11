@@ -218,6 +218,13 @@ TEST_CASE("Can get list of transactions and balance for account", "[getTransacti
         REQUIRE(transactions["transactions"].toArray()[1].toObject()["id"] == 2);
     }
 
+    SECTION("It gets the transactions by date") {
+        account.addTransaction(accountTestPath, 1, now.addDays(1), "Foo", true, 500, "Eating Out", "Espresso");
+        QJsonObject transactions = account.getTransactions(accountTestPath, 1);
+
+        REQUIRE(transactions["transactions"].toArray()[0].toObject()["payee"] == "Foo");
+    }
+
     remove("AccountTestFile.mbgt");
 }
 
