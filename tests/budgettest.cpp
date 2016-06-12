@@ -127,18 +127,15 @@ TEST_CASE("Can get a list of only category names", "[getCategoryNames]") {
     Budget budget;
     accManager.createBudget(dirPath, "BudgetTestAccount");
     budget.addCategory(budgetFilePath, "Test Category", 10000);
+    budget.addCategory(budgetFilePath, "Hello World", 20000);
 
-    SECTION("Returns an QList of the category names") {
-        QList<QString> categories = budget.getCategoryNames(budgetFilePath);
-        REQUIRE(categories.at(0) == "Test Category");
-    }
-
-    SECTION("The list is alphabetized") {
-        budget.addCategory(budgetFilePath, "Hello World", 20000);
+    SECTION("Returns an alphabetized QList of the category names") {
         QList<QString> categories = budget.getCategoryNames(budgetFilePath);
 
         REQUIRE(categories.at(0) == "Hello World");
-        REQUIRE(categories.at(1) == "Test Category");
+        REQUIRE(categories.at(1) == "Income");
+        REQUIRE(categories.at(2) == "Test Category");
+        REQUIRE(categories.at(3) == "Uncategorized");
     }
 
     remove("BudgetTestAccount.mbgt");

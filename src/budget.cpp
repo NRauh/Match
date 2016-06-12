@@ -131,6 +131,8 @@ QList<QString> Budget::getCategoryNames(QUrl filePath)
         categoryList << query.row().text(0).c_str();
     }
 
+    categoryList << "Income" << "Uncategorized";
+
     categoryList.sort();
 
     return categoryList;

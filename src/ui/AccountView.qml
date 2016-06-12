@@ -189,6 +189,7 @@ Rectangle {
             id: categoryInput
             height: 25
             model: categories
+            currentIndex: categories.indexOf("Uncategorized")
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.right: parent.right
