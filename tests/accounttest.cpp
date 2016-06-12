@@ -207,15 +207,15 @@ TEST_CASE("Can get list of transactions and balance for account", "[getTransacti
         QJsonObject transactions = account.getTransactions(accountTestPath, 1);
 
         REQUIRE(transactions["balance"] == "98.75");
-        REQUIRE(transactions["transactions"].toArray()[0].toObject()["amount"] == "+100.00");
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["date"] == now.toString("M/d/yy"));
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["payee"] == "Caffe Nero");
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["note"] == "Espresso");
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["amount"] == "-1.25");
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["category"] == "Eating Out");
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["outflow"] == true);
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["intDate"] == now.toString("yyyy-MM-dd"));
-        REQUIRE(transactions["transactions"].toArray()[1].toObject()["id"] == 2);
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["amount"] == "+100.00");
+        REQUIRE(transactions["transactions"].toArray()[0].toObject()["date"] == now.toString("M/d/yy"));
+        REQUIRE(transactions["transactions"].toArray()[0].toObject()["payee"] == "Caffe Nero");
+        REQUIRE(transactions["transactions"].toArray()[0].toObject()["note"] == "Espresso");
+        REQUIRE(transactions["transactions"].toArray()[0].toObject()["amount"] == "-1.25");
+        REQUIRE(transactions["transactions"].toArray()[0].toObject()["category"] == "Eating Out");
+        REQUIRE(transactions["transactions"].toArray()[0].toObject()["outflow"] == true);
+        REQUIRE(transactions["transactions"].toArray()[0].toObject()["intDate"] == now.toString("yyyy-MM-dd"));
+        REQUIRE(transactions["transactions"].toArray()[0].toObject()["id"] == 2);
     }
 
     SECTION("It gets the transactions by date") {
@@ -223,6 +223,8 @@ TEST_CASE("Can get list of transactions and balance for account", "[getTransacti
         QJsonObject transactions = account.getTransactions(accountTestPath, 1);
 
         REQUIRE(transactions["transactions"].toArray()[0].toObject()["payee"] == "Foo");
+        REQUIRE(transactions["transactions"].toArray()[1].toObject()["payee"] == "Caffe Nero");
+        REQUIRE(transactions["transactions"].toArray()[2].toObject()["payee"] == "Self");
     }
 
     remove("AccountTestFile.mbgt");
