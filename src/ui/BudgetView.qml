@@ -89,10 +89,10 @@ Item {
                     categories = budget.getCategories(activeFile, selectedMonth)
                     meta = budget.getMeta(activeFile, selectedMonth);
                     if (selectedMonth === -2) {
-                        parent.visible = false
+                        previousMonth.visible = false
                     }
                     if (selectedMonth < 2) {
-                        rightArrow.visible = true
+                        nextMonth.visible = true
                     }
                 }
             }
@@ -139,10 +139,10 @@ Item {
                     categories = budget.getCategories(activeFile, selectedMonth)
                     meta = budget.getMeta(activeFile, selectedMonth)
                     if (selectedMonth === 2) {
-                        parent.visible = false
+                        nextMonth.visible = false
                     }
                     if (selectedMonth > -2) {
-                        leftArrow.visible = true
+                        previousMonth.visible = true
                     }
                 }
             }
