@@ -13,6 +13,7 @@ Rectangle {
     property var selectedTransactionId
     property var categories
     property var activeFile
+    property var sidebarRefresh
     Component.onCompleted: {
         transactions = account.getTransactions(activeFile, accountId)
         // TODO: fix this returning a weird not quite array
@@ -231,6 +232,7 @@ Rectangle {
                     noteInput.text = ""
                     // TODO: Should arrange by date
                     transactions = account.getTransactions(activeFile, accountId);
+                    sidebarRefresh()
                 }
             }
         }
@@ -301,6 +303,7 @@ Rectangle {
                 outflowInput.checked = true
 
                 transactions = account.getTransactions(activeFile, accountId)
+                sidebarRefresh()
             }
         }
     }

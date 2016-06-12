@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
+import com.nrauh 1.0
 
 Rectangle {
     id: sidebar
@@ -10,6 +11,18 @@ Rectangle {
     property var offBudgetData
     property var targetLoader
     property var activeFile
+    Component.onCompleted: {
+        loadAccountList()
+    }
+
+    function loadAccountList() {
+        accountData = account.getAccountList(activeFile, 1)
+        offBudgetData = account.getAccountList(activeFile, 2)
+    }
+
+    Account {
+        id: account
+    }
 
     Label {
         id: logo
@@ -99,8 +112,8 @@ Rectangle {
                 id: accountRect
                 width: 250
                 height: 25
-                anchors.right: parent.right
-                anchors.left: parent.left
+                anchors.right: accountList.right
+                anchors.left: accountList.left
                 color: "#adc9d9"
 
                 Label {
@@ -128,7 +141,10 @@ Rectangle {
                     onClicked: targetLoader.setSource("AccountView.qml", {
                                                           activeFile: activeFile,
                                                           accountId: modelData.accountId,
-                                                          accountName: accountNameLabel.text
+                                                          accountName: accountNameLabel.text,
+                                                          onBudget: accountData,
+                                                          offBudget: offBudgetData,
+                                                          sidebarRefresh: loadAccountList
                                                       })
                 }
             }
@@ -179,8 +195,8 @@ Rectangle {
                 width: 250
                 height: 25
                 color: "#adc9d9"
-                anchors.left: parent.left
-                anchors.right: parent.right
+                anchors.left: offBudgetList.left
+                anchors.right: offBudgetList.right
                 Label {
                     id: offBudgetAccountNameLabel
                     text: modelData.accountName || ""
@@ -206,7 +222,8 @@ Rectangle {
                     onClicked: targetLoader.setSource("AccountView.qml", {
                                                           activeFile: activeFile,
                                                           accountId: modelData.accountId,
-                                                          accountName: offBudgetAccountNameLabel.text
+                                                          accountName: offBudgetAccountNameLabel.text,
+                                                          sidebarRefresh: loadAccountList
                                                       })
 
                 }
