@@ -18,3 +18,13 @@ TEST_CASE("Can convert integers to a formatted QString", "[intToQs") {
         REQUIRE(number == "0.01");
     }
 }
+
+TEST_CASE("Can select month from relative months out", "monthFromIndex") {
+    SECTION("Give -2..2 and it returns a string for which month to select") {
+        REQUIRE(monthFromIndex(-2) == "prevTwo");
+        REQUIRE(monthFromIndex(-1) == "prevOne");
+        REQUIRE(monthFromIndex(0) == "monthOne");
+        REQUIRE(monthFromIndex(1) == "monthTwo");
+        REQUIRE(monthFromIndex(2) == "monthThree");
+    }
+}

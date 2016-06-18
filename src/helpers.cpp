@@ -12,3 +12,28 @@ QString intToQs(int i) {
 
     return iString;
 }
+
+std::string monthFromIndex(int i) {
+    std::string selectedMonth;
+
+    switch (i) {
+    case -2:
+        selectedMonth = "prevTwo";
+        break;
+    case -1:
+        selectedMonth = "prevOne";
+        break;
+    case 0:
+        selectedMonth = "monthOne";
+        break;
+    case 1:
+        selectedMonth = "monthTwo";
+        break;
+    case 2:
+        selectedMonth = "monthThree";
+    default:
+        break;
+    }
+
+    return selectedMonth;
+}
