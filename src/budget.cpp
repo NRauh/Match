@@ -44,8 +44,8 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
 {
     QJsonArray categoryArray;
     QDate selectedMonth = QDate::currentDate();
-    std::string sqlQuery;
-    std::string selectedMonthSpent;
+    std::string sqlQuery = monthFromIndex(month);
+    std::string selectedMonthSpent = sqlQuery + "Spent";
 
     if (month < 3 && month > -3) {
         selectedMonth = selectedMonth.addMonths(month);
@@ -54,31 +54,6 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
         err.insert("err", "Out of stored range");
         categoryArray.append(err);
         return categoryArray;
-    }
-
-    switch (month) {
-    case -2:
-        sqlQuery = "prevTwo";
-        selectedMonthSpent = "prevTwoSpent";
-        break;
-    case -1:
-        sqlQuery = "prevOne";
-        selectedMonthSpent = "prevOneSpent";
-        break;
-    case 0:
-        sqlQuery = "monthOne";
-        selectedMonthSpent = "monthOneSpent";
-        break;
-    case 1:
-        sqlQuery = "monthTwo";
-        selectedMonthSpent = "monthTwoSpent";
-        break;
-    case 2:
-        sqlQuery = "monthThree";
-        selectedMonthSpent = "monthThreeSpent";
-        break;
-    default:
-        break;
     }
 
     sqlQuery = "SELECT categoryName," +
@@ -158,27 +133,7 @@ bool Budget::addToSpent(QUrl filePath, QString category, QString month, int amou
 
 void Budget::updateBudget(QUrl filePath, int month, QString category, int amount)
 {
-    std::string selectedMonth;
-
-    switch (month) {
-    case -2:
-        selectedMonth = "prevTwo";
-        break;
-    case -1:
-        selectedMonth = "prevOne";
-        break;
-    case 0:
-        selectedMonth = "monthOne";
-        break;
-    case 1:
-        selectedMonth = "monthTwo";
-        break;
-    case 2:
-        selectedMonth = "monthThree";
-        break;
-    default:
-        break;
-    }
+    std::string selectedMonth = monthFromIndex(month);
 
     std::string prepQuery;
     prepQuery = "UPDATE budgets SET " + selectedMonth + " = ? WHERE categoryName == ?";
@@ -199,29 +154,9 @@ QJsonObject Budget::getMeta(QUrl filePath, int month)
     meta.insert("month", monthLongform.toString("MMMM, yyyy"));
     meta.insert("monthInt", monthLongform.toString("yyyy-MM"));
 
-    std::string selectedMonth;
     int amount = 0;
     int spentAmount = 0;
-
-    switch (month) {
-    case -2:
-        selectedMonth = "prevTwo";
-        break;
-    case -1:
-        selectedMonth = "prevOne";
-        break;
-    case 0:
-        selectedMonth = "monthOne";
-        break;
-    case 1:
-        selectedMonth = "monthTwo";
-        break;
-    case 2:
-        selectedMonth = "monthThree";
-        break;
-    default:
-        break;
-    }
+    std::string selectedMonth = monthFromIndex(month);
 
     std::string prepQuery;
     prepQuery = "SELECT " + selectedMonth + "Spent, " + selectedMonth + " FROM budgets";
