@@ -15,7 +15,8 @@ HEADERS += catch.hpp ../src/accountmanager.h ../src/json/json.h ../src/json/json
         ../src/account.h \
         ../src/sqlite/sqlite3.h \
         ../src/sqlite/sqlite.hpp \
-        ../src/budget.h
+        ../src/budget.h \
+        ../src/helpers.h
 SOURCES += accountmanagertest.cpp \
         matchtest.cpp \
         ../src/accountmanager.cpp \
@@ -25,4 +26,6 @@ SOURCES += accountmanagertest.cpp \
         ../src/sqlite/sqlite3.c \
         ../src/sqlite/sqlite.cpp \
         budgettest.cpp \
-        ../src/budget.cpp
+        ../src/budget.cpp \
+        helperstest.cpp \
+        ../src/helpers.cpp
