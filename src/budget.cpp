@@ -4,6 +4,7 @@
 #include <QDate>
 #include <QDebug>
 #include <QJsonValue>
+#include "helpers.h"
 
 Budget::Budget(QObject *parent) : QObject(parent)
 {
@@ -89,31 +90,17 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
     query.bind().text(1, selectedMonth.toString("yyyy-MM").toStdString());
 
     while (query.step()) {
-        int initialAmount = query.row().int32(1);
-        int remainingAmount = query.row().int32(2);
+        int amount = query.row().int32(1);
+        int spent = query.row().int32(2);
         QJsonObject category;
         QString categoryName = QString::fromStdString(query.row().text(0));
-        QString amount = QString::number(initialAmount);
-        QString remaining = QString::number(initialAmount - remainingAmount);
 
-        if (amount.length() == 1) {
-            amount.prepend("00");
-        } else if (amount.length() == 2) {
-            amount.prepend("0");
-        }
-
-        if (remaining.length() == 1) {
-            remaining.prepend("00");
-        } else if (remaining.length() == 2) {
-            remaining.prepend("0");
-        }
-
-        amount = amount.insert(amount.length() - 2, ".");
-        remaining = remaining.insert(remaining.length() - 2, ".");
+        QString formattedAmount = intToQs(amount);
+        QString formattedRemainingAmount = intToQs(amount - spent);
 
         category.insert("categoryName", categoryName);
-        category.insert("amount", amount);
-        category.insert("remaining", remaining);
+        category.insert("amount", formattedAmount);
+        category.insert("remaining", formattedRemainingAmount);
 
         categoryArray.append(category);
     }
@@ -248,24 +235,15 @@ QJsonObject Budget::getMeta(QUrl filePath, int month)
     }
 
     int remainingAmount = amount - spentAmount;
-    QString remainingAmountString = QString::number(remainingAmount);
+    QString formattedRemainingAmount = intToQs(remainingAmount);
 
-    if (remainingAmountString.length() == 1) {
-        remainingAmountString.prepend("00");
-    } else if (remainingAmountString.length() == 2) {
-        remainingAmountString.prepend("0");
-    }
-
-    remainingAmountString.insert(remainingAmountString.length() - 2, ".");
-
-    meta.insert("remaining", remainingAmountString);
+    meta.insert("remaining", formattedRemainingAmount);
 
     return meta;
 }
 
 QString Budget::getAvailableMoney(QUrl filePath)
 {
-    QString available;
     int totalBalance = 0;
     int totalBudgets = 0;
 
@@ -283,17 +261,10 @@ QString Budget::getAvailableMoney(QUrl filePath)
         totalBudgets += budgetUpcoming;
     }
 
-    available = QString::number(totalBalance - totalBudgets);
+    int available = totalBalance - totalBudgets;
+    QString formattedAvailable = intToQs(available);
 
-    if (available.length() == 1) {
-        available.prepend("00");
-    } else if (available.length() == 2) {
-        available.prepend("0");
-    }
-
-    available.insert(available.length() - 2, ".");
-
-    return available;
+    return formattedAvailable;
 }
 
 QJsonArray Budget::getCategoryTransactions(QUrl filePath, QString category, QString date)
@@ -317,13 +288,8 @@ QJsonArray Budget::getCategoryTransactions(QUrl filePath, QString category, QStr
         QDate formattedDate = QDate::fromString(query.row().text(0).c_str(), "yyyy-MM-dd");
         QString toAccount;
 
-        QString formattedAmount = query.row().text(3).c_str();
-        if (formattedAmount.length() == 1) {
-            formattedAmount.prepend("00");
-        } else if (formattedAmount.length() == 2) {
-            formattedAmount.prepend("0");
-        }
-        formattedAmount.insert(formattedAmount.length() - 2, ".");
+        int amount = query.row().int32(3);
+        QString formattedAmount = intToQs(amount);
 
         transaction.insert("date", formattedDate.toString("M/d/yy"));
         transaction.insert("payee", query.row().text(1).c_str());
