@@ -6,6 +6,7 @@
 #include <QJsonArray>
 #include "budget.h"
 #include <QDebug>
+#include "helpers.h"
 
 Account::Account(QObject *parent) : QObject(parent)
 {
@@ -147,8 +148,7 @@ QJsonObject Account::getAccountList(QUrl filePath, int selection)
         totalBalance += query.row().int32(2);
     }
 
-    QString formattedBalance = QString::number(totalBalance);
-    formattedBalance.insert(formattedBalance.length() - 2, ".");
+    QString formattedBalance = intToQs(totalBalance);
     QJsonValue accountsValue(accounts);
 
     accountList.insert("balance", formattedBalance);
@@ -183,8 +183,8 @@ QJsonObject Account::getTransactions(QUrl filePath, int accountId)
     while (query.step()) {
         QJsonObject transaction;
         bool outflow = query.row().int32(4);
-        QString formattedAmount = QString::fromStdString(query.row().text(2));
-        formattedAmount.insert(formattedAmount.length() - 2, ".");
+        QString formattedAmount = intToQs(query.row().int32(2));
+
         if (outflow) {
             formattedAmount.prepend("-");
         } else {
