@@ -1,11 +1,9 @@
+#include <QJsonArray>
+#include <QVector>
 #include "account.h"
 #include "accountmanager.h"
-#include <QUuid>
 #include "sqlite/sqlite.hpp"
-#include <iostream>
-#include <QJsonArray>
 #include "budget.h"
-#include <QDebug>
 #include "helpers.h"
 
 Account::Account(QObject *parent) : QObject(parent)
@@ -15,17 +13,17 @@ Account::Account(QObject *parent) : QObject(parent)
 
 void Account::addAccount(QUrl filePath, QString accountName, int balance, QDate balanceDate, bool onBudget)
 {
+    int accountId;
+
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(budget, "INSERT INTO accounts (accountName, balance, onBudget) VALUES (?, 0, ?)");
+
     query.bind().text(1, accountName.toStdString());
     query.bind().int32(2, onBudget);
     query.exec();
 
-    query.reset();
     query = io::sqlite::stmt(budget, "SELECT last_insert_rowid() FROM accounts");
 
-    int accountId;
-    query.exec();
     while (query.step()) {
         accountId = query.row().int32(0);
     }
@@ -36,12 +34,15 @@ void Account::addAccount(QUrl filePath, QString accountName, int balance, QDate 
 void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString payee, bool outflow, int amount, QString category, QString note)
 {
     Budget mbgt;
+    std::string prepQuery;
     QString formattedDate = date.toString("yyyy-MM-dd");
-    std::string queryPrep;
+
+    // add the transaction
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(budget, "INSERT INTO transactions"
                                    "(toAccount, transactionDate, payee, amount, outflow, category, note)"
                                    "VALUES (?, ?, ?, ?, ?, ?, ?)");
+
     query.bind().int32(1, accountId);
     query.bind().text(2, formattedDate.toStdString());
     query.bind().text(3, payee.toStdString());
@@ -51,19 +52,19 @@ void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString p
     query.bind().text(7, note.toStdString());
     query.exec();
 
-    query.reset();
-
+    // lower account balance and possibly add to spent for a budget category
+    // or increase account balance
     if (outflow) {
-        queryPrep = "UPDATE accounts SET balance = balance - ? WHERE id == ?";
+        prepQuery = "UPDATE accounts SET balance = balance - ? WHERE id == ?";
 
         if (isOnBudget(filePath, accountId)) {
             mbgt.addToSpent(filePath, category, date.toString("yyyy-MM"), amount);
         }
     } else {
-        queryPrep = "UPDATE accounts SET balance = balance + ? WHERE id == ?";
+        prepQuery = "UPDATE accounts SET balance = balance + ? WHERE id == ?";
     }
 
-    query = io::sqlite::stmt(budget, queryPrep.c_str());
+    query = io::sqlite::stmt(budget, prepQuery.c_str());
 
     query.bind().int32(1, amount);
     query.bind().int32(2, accountId);
@@ -73,8 +74,13 @@ void Account::addTransaction(QUrl filePath, int accountId, QDate date, QString p
 void Account::deleteTransaction(QUrl filePath, int transactionId)
 {
     Budget mbgt;
+
+    // getting transaction details
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
-    io::sqlite::stmt query(budget, "SELECT toAccount, amount, outflow, category, transactionDate FROM transactions WHERE id == ?");
+    io::sqlite::stmt query(budget, "SELECT toAccount, amount,"
+                                   " outflow, category, transactionDate"
+                                   " FROM transactions WHERE id == ?");
+
     query.bind().int32(1, transactionId);
     query.exec();
 
@@ -94,8 +100,7 @@ void Account::deleteTransaction(QUrl filePath, int transactionId)
         month = date.toString("yyyy-MM");
     }
 
-    query.reset();
-
+    // negating transaction effect on balances and budget category
     if (outflow) {
         query = io::sqlite::stmt(budget, "UPDATE accounts SET balance = balance + ? WHERE id == ?");
 
@@ -110,6 +115,7 @@ void Account::deleteTransaction(QUrl filePath, int transactionId)
     query.bind().int32(2, account);
     query.exec();
 
+    // deleting the transaction
     query = io::sqlite::stmt(budget, "DELETE FROM transactions WHERE id == ?");
     query.bind().int32(1, transactionId);
     query.exec();
@@ -119,8 +125,8 @@ QJsonObject Account::getAccountList(QUrl filePath, int selection)
 {
     QJsonObject accountList;
     QJsonArray accounts;
-    int totalBalance = 0;
     std::string prepQuery;
+    int totalBalance = 0;
 
     if (selection == 2) {
         prepQuery = "SELECT id, accountName, balance FROM accounts WHERE onBudget == 0 ORDER BY accountName";
@@ -136,23 +142,20 @@ QJsonObject Account::getAccountList(QUrl filePath, int selection)
     while (query.step()) {
         QJsonObject account;
         QString accountName = QString::fromStdString(query.row().text(1));
-        QString accountBalance = QString::number(query.row().int32(2));
-        accountBalance.insert(accountBalance.length() - 2, ".");
+        QString accountBalance = intToQs(query.row().int32(2));
 
         account.insert("accountId", query.row().int32(0));
         account.insert("accountName", accountName);
         account.insert("accountBalance", accountBalance);
 
-        QJsonValue accountValue(account);
-        accounts.append(accountValue);
+        accounts.append(account);
         totalBalance += query.row().int32(2);
     }
 
-    QString formattedBalance = intToQs(totalBalance);
-    QJsonValue accountsValue(accounts);
+    QString formattedTotalBalance = intToQs(totalBalance);
 
-    accountList.insert("balance", formattedBalance);
-    accountList.insert("accounts", accountsValue);
+    accountList.insert("balance", formattedTotalBalance);
+    accountList.insert("accounts", accounts);
 
     return accountList;
 }
@@ -160,10 +163,13 @@ QJsonObject Account::getAccountList(QUrl filePath, int selection)
 QJsonObject Account::getTransactions(QUrl filePath, int accountId)
 {
     QJsonObject transactionList;
+    QJsonArray transactions;
     int balance;
 
+    // getting account balance
     io::sqlite::db budget(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(budget, "SELECT balance FROM accounts WHERE id == ?");
+
     query.bind().int32(1, accountId);
     query.exec();
 
@@ -171,7 +177,7 @@ QJsonObject Account::getTransactions(QUrl filePath, int accountId)
         balance = query.row().int32(0);
     }
 
-    query.reset();
+    // getting individual transactions
     query = io::sqlite::stmt(budget, "SELECT transactionDate, payee, amount,"
                                      "category, outflow, note, id"
                                      " FROM transactions WHERE toAccount == ?"
@@ -179,7 +185,6 @@ QJsonObject Account::getTransactions(QUrl filePath, int accountId)
     query.bind().int32(1, accountId);
     query.exec();
 
-    QJsonArray transactions;
     while (query.step()) {
         QJsonObject transaction;
         bool outflow = query.row().int32(4);
@@ -194,24 +199,20 @@ QJsonObject Account::getTransactions(QUrl filePath, int accountId)
         QString date = QString::fromStdString(query.row().text(0));
         QDate formattedDate = QDate::fromString(date, QString("yyyy-MM-dd"));
 
-        QString payee = QString::fromStdString(query.row().text(1));
-        QString category = QString::fromStdString(query.row().text(3));
-        QString note = QString::fromStdString(query.row().text(5));
-        int transactionId = query.row().int32(6);
-
-        transaction.insert("amount", formattedAmount);
         transaction.insert("date", formattedDate.toString("M/d/yy"));
-        transaction.insert("payee", payee);
-        transaction.insert("category", category);
-        transaction.insert("note", note);
-        transaction.insert("outflow", outflow);
         transaction.insert("intDate", date);
-        transaction.insert("id", transactionId);
+        transaction.insert("payee", query.row().text(1).c_str());
+        transaction.insert("amount", formattedAmount);
+        transaction.insert("category", query.row().text(3).c_str());
+        transaction.insert("outflow", outflow);
+        transaction.insert("note", query.row().text(5).c_str());
+        transaction.insert("id", query.row().int32(6));
+
         transactions.append(transaction);
     }
 
-    QString formattedBalance = QString::number(balance);
-    formattedBalance.insert(formattedBalance.length() - 2, ".");
+    // inserting the balance and transactions
+    QString formattedBalance = intToQs(balance);
     transactionList.insert("balance", formattedBalance);
     transactionList.insert("transactions", transactions);
 

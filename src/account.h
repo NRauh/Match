@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QUrl>
 #include <QDate>
-#include "json/json.h"
 #include <QJsonObject>
 
 class Account : public QObject
@@ -20,10 +19,6 @@ public:
     Q_INVOKABLE bool isOnBudget(QUrl filePath, int accountId);
     Q_INVOKABLE void changeOnBudget(QUrl filePath, int accountId, bool newStatus);
     Q_INVOKABLE void deleteAccount(QUrl filePath, int accountId);
-    /*
-    Q_INVOKABLE QString getAccountListString(QUrl filePath);
-    Q_INVOKABLE QString getTransactionsString(QUrl filePath, QString accountId);
-    */
 
 signals:
 
