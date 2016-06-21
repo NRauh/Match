@@ -1,9 +1,6 @@
 #include "budget.h"
-#include "sqlite/sqlite.hpp"
-#include <iostream>
 #include <QDate>
-#include <QDebug>
-#include <QJsonValue>
+#include "sqlite/sqlite.hpp"
 #include "helpers.h"
 
 Budget::Budget(QObject *parent) : QObject(parent)
@@ -43,9 +40,9 @@ void Budget::addCategory(QUrl filePath, QString categoryName, int initialAmount)
 QJsonArray Budget::getCategories(QUrl filePath, int month)
 {
     QJsonArray categoryArray;
+    std::string prepQuery;
     QDate selectedMonth = QDate::currentDate();
-    std::string sqlQuery = monthFromIndex(month);
-    std::string selectedMonthSpent = sqlQuery + "Spent";
+    std::string monthIndex = monthFromIndex(month);
 
     if (month < 3 && month > -3) {
         selectedMonth = selectedMonth.addMonths(month);
@@ -56,19 +53,20 @@ QJsonArray Budget::getCategories(QUrl filePath, int month)
         return categoryArray;
     }
 
-    sqlQuery = "SELECT categoryName," +
-               sqlQuery + ", " + selectedMonthSpent +
-               " FROM budgets WHERE " + sqlQuery + "Date == ? ORDER BY categoryName";
+    prepQuery = "SELECT categoryName," +
+               monthIndex + ", " + monthIndex + "Spent " +
+               " FROM budgets WHERE " + monthIndex + "Date == ? ORDER BY categoryName";
 
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
-    io::sqlite::stmt query(mbgt, sqlQuery.c_str());
+    io::sqlite::stmt query(mbgt, prepQuery.c_str());
+
     query.bind().text(1, selectedMonth.toString("yyyy-MM").toStdString());
 
     while (query.step()) {
-        int amount = query.row().int32(1);
-        int spent = query.row().int32(2);
         QJsonObject category;
         QString categoryName = QString::fromStdString(query.row().text(0));
+        int amount = query.row().int32(1);
+        int spent = query.row().int32(2);
 
         QString formattedAmount = intToQs(amount);
         QString formattedRemainingAmount = intToQs(amount - spent);
@@ -102,27 +100,28 @@ QList<QString> Budget::getCategoryNames(QUrl filePath)
 
 bool Budget::addToSpent(QUrl filePath, QString category, QString month, int amount)
 {
+    std::string monthSpent;
+    std::string prepQuery;
     QDate currentMonth = QDate::currentDate();
-    std::string toUpdate;
 
     if (month == currentMonth.toString("yyyy-MM")) {
-        toUpdate = "monthOneSpent";
+        monthSpent = "monthOneSpent";
     } else if (month == currentMonth.addMonths(-2).toString("yyyy-MM")) {
-        toUpdate = "prevTwoSpent";
+        monthSpent = "prevTwoSpent";
     } else if (month == currentMonth.addMonths(-1).toString("yyyy-MM")) {
-        toUpdate = "prevOneSpent";
+        monthSpent = "prevOneSpent";
     } else if (month == currentMonth.addMonths(1).toString("yyyy-MM")) {
-        toUpdate = "monthTwoSpent";
+        monthSpent = "monthTwoSpent";
     } else if (month == currentMonth.addMonths(2).toString("yyyy-MM")) {
-        toUpdate = "monthThreeSpent";
+        monthSpent = "monthThreeSpent";
     } else {
         return false;
     }
 
+    prepQuery = "UPDATE budgets SET " + monthSpent + " = " + monthSpent + " + ? WHERE categoryName == ?";
+
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
-    std::string formattedQuery;
-    formattedQuery = "UPDATE budgets SET " + toUpdate + " = " + toUpdate + " + ? WHERE categoryName == ?";
-    io::sqlite::stmt query(mbgt, formattedQuery.c_str());
+    io::sqlite::stmt query(mbgt, prepQuery.c_str());
 
     query.bind().int32(1, amount);
     query.bind().text(2, category.toStdString());
@@ -133,9 +132,9 @@ bool Budget::addToSpent(QUrl filePath, QString category, QString month, int amou
 
 void Budget::updateBudget(QUrl filePath, int month, QString category, int amount)
 {
+    std::string prepQuery;
     std::string selectedMonth = monthFromIndex(month);
 
-    std::string prepQuery;
     prepQuery = "UPDATE budgets SET " + selectedMonth + " = ? WHERE categoryName == ?";
 
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
@@ -150,16 +149,19 @@ QJsonObject Budget::getMeta(QUrl filePath, int month)
 {
     QJsonObject meta;
 
-    QDate monthLongform = QDate::currentDate().addMonths(month);
-    meta.insert("month", monthLongform.toString("MMMM, yyyy"));
-    meta.insert("monthInt", monthLongform.toString("yyyy-MM"));
+    // getting and formatting the month
+    QDate selectedMonth = QDate::currentDate().addMonths(month);
+    meta.insert("month", selectedMonth.toString("MMMM, yyyy"));
+    meta.insert("monthInt", selectedMonth.toString("yyyy-MM"));
 
-    int amount = 0;
+    // getting how much money has been spent
+    // and how much was budgeted this month
     int spentAmount = 0;
-    std::string selectedMonth = monthFromIndex(month);
-
+    int amount = 0;
     std::string prepQuery;
-    prepQuery = "SELECT " + selectedMonth + "Spent, " + selectedMonth + " FROM budgets";
+    std::string selectedMonthIndex = monthFromIndex(month);
+
+    prepQuery = "SELECT " + selectedMonthIndex + "Spent, " + selectedMonthIndex + " FROM budgets";
 
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(mbgt, prepQuery.c_str());
@@ -169,6 +171,7 @@ QJsonObject Budget::getMeta(QUrl filePath, int month)
         amount += query.row().int32(1);
     }
 
+    // figuring how much money can be spent this month
     int remainingAmount = amount - spentAmount;
     QString formattedRemainingAmount = intToQs(remainingAmount);
 
@@ -182,6 +185,7 @@ QString Budget::getAvailableMoney(QUrl filePath)
     int totalBalance = 0;
     int totalBudgets = 0;
 
+    // getting the remaining balances from all on budget accounts
     io::sqlite::db mbgt(filePath.toLocalFile().toStdString());
     io::sqlite::stmt query(mbgt, "SELECT balance FROM accounts WHERE onBudget == 1");
 
@@ -189,6 +193,7 @@ QString Budget::getAvailableMoney(QUrl filePath)
         totalBalance += query.row().int32(0);
     }
 
+    // getting total future budgeted amount for each category
     query = io::sqlite::stmt(mbgt, "SELECT monthOne, monthTwo, monthThree FROM budgets");
 
     while (query.step()) {
@@ -196,6 +201,7 @@ QString Budget::getAvailableMoney(QUrl filePath)
         totalBudgets += budgetUpcoming;
     }
 
+    // figuring remaining money that can be budgeted
     int available = totalBalance - totalBudgets;
     QString formattedAvailable = intToQs(available);
 
@@ -220,8 +226,8 @@ QJsonArray Budget::getCategoryTransactions(QUrl filePath, QString category, QStr
 
     while (query.step()) {
         QJsonObject transaction;
-        QDate formattedDate = QDate::fromString(query.row().text(0).c_str(), "yyyy-MM-dd");
         QString toAccount;
+        QDate formattedDate = QDate::fromString(query.row().text(0).c_str(), "yyyy-MM-dd");
 
         int amount = query.row().int32(3);
         QString formattedAmount = intToQs(amount);
