@@ -5,7 +5,6 @@
 #include <QDir>
 #include <QDebug>
 #include <QSettings>
-#include "../src/json/json.h"
 #include "../src/sqlite/sqlite.hpp"
 #include <QDate>
 #include "../src/budget.h"

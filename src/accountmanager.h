@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QUrl>
-#include "json/json.h"
 #include <QDate>
 
 class AccountManager : public QObject

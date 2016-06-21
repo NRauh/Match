@@ -2,7 +2,6 @@
 #include "../src/account.h"
 #include <QUrl>
 #include <QDate>
-#include "../src/json/json.h"
 #include "../src/accountmanager.h"
 #include "../src/sqlite/sqlite.hpp"
 #include <iostream>

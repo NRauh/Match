@@ -8,7 +8,6 @@ LIBS += -ldl
 
 SOURCES += src/main.cpp \
         src/accountmanager.cpp \
-        src/jsoncpp.cpp \
         src/account.cpp \
         src/sqlite/sqlite3.c \
         src/sqlite/sqlite.cpp \
@@ -25,8 +24,6 @@ include(deployment.pri)
 
 HEADERS += \
         src/accountmanager.h \
-        src/json/json.h \
-        src/json/json-forwards.h \
         src/account.h \
         src/sqlite/sqlite3.h \
         src/sqlite/sqlite.cpp \

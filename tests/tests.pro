@@ -11,7 +11,8 @@ CONFIG += c++11
 LIBS += -ldl
 
 # Input
-HEADERS += catch.hpp ../src/accountmanager.h ../src/json/json.h ../src/json/json.h ../src/json/json-forwards.h \
+HEADERS += catch.hpp \
+        ../src/accountmanager.h \
         ../src/account.h \
         ../src/sqlite/sqlite3.h \
         ../src/sqlite/sqlite.hpp \
@@ -20,7 +21,6 @@ HEADERS += catch.hpp ../src/accountmanager.h ../src/json/json.h ../src/json/json
 SOURCES += accountmanagertest.cpp \
         matchtest.cpp \
         ../src/accountmanager.cpp \
-        ../src/jsoncpp.cpp \
         accounttest.cpp \
         ../src/account.cpp \
         ../src/sqlite/sqlite3.c \
